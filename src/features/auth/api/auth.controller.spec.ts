@@ -4,8 +4,8 @@ jest.mock('better-auth', () => ({
     handler: jest.fn(),
   })),
 }));
-import { AuthController } from './auth.controller';
-import { AuthService } from '../application/auth.service';
+import { AuthController } from '@/features/auth/api/auth.controller';
+import { AuthService } from '@/features/auth/application/auth.service';
 import { Request, Response } from 'express';
 
 describe('AuthController', () => {

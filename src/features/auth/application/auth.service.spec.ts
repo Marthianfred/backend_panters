@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { AuthService } from './auth.service';
+import { AuthService } from '@/features/auth/application/auth.service';
 import { Request, Response } from 'express';
 
 // We replace the actual better_auth module export with our mock
