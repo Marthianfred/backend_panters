@@ -6,7 +6,7 @@ import { StreamNotFoundError } from './get-viewer-access.models';
 
 describe('GetViewerAccessController', () => {
   let controller: GetViewerAccessController;
-  let mockHandler = {
+  const mockHandler = {
     execute: jest.fn(),
   };
 
