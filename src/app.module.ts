@@ -5,6 +5,7 @@ import { AuthModule } from '@/features/auth/auth.module';
 import { StreamingModule } from '@/features/streaming/streaming.module';
 import { WalletModule } from '@/features/wallet/wallet.module';
 import { ProfilesModule } from '@/features/profiles/profiles.module';
+import { ContentModule } from '@/features/content/content.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ProfilesModule } from '@/features/profiles/profiles.module';
     StreamingModule,
     WalletModule,
     ProfilesModule,
+    ContentModule,
   ],
 })
 export class AppModule {}
