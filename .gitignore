@@ -1,0 +1,11 @@
+/node_modules
+.env
+dist
+.DS_Store
+.idea
+.vscode
+.cursor
+.agent
+.cursorrules
+.cursorconfig
+.cursorignore
