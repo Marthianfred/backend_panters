@@ -7,6 +7,7 @@ import { StreamingModule } from '@/features/streaming/streaming.module';
 import { WalletModule } from '@/features/wallet/wallet.module';
 import { ProfilesModule } from '@/features/profiles/profiles.module';
 import { ContentModule } from '@/features/content/content.module';
+import { PantersModule } from '@/features/panters/panters.module';
 import { RequestLoggerMiddleware } from '@/core/infrastructure/logger/request-logger.middleware';
 
 @Module({
@@ -26,6 +27,7 @@ import { RequestLoggerMiddleware } from '@/core/infrastructure/logger/request-lo
     WalletModule,
     ProfilesModule,
     ContentModule,
+    PantersModule,
   ],
 })
 export class AppModule implements NestModule {

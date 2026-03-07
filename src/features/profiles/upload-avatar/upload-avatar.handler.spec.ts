@@ -67,20 +67,28 @@ describe('UploadAvatarHandler', () => {
       mockStorageService.uploadAvatar.mockResolvedValue(mockS3Url);
       mockRepository.updateAvatarUrl.mockResolvedValue(false);
 
-      await expect(handler.execute(mockRequest)).rejects.toThrow(AvatarUploadFailedError);
+      await expect(handler.execute(mockRequest)).rejects.toThrow(
+        AvatarUploadFailedError,
+      );
     });
 
     it('should pass through AvatarUploadFailedError if storage service throws it', async () => {
       const dbError = new AvatarUploadFailedError(mockRequest.userId);
       mockStorageService.uploadAvatar.mockRejectedValue(dbError);
 
-      await expect(handler.execute(mockRequest)).rejects.toThrow(AvatarUploadFailedError);
+      await expect(handler.execute(mockRequest)).rejects.toThrow(
+        AvatarUploadFailedError,
+      );
     });
 
     it('should wrap unknown errors in AvatarUploadFailedError', async () => {
-      mockStorageService.uploadAvatar.mockRejectedValue(new Error('S3 offline'));
+      mockStorageService.uploadAvatar.mockRejectedValue(
+        new Error('S3 offline'),
+      );
 
-      await expect(handler.execute(mockRequest)).rejects.toThrow(AvatarUploadFailedError);
+      await expect(handler.execute(mockRequest)).rejects.toThrow(
+        AvatarUploadFailedError,
+      );
     });
   });
 });

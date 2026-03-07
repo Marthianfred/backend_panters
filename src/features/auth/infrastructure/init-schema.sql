@@ -64,6 +64,10 @@ CREATE TABLE IF NOT EXISTS "antigravity_profiles" (
     avatar_url TEXT,
     bio TEXT,
     is_active BOOLEAN DEFAULT true,
+    is_online BOOLEAN DEFAULT false,
+    reviews_count INT DEFAULT 0,
+    is_vip BOOLEAN DEFAULT false,
+    services JSONB DEFAULT '[]'::jsonb,
     created_at TIMESTAMP DEFAULT now(),
     updated_at TIMESTAMP DEFAULT now()
 );

@@ -91,7 +91,9 @@ describe('UploadAvatarController', () => {
 
       await controller.uploadAvatar(mockReq, mockRes, mockFile);
 
-      expect(mockRes.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+      expect(mockRes.status).toHaveBeenCalledWith(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
       expect(mockRes.json).toHaveBeenCalledWith({
         error: 'Error interno del servidor al procesar la subida del avatar.',
       });
