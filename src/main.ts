@@ -5,7 +5,8 @@ import { Request, Response, NextFunction } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    bodyParser: false,
+    bodyParser: true, // Habilitar el nativo de NestJS para evitar colisiones
+    rawBody: true,
   });
 
   app.enableCors({
@@ -20,16 +21,9 @@ async function bootstrap() {
     ],
   });
 
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    if (req.path.startsWith('/api/auth')) {
-      return next();
-    }
-
-    json({ limit: '50mb' })(req, res, (err) => {
-      if (err) return next(err);
-      urlencoded({ extended: true, limit: '50mb' })(req, res, next);
-    });
-  });
+  // Habilitar tamaños de carga colosales globalmente para evitar el Error 413 "Payload Too Large"
+  app.use(json({ limit: '10000mb' }));
+  app.use(urlencoded({ extended: true, limit: '10000mb' }));
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);

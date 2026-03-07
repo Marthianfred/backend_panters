@@ -24,14 +24,14 @@ export class UploadAvatarController {
   constructor(private readonly handler: UploadAvatarHandler) {}
 
   @Post('me/avatar')
-  @UseInterceptors(FileInterceptor('file')) // "file" es la propiedad dentro del form-data
+  @UseInterceptors(FileInterceptor('file')) // Tolerancia delegada globalmente al servidor
   public async uploadAvatar(
     @Req() req: AuthenticatedRequest,
     @Res() res: Response,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
-          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5MB limit
+          new MaxFileSizeValidator({ maxSize: 5 * 1024 * 1024 }), // 5 MB como regla de negocio
           new FileTypeValidator({ fileType: '.(png|jpeg|jpg)' }),
         ],
       }),
