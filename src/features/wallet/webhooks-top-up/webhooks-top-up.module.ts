@@ -7,7 +7,7 @@ import {
   STRIPE_VALIDATOR_TOKEN,
   BINANCE_VALIDATOR_TOKEN,
 } from './interfaces/signature.validator.interface';
-import { InMemoryWalletRepository } from './infrastructure/in-memory.wallet.repository';
+import { PostgresTopUpWalletRepository } from './infrastructure/postgres.topup-wallet.repository';
 import {
   StripeSignatureValidator,
   BinanceSignatureValidator,
@@ -20,7 +20,7 @@ import {
     BinanceWebhookHandler,
     {
       provide: WALLET_REPOSITORY_TOKEN,
-      useClass: InMemoryWalletRepository,
+      useClass: PostgresTopUpWalletRepository,
     },
     {
       provide: STRIPE_VALIDATOR_TOKEN,

@@ -7,9 +7,9 @@ import { ListContentHandler } from './list-content/list-content.handler';
 import { PurchaseContentController } from './purchase-content/purchase-content.controller';
 import { PurchaseContentHandler } from './purchase-content/purchase-content.handler';
 import { CONTENT_REPOSITORY_TOKEN } from './interfaces/content.repository.interface';
-import { InMemoryContentRepository } from './infrastructure/in-memory.content.repository';
+import { PostgresContentRepository } from './infrastructure/postgres.content.repository';
 import { P2P_TRANSACTION_SERVICE_TOKEN } from './purchase-content/interfaces/p2p-transaction.service.interface';
-import { MockP2PTransactionService } from './purchase-content/infrastructure/mock.p2ptransaction.service';
+import { PostgresP2PTransactionService } from './purchase-content/infrastructure/postgres.p2p.service';
 
 @Module({
   imports: [AuthModule],
@@ -24,11 +24,11 @@ import { MockP2PTransactionService } from './purchase-content/infrastructure/moc
     PurchaseContentHandler,
     {
       provide: CONTENT_REPOSITORY_TOKEN,
-      useClass: InMemoryContentRepository,
+      useClass: PostgresContentRepository,
     },
     {
       provide: P2P_TRANSACTION_SERVICE_TOKEN,
-      useClass: MockP2PTransactionService,
+      useClass: PostgresP2PTransactionService,
     },
   ],
 })
