@@ -6,7 +6,7 @@ import { AuthService } from '@/features/auth/application/auth.service';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @All('*')
+  @All('*path')
   async handleAuth(@Req() req: Request, @Res() res: Response) {
     return this.authService.handleAuthRequest(req, res);
   }

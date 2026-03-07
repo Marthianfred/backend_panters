@@ -12,31 +12,37 @@ import { PurchaseContentHandler } from './purchase-content.handler';
 import { Roles } from '../../../core/auth/decorators/roles.decorator';
 import { Role } from '../../../core/auth/roles.enum';
 import { RolesGuard } from '../../../core/auth/guards/roles.guard';
+import { AuthGuard } from '../../auth/guards/auth.guard';
 import {
   ContentNotFoundError,
   InsufficientCoinsError,
 } from './purchase-content.models';
 
 @Controller('api/v1/content')
-@UseGuards(RolesGuard)
+@UseGuards(AuthGuard, RolesGuard) // El orden importa, AuthGuard carga el usuario
 export class PurchaseContentController {
   constructor(private readonly handler: PurchaseContentHandler) {}
 
   @Post('purchase')
-  @Roles(Role.SUBSCRIBER) // Sólo clientes consumidores pagan y compran
+  @Roles(Role.SUBSCRIBER)
   public async purchase(
     @Req() req: Request,
     @Body() body: { contentId: string },
     @Res() res: Response,
   ): Promise<void> {
     try {
-      const subscriberId =
-        (req as any).user?.id ||
-        req.headers['x-mock-user-id'] ||
-        'bankrupt_user';
+      // Tomamos el usuario real inyectado por el guard
+      const subscriberId = (req as any).user?.id;
+
+      if (!subscriberId) {
+        res
+          .status(HttpStatus.UNAUTHORIZED)
+          .json({ error: 'Usuario no autenticado.' });
+        return;
+      }
 
       const response = await this.handler.execute({
-        subscriberId: subscriberId as string,
+        subscriberId: subscriberId,
         contentId: body.contentId,
       });
 

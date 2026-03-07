@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AuthModule } from '../auth/auth.module';
 import { UploadContentController } from './upload-content/upload-content.controller';
 import { UploadContentHandler } from './upload-content/upload-content.handler';
 import { ListContentController } from './list-content/list-content.controller';
@@ -11,6 +12,7 @@ import { P2P_TRANSACTION_SERVICE_TOKEN } from './purchase-content/interfaces/p2p
 import { MockP2PTransactionService } from './purchase-content/infrastructure/mock.p2ptransaction.service';
 
 @Module({
+  imports: [AuthModule],
   controllers: [
     UploadContentController,
     ListContentController,

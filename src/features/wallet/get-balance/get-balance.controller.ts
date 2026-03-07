@@ -1,16 +1,25 @@
-import { Controller, Get, Req, Res, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Req,
+  Res,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
 import type { Request, Response } from 'express';
 import { GetBalanceHandler } from './get-balance.handler';
 import { WalletNotFoundError } from './get-balance.models';
+import { AuthGuard } from '../../auth/guards/auth.guard';
 
 @Controller('api/v1/wallet')
+@UseGuards(AuthGuard)
 export class GetBalanceController {
   constructor(private readonly handler: GetBalanceHandler) {}
 
   @Get('balance')
   async getBalance(@Req() req: Request, @Res() res: Response): Promise<void> {
     try {
-      const userId = (req as any).user?.id || 'anonymous-user';
+      const userId = (req as any).user?.id;
 
       if (!userId) {
         res
@@ -28,7 +37,6 @@ export class GetBalanceController {
         return;
       }
 
-      console.error('Error obteniendo balance de wallet:', error);
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
         .json({ error: 'Error interno del servidor.' });

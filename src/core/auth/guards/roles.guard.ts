@@ -13,21 +13,20 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    if (!requiredRoles) {
-      return true; // Si no hay decorador, el endpoint es público
+    if (!requiredRoles || requiredRoles.length === 0) {
+      return true; // Si no hay decorador, el endpoint es público o gestionado por AuthGuard
     }
 
     const request = context.switchToHttp().getRequest();
-    // Por motivos de la demostración sin Auth/DB final:
-    const user = request.user || {
-      id: 'anonymous',
-      role: request.headers['x-mock-role'],
-    };
+    const user = request.user; // Cargado previamente por AuthGuard
 
-    if (!user || !user.role) {
-      return false; // Sin sesión iniciada o rol definido
+    if (!user) {
+      return false; // Sin sesión (el AuthGuard ya debería haber fallado antes si se aplica)
     }
 
-    return requiredRoles.some((role) => user.role === role);
+    // Nota: El rol en BetterAuth se guarda típicamente en el objeto del usuario
+    const userRole = (user as any).role || Role.SUBSCRIBER;
+
+    return requiredRoles.includes(userRole as Role);
   }
 }

@@ -1,37 +1,18 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { betterAuth } from 'better-auth';
-import { Pool } from 'pg';
+import { Injectable, Inject } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { toNodeHandler } from 'better-auth/node';
+import { BETTER_AUTH_TOKEN } from '../infrastructure/better-auth.provider';
 
 @Injectable()
-export class AuthService implements OnModuleInit {
-  private authInstance: any;
+export class AuthService {
+  constructor(@Inject(BETTER_AUTH_TOKEN) private readonly authInstance: any) {}
 
-  constructor(private readonly configService: ConfigService) {}
-
-  onModuleInit() {
-    const databaseUrl = this.configService.getOrThrow<string>('DATABASE_URL');
-
-    this.authInstance = betterAuth({
-      database: new Pool({
-        connectionString: databaseUrl,
-      }),
-      emailAndPassword: {
-        enabled: true,
-      },
-      // You can expand Better Auth plugins according to VSA principles when needed.
-    });
-  }
-
-  get instance() {
+  public get instance() {
     return this.authInstance;
   }
 
-  async handleAuthRequest(req: Request, res: Response) {
-    if (!this.authInstance) {
-      throw new Error('BetterAuth is not initialized.');
-    }
-    return this.authInstance.handler(req, res);
+  public async handleAuthRequest(req: Request, res: Response): Promise<void> {
+    const handler = toNodeHandler(this.authInstance);
+    return handler(req, res);
   }
 }

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigService } from '@nestjs/config';
+import { SchemaInitializationService } from './schema-initialization.service';
 
 @Module({
   imports: [
@@ -14,5 +15,6 @@ import { ConfigService } from '@nestjs/config';
       }),
     }),
   ],
+  providers: [SchemaInitializationService],
 })
 export class DatabaseModule {}
