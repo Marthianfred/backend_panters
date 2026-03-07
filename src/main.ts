@@ -5,8 +5,8 @@ import { Request, Response, NextFunction } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
-    bodyParser: true, // Habilitar el nativo de NestJS para evitar colisiones
-    rawBody: true,
+    bodyParser: false,
+    rawBody: false,
   });
 
   app.enableCors({
@@ -21,9 +21,23 @@ async function bootstrap() {
     ],
   });
 
-  // Habilitar tamaños de carga colosales globalmente para evitar el Error 413 "Payload Too Large"
-  app.use(json({ limit: '10000mb' }));
-  app.use(urlencoded({ extended: true, limit: '10000mb' }));
+  const limitSize = '10000mb';
+
+  const rawBodyBuffer = (
+    req: Request,
+    res: Response,
+    buffer: Buffer,
+    encoding: BufferEncoding,
+  ) => {
+    if (buffer && buffer.length) {
+      req['rawBody'] = buffer;
+    }
+  };
+
+  app.use(json({ verify: rawBodyBuffer, limit: limitSize }));
+  app.use(
+    urlencoded({ verify: rawBodyBuffer, extended: true, limit: limitSize }),
+  );
 
   const port = process.env.PORT ?? 3000;
   await app.listen(port);
