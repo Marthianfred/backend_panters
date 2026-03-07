@@ -33,7 +33,7 @@ export class ListContentController {
 
       const response = await this.handler.execute({
         creatorId,
-        isSubscriber: userRole === Role.SUBSCRIBER,
+        isSubscriber: (userRole as Role) === Role.SUBSCRIBER,
       });
 
       res.status(HttpStatus.OK).json(response);

@@ -1,6 +1,8 @@
 import { Injectable, Inject } from '@nestjs/common';
 import type { IContentRepository } from '../interfaces/content.repository.interface';
 import { CONTENT_REPOSITORY_TOKEN } from '../interfaces/content.repository.interface';
+import type { IContentStorageService } from './interfaces/content-storage.service.interface';
+import { CONTENT_STORAGE_SERVICE } from './interfaces/content-storage.service.interface';
 import type {
   UploadContentRequest,
   UploadContentResponse,
@@ -12,6 +14,8 @@ export class UploadContentHandler {
   constructor(
     @Inject(CONTENT_REPOSITORY_TOKEN)
     private readonly contentRepository: IContentRepository,
+    @Inject(CONTENT_STORAGE_SERVICE)
+    private readonly storageService: IContentStorageService,
   ) {}
 
   public async execute(
@@ -33,12 +37,19 @@ export class UploadContentHandler {
       createdAt: new Date(),
     });
 
+    // Subcarpetas por usuario para el contenido tal cual se solicitó
+    const presignedUploadUrl = await this.storageService.getPresignedUploadUrl(
+      request.creatorId,
+      contentId,
+      'video/mp4',
+    );
+
     return {
       contentId,
       status: 'AWAITING_MEDIA',
       message:
         'Los metadatos fueron creados. Proceda a subir el MP4 mediante la URL provista.',
-      presignedUploadUrl: `https://mock-s3-bucket.amazonaws.com/${contentId}?signature=fakemock`, // Mock del SDK S3 Upload URL
+      presignedUploadUrl,
     };
   }
 }

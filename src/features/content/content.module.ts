@@ -11,6 +11,9 @@ import { PostgresContentRepository } from './infrastructure/postgres.content.rep
 import { P2P_TRANSACTION_SERVICE_TOKEN } from './purchase-content/interfaces/p2p-transaction.service.interface';
 import { PostgresP2PTransactionService } from './purchase-content/infrastructure/postgres.p2p.service';
 
+import { CONTENT_STORAGE_SERVICE } from './upload-content/interfaces/content-storage.service.interface';
+import { MinioContentStorageService } from './upload-content/infrastructure/minio.content-storage.service';
+
 @Module({
   imports: [AuthModule],
   controllers: [
@@ -29,6 +32,10 @@ import { PostgresP2PTransactionService } from './purchase-content/infrastructure
     {
       provide: P2P_TRANSACTION_SERVICE_TOKEN,
       useClass: PostgresP2PTransactionService,
+    },
+    {
+      provide: CONTENT_STORAGE_SERVICE,
+      useClass: MinioContentStorageService,
     },
   ],
 })
