@@ -6,10 +6,11 @@ import {
   HttpStatus,
   UseGuards,
 } from '@nestjs/common';
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import { GetBalanceHandler } from './get-balance.handler';
 import { WalletNotFoundError } from './get-balance.models';
 import { AuthGuard } from '../../auth/guards/auth.guard';
+import type { AuthenticatedRequest } from '../../auth/types/auth.types';
 
 @Controller('api/v1/wallet')
 @UseGuards(AuthGuard)
@@ -17,9 +18,12 @@ export class GetBalanceController {
   constructor(private readonly handler: GetBalanceHandler) {}
 
   @Get('balance')
-  async getBalance(@Req() req: Request, @Res() res: Response): Promise<void> {
+  async getBalance(
+    @Req() req: AuthenticatedRequest,
+    @Res() res: Response,
+  ): Promise<void> {
     try {
-      const userId = (req as any).user?.id;
+      const userId = req.user.id;
 
       if (!userId) {
         res

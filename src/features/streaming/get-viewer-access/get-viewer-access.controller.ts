@@ -1,22 +1,31 @@
-import { Controller, Get, Param, Req, Res, HttpStatus } from '@nestjs/common';
-import type { Request, Response } from 'express';
+import {
+  Controller,
+  Get,
+  Param,
+  Req,
+  Res,
+  HttpStatus,
+  UseGuards,
+} from '@nestjs/common';
+import type { Response } from 'express';
 import { GetViewerAccessHandler } from './get-viewer-access.handler';
 import { StreamNotFoundError } from './get-viewer-access.models';
+import { AuthGuard } from '../../auth/guards/auth.guard';
+import type { AuthenticatedRequest } from '../../auth/types/auth.types';
 
 @Controller('api/v1/streams')
+@UseGuards(AuthGuard)
 export class GetViewerAccessController {
   constructor(private readonly handler: GetViewerAccessHandler) {}
 
   @Get(':streamId/access')
   async getAccess(
     @Param('streamId') streamId: string,
-    @Req() req: Request,
+    @Req() req: AuthenticatedRequest,
     @Res() res: Response,
   ): Promise<void> {
     try {
-      // Usaremos un dummy para el usuario por ahora, en un modelo real lo toma del jwt.
-      // Assuming a middleware sets `req.user`
-      const userId = (req as any).user?.id || 'anonymous-user';
+      const userId = req.user.id;
 
       if (!streamId) {
         res

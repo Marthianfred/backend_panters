@@ -6,6 +6,12 @@ import {
   WalletData,
 } from '../interfaces/wallet.repository.interface';
 
+interface WalletQueryRow {
+  userId: string;
+  panterCoinBalance: string;
+  lastUpdated: Date;
+}
+
 @Injectable()
 export class PostgresWalletRepository implements IWalletRepository {
   private pool: Pool;
@@ -26,17 +32,19 @@ export class PostgresWalletRepository implements IWalletRepository {
       WHERE user_id = $1 AND is_active = true;
     `;
 
-    const result = await this.pool.query(query, [userId]);
+    const result = await this.pool.query<WalletQueryRow>(query, [userId]);
 
     if (result.rows.length === 0) {
       return null;
     }
 
+    const row = result.rows[0];
+
     // Retornamos el balance forzando el mapeo desde numerics de PostgreSQL si es necesario
     return {
-      userId: result.rows[0].userId,
-      panterCoinBalance: parseFloat(result.rows[0].panterCoinBalance),
-      lastUpdated: result.rows[0].lastUpdated,
+      userId: row.userId,
+      panterCoinBalance: parseFloat(row.panterCoinBalance),
+      lastUpdated: row.lastUpdated,
     };
   }
 }

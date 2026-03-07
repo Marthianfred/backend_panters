@@ -47,11 +47,9 @@ describe('AuthController', () => {
 
       await controller.handleAuth(mockReq, mockRes);
 
-      expect(authService.handleAuthRequest).toHaveBeenCalledWith(
-        mockReq,
-        mockRes,
-      );
-      expect(authService.handleAuthRequest).toHaveBeenCalledTimes(1);
+      const handleAuthRequestMock = authService.handleAuthRequest as jest.Mock;
+      expect(handleAuthRequestMock).toHaveBeenCalledWith(mockReq, mockRes);
+      expect(handleAuthRequestMock).toHaveBeenCalledTimes(1);
     });
   });
 });

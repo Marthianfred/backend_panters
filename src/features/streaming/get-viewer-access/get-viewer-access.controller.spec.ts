@@ -1,8 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GetViewerAccessController } from './get-viewer-access.controller';
 import { GetViewerAccessHandler } from './get-viewer-access.handler';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { StreamNotFoundError } from './get-viewer-access.models';
+import { AuthenticatedRequest } from '../../auth/types/auth.types';
+import { AuthGuard } from '../../auth/guards/auth.guard';
 
 describe('GetViewerAccessController', () => {
   let controller: GetViewerAccessController;
@@ -14,7 +16,10 @@ describe('GetViewerAccessController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [GetViewerAccessController],
       providers: [{ provide: GetViewerAccessHandler, useValue: mockHandler }],
-    }).compile();
+    })
+      .overrideGuard(AuthGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<GetViewerAccessController>(
       GetViewerAccessController,
@@ -26,7 +31,7 @@ describe('GetViewerAccessController', () => {
   });
 
   it('debe devolver error 400 si falta el streamId', async () => {
-    const req = { user: { id: 'user1' } } as unknown as Request;
+    const req = { user: { id: 'user1' } } as unknown as AuthenticatedRequest;
     const res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
@@ -34,8 +39,11 @@ describe('GetViewerAccessController', () => {
 
     await controller.getAccess('', req, res);
 
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({
+    const statusMock = res.status as jest.Mock;
+    const jsonMock = res.json as jest.Mock;
+
+    expect(statusMock).toHaveBeenCalledWith(400);
+    expect(jsonMock).toHaveBeenCalledWith({
       error: 'Faltan parámetros requeridos: streamId.',
     });
   });
@@ -43,7 +51,7 @@ describe('GetViewerAccessController', () => {
   it('debe devolver error 404 si el stream no existe', async () => {
     mockHandler.execute.mockRejectedValue(new StreamNotFoundError('123'));
 
-    const req = { user: { id: 'user1' } } as unknown as Request;
+    const req = { user: { id: 'user1' } } as unknown as AuthenticatedRequest;
     const res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
@@ -51,7 +59,8 @@ describe('GetViewerAccessController', () => {
 
     await controller.getAccess('123', req, res);
 
-    expect(res.status).toHaveBeenCalledWith(404);
+    const statusMock = res.status as jest.Mock;
+    expect(statusMock).toHaveBeenCalledWith(404);
   });
 
   it('debe devolver 200 con las credenciales y la URL', async () => {
@@ -64,7 +73,7 @@ describe('GetViewerAccessController', () => {
 
     mockHandler.execute.mockResolvedValue(successResponse);
 
-    const req = { user: { id: 'user1' } } as unknown as Request;
+    const req = { user: { id: 'user1' } } as unknown as AuthenticatedRequest;
     const res = {
       status: jest.fn().mockReturnThis(),
       json: jest.fn(),
@@ -76,7 +85,11 @@ describe('GetViewerAccessController', () => {
       streamId: '123',
       userId: 'user1',
     });
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(successResponse);
+
+    const statusMock = res.status as jest.Mock;
+    const jsonMock = res.json as jest.Mock;
+
+    expect(statusMock).toHaveBeenCalledWith(200);
+    expect(jsonMock).toHaveBeenCalledWith(successResponse);
   });
 });

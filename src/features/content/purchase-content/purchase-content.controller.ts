@@ -7,12 +7,13 @@ import {
   HttpStatus,
   Res,
 } from '@nestjs/common';
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import { PurchaseContentHandler } from './purchase-content.handler';
 import { Roles } from '../../../core/auth/decorators/roles.decorator';
 import { Role } from '../../../core/auth/roles.enum';
 import { RolesGuard } from '../../../core/auth/guards/roles.guard';
 import { AuthGuard } from '../../auth/guards/auth.guard';
+import type { AuthenticatedRequest } from '../../auth/types/auth.types';
 import {
   ContentNotFoundError,
   InsufficientCoinsError,
@@ -26,13 +27,13 @@ export class PurchaseContentController {
   @Post('purchase')
   @Roles(Role.SUBSCRIBER)
   public async purchase(
-    @Req() req: Request,
+    @Req() req: AuthenticatedRequest,
     @Body() body: { contentId: string },
     @Res() res: Response,
   ): Promise<void> {
     try {
       // Tomamos el usuario real inyectado por el guard
-      const subscriberId = (req as any).user?.id;
+      const subscriberId = req.user.id;
 
       if (!subscriberId) {
         res

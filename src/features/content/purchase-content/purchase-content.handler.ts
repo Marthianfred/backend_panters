@@ -37,6 +37,7 @@ export class PurchaseContentHandler {
     const txSuccess = await this.p2pTransactionService.executeContentPurchase(
       request.subscriberId,
       content.creatorId,
+      content.id,
       content.price,
     );
 

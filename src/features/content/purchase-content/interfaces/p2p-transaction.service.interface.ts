@@ -6,6 +6,7 @@ export interface IP2PTransactionService {
   executeContentPurchase(
     subscriberId: string,
     creatorId: string,
+    contentId: string,
     amountInCoins: number,
   ): Promise<boolean>;
 }

@@ -4,6 +4,15 @@ import { Pool } from 'pg';
 import { IWalletRepository } from '../interfaces/wallet.repository.interface';
 import { Wallet } from '../webhooks-top-up.models';
 
+interface WalletRow {
+  id: string;
+  panter_coin_balance: string;
+}
+
+interface InsertRes {
+  id: string;
+}
+
 @Injectable()
 export class PostgresTopUpWalletRepository implements IWalletRepository {
   private readonly logger = new Logger(PostgresTopUpWalletRepository.name);
@@ -26,7 +35,7 @@ export class PostgresTopUpWalletRepository implements IWalletRepository {
       await client.query('BEGIN');
 
       // 1. Obtener o crear billetera
-      let walletRes = await client.query(
+      const walletRes = await client.query<WalletRow>(
         'SELECT id, panter_coin_balance FROM antigravity_wallets WHERE user_id = $1 FOR UPDATE',
         [userId],
       );
@@ -35,7 +44,7 @@ export class PostgresTopUpWalletRepository implements IWalletRepository {
       let newBalance: number;
 
       if (walletRes.rows.length === 0) {
-        const insertRes = await client.query(
+        const insertRes = await client.query<InsertRes>(
           'INSERT INTO antigravity_wallets (user_id, panter_coin_balance) VALUES ($1, $2) RETURNING id',
           [userId, amount],
         );
@@ -76,7 +85,9 @@ export class PostgresTopUpWalletRepository implements IWalletRepository {
       };
     } catch (error) {
       await client.query('ROLLBACK');
-      this.logger.error(`Error acreditando monedas: ${error.message}`);
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
+      this.logger.error(`Error acreditando monedas: ${message}`);
       throw error;
     } finally {
       client.release();

@@ -3,7 +3,7 @@ import { ISignatureValidator } from '../interfaces/signature.validator.interface
 
 @Injectable()
 export class StripeSignatureValidator implements ISignatureValidator {
-  public validateSignature(payload: any, signature: string): boolean {
+  public validateSignature(payload: unknown, signature: string): boolean {
     // Aquí integraremos el Stripe SDK con process.env.STRIPE_WEBHOOK_SECRET en el futuro
     if (!signature || signature.trim() === '') {
       return false;
@@ -14,7 +14,7 @@ export class StripeSignatureValidator implements ISignatureValidator {
 
 @Injectable()
 export class BinanceSignatureValidator implements ISignatureValidator {
-  public validateSignature(payload: any, signature: string): boolean {
+  public validateSignature(payload: unknown, signature: string): boolean {
     // Aquí integraremos crypto para validar contra public key de Binance Pay en el futuro
     if (!signature || signature.trim() === '') {
       return false;

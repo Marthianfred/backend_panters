@@ -3,6 +3,15 @@ import { ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 import { IP2PTransactionService } from '../interfaces/p2p-transaction.service.interface';
 
+interface WalletRow {
+  id: string;
+  panter_coin_balance: string;
+}
+
+interface IdRow {
+  id: string;
+}
+
 @Injectable()
 export class PostgresP2PTransactionService implements IP2PTransactionService {
   private readonly logger = new Logger(PostgresP2PTransactionService.name);
@@ -17,6 +26,7 @@ export class PostgresP2PTransactionService implements IP2PTransactionService {
   public async executeContentPurchase(
     subscriberId: string,
     creatorId: string,
+    contentId: string,
     amountInCoins: number,
   ): Promise<boolean> {
     const client = await this.pool.connect();
@@ -24,8 +34,18 @@ export class PostgresP2PTransactionService implements IP2PTransactionService {
     try {
       await client.query('BEGIN');
 
+      // 0. Verificar si ya fue comprado
+      const existingPurchase = await client.query<IdRow>(
+        'SELECT id FROM content_purchases WHERE user_id = $1 AND content_item_id = $2',
+        [subscriberId, contentId],
+      );
+
+      if (existingPurchase.rows.length > 0) {
+        throw new Error('El contenido ya fue adquirido previamente.');
+      }
+
       // 1. Obtener billetera del suscriptor
-      const subscriberWalletRes = await client.query(
+      const subscriberWalletRes = await client.query<WalletRow>(
         'SELECT id, panter_coin_balance FROM antigravity_wallets WHERE user_id = $1 FOR UPDATE',
         [subscriberId],
       );
@@ -48,16 +68,18 @@ export class PostgresP2PTransactionService implements IP2PTransactionService {
       );
 
       // 3. Registrar transacción de débito
-      await client.query(
-        'INSERT INTO wallet_transactions (wallet_id, type, amount, description, reference_id) VALUES ($1, $2, $3, $4, $5)',
+      const txRef = `PURCHASE-${Date.now()}-${subscriberId.slice(0, 4)}`;
+      const txResult = await client.query<IdRow>(
+        'INSERT INTO wallet_transactions (wallet_id, type, amount, description, reference_id) VALUES ($1, $2, $3, $4, $5) RETURNING id',
         [
           subscriberWallet.id,
           'debit',
           amountInCoins,
-          `Compra de contenido a creador: ${creatorId}`,
-          `PURCHASE-${Date.now()}-${subscriberId.slice(0, 4)}`,
+          `Compra de contenido ID: ${contentId}`,
+          txRef,
         ],
       );
+      const transactionId = txResult.rows[0].id;
 
       // 4. Repartición 70/30 para la creadora
       const creatorAmount = amountInCoins * 0.7;
@@ -74,11 +96,19 @@ export class PostgresP2PTransactionService implements IP2PTransactionService {
         [creatorId, amountInCoins, platformCommission, creatorAmount],
       );
 
+      // 5. Registrar la compra de contenido
+      await client.query(
+        'INSERT INTO content_purchases (user_id, content_item_id, price_paid, transaction_id) VALUES ($1, $2, $3, $4)',
+        [subscriberId, contentId, amountInCoins, transactionId],
+      );
+
       await client.query('COMMIT');
       return true;
     } catch (error) {
       await client.query('ROLLBACK');
-      this.logger.error(`Error en transacción P2P: ${error.message}`);
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
+      this.logger.error(`Error en transacción P2P: ${message}`);
       return false;
     } finally {
       client.release();

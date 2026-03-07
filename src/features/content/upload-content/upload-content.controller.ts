@@ -7,12 +7,13 @@ import {
   HttpStatus,
   Res,
 } from '@nestjs/common';
-import type { Request, Response } from 'express';
+import type { Response } from 'express';
 import { UploadContentHandler } from './upload-content.handler';
 import { Roles } from '../../../core/auth/decorators/roles.decorator';
 import { Role } from '../../../core/auth/roles.enum';
 import { RolesGuard } from '../../../core/auth/guards/roles.guard';
 import { AuthGuard } from '../../auth/guards/auth.guard';
+import type { AuthenticatedRequest } from '../../auth/types/auth.types';
 import { InvalidPriceError } from './upload-content.models';
 
 @Controller('api/v1/content')
@@ -23,12 +24,12 @@ export class UploadContentController {
   @Post('upload')
   @Roles(Role.PANTER, Role.ADMIN)
   public async upload(
-    @Req() req: Request,
+    @Req() req: AuthenticatedRequest,
     @Body() body: { title: string; description: string; price: number },
     @Res() res: Response,
   ): Promise<void> {
     try {
-      const creatorId = (req as any).user?.id;
+      const creatorId = req.user.id;
 
       if (!creatorId) {
         res

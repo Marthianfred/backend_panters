@@ -2,6 +2,7 @@ import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { Role } from '../roles.enum';
 import { ROLES_KEY } from '../decorators/roles.decorator';
+import type { AuthenticatedRequest } from '../../../features/auth/types/auth.types';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -17,7 +18,7 @@ export class RolesGuard implements CanActivate {
       return true; // Si no hay decorador, el endpoint es público o gestionado por AuthGuard
     }
 
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const user = request.user; // Cargado previamente por AuthGuard
 
     if (!user) {
@@ -25,8 +26,8 @@ export class RolesGuard implements CanActivate {
     }
 
     // Nota: El rol en BetterAuth se guarda típicamente en el objeto del usuario
-    const userRole = (user as any).role || Role.SUBSCRIBER;
+    const userRole = (user.role as Role) || Role.SUBSCRIBER;
 
-    return requiredRoles.includes(userRole as Role);
+    return requiredRoles.includes(userRole);
   }
 }

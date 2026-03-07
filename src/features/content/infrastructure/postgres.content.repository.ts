@@ -6,6 +6,16 @@ import {
   IContentRepository,
 } from '../interfaces/content.repository.interface';
 
+interface ContentRow {
+  id: string;
+  creator_id: string;
+  title: string;
+  description: string;
+  price_coins: string;
+  created_at: Date;
+  file_url: string;
+}
+
 @Injectable()
 export class PostgresContentRepository implements IContentRepository {
   private pool: Pool;
@@ -42,7 +52,7 @@ export class PostgresContentRepository implements IContentRepository {
       'published',
     ];
 
-    const result = await this.pool.query(query, values);
+    const result = await this.pool.query<ContentRow>(query, values);
     return this.mapToDomain(result.rows[0]);
   }
 
@@ -51,7 +61,7 @@ export class PostgresContentRepository implements IContentRepository {
     published?: boolean;
   }): Promise<Content[]> {
     let query = 'SELECT * FROM content_items WHERE 1=1';
-    const values: any[] = [];
+    const values: string[] = [];
 
     if (params?.creatorId) {
       values.push(params.creatorId);
@@ -62,13 +72,13 @@ export class PostgresContentRepository implements IContentRepository {
       query += ` AND status = 'published'`;
     }
 
-    const result = await this.pool.query(query, values);
+    const result = await this.pool.query<ContentRow>(query, values);
     return result.rows.map((row) => this.mapToDomain(row));
   }
 
   public async getContentById(id: string): Promise<Content | null> {
     const query = 'SELECT * FROM content_items WHERE id = $1';
-    const result = await this.pool.query(query, [id]);
+    const result = await this.pool.query<ContentRow>(query, [id]);
 
     if (result.rows.length === 0) {
       return null;
@@ -77,7 +87,7 @@ export class PostgresContentRepository implements IContentRepository {
     return this.mapToDomain(result.rows[0]);
   }
 
-  private mapToDomain(row: any): Content {
+  private mapToDomain(row: ContentRow): Content {
     return {
       id: row.id,
       creatorId: row.creator_id,
