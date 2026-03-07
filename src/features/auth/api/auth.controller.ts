@@ -12,11 +12,6 @@ import { AuthGuard } from '../guards/auth.guard';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @All('*path')
-  async handleAuth(@Req() req: AuthenticatedRequest, @Res() res: Response) {
-    return this.authService.handleAuthRequest(req, res);
-  }
-
   @Get('me')
   @UseGuards(AuthGuard)
   getMe(@CurrentUser() user: AuthenticatedUser) {
@@ -24,5 +19,10 @@ export class AuthController {
       authenticated: true,
       user,
     };
+  }
+
+  @All('*path')
+  async handleAuth(@Req() req: AuthenticatedRequest, @Res() res: Response) {
+    return this.authService.handleAuthRequest(req, res);
   }
 }
