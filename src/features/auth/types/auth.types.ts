@@ -1,37 +1,40 @@
 import { Request } from 'express';
 
-/**
- * Representa un usuario autenticado por BetterAuth.
- */
 export interface AuthenticatedUser {
   id: string;
-  name: string;
   email: string;
+  name: string;
   emailVerified: boolean;
   image?: string;
+  role?: string;
   createdAt: Date;
   updatedAt: Date;
-  role?: string;
 }
 
-/**
- * Representa una sesión activa de BetterAuth.
- */
 export interface Session {
   id: string;
-  expiresAt: Date;
+  userId: string;
   token: string;
-  createdAt: Date;
-  updatedAt: Date;
+  expiresAt: Date;
   ipAddress?: string;
   userAgent?: string;
-  userId: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
-/**
- * Extensión de la interfaz Request de Express para incluir los datos de autenticación.
- */
 export interface AuthenticatedRequest extends Request {
   user: AuthenticatedUser;
   session: Session;
+}
+
+export interface BetterAuthInstance {
+  api: {
+    getSession: (options: { headers: Headers }) => Promise<{
+      user: AuthenticatedUser;
+      session: Session;
+    } | null>;
+    signUpEmail: (options: Record<string, unknown>) => Promise<unknown>;
+  };
+  handler: (request: Request) => Promise<Response>;
+  database?: unknown;
 }

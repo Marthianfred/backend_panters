@@ -7,6 +7,7 @@ jest.mock('better-auth', () => ({
 import { AuthController } from '@/features/auth/api/auth.controller';
 import { AuthService } from '@/features/auth/application/auth.service';
 import { Request, Response } from 'express';
+import { AuthenticatedRequest } from '../types/auth.types';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -38,7 +39,7 @@ describe('AuthController', () => {
       const mockReq = {
         url: '/api/auth/session',
         method: 'GET',
-      } as unknown as Request;
+      } as unknown as AuthenticatedRequest;
 
       const mockRes = {
         status: jest.fn().mockReturnThis(),

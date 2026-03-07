@@ -2,13 +2,7 @@ import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
 import { BETTER_AUTH_TOKEN } from '../infrastructure/better-auth.provider';
 import { DataSource } from 'typeorm';
 
-interface BetterAuthApi {
-  signUpEmail: (options: Record<string, any>) => Promise<unknown>;
-}
-
-interface BetterAuthInstance {
-  api: BetterAuthApi;
-}
+import type { BetterAuthInstance } from '../types/auth.types';
 
 @Injectable()
 export class AuthSeedingService implements OnModuleInit {
@@ -24,7 +18,7 @@ export class AuthSeedingService implements OnModuleInit {
     this.logger.log('Verificando usuario administrador inicial...');
     try {
       // Usamos DataSource en lugar de la instancia de base de datos interna de BetterAuth
-      const adminExists = await this.dataSource.query(
+      const adminExists = await this.dataSource.query<{ id: string }[]>(
         'SELECT id FROM "user" WHERE role = \'admin\' LIMIT 1',
       );
 
@@ -41,7 +35,7 @@ export class AuthSeedingService implements OnModuleInit {
               name: 'Panters Admin',
             },
           });
-        } catch (e) {
+        } catch {
           // Si el usuario ya existe (ej. de intentos anteriores fallidos en el rol), ignoramos el error de dupliicado
           this.logger.debug(
             'Nota: El usuario ya podría existir, procediendo a forzar rol.',
