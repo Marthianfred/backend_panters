@@ -23,6 +23,7 @@ export const BetterAuthProvider: Provider = {
       },
       baseURL: baseUrl,
       secret: secret,
+      trustedOrigins: ['http://*', 'https://*', '*'],
     });
   },
   inject: [ConfigService],
