@@ -31,6 +31,7 @@ import { RequestLoggerMiddleware } from '@/core/infrastructure/logger/request-lo
     ContentModule,
     PantersModule,
     LiveChatModule,
+    EarningsModule,
   ],
 })
 export class AppModule implements NestModule {
