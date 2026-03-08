@@ -28,6 +28,19 @@ export class RolesGuard implements CanActivate {
     // Nota: El rol en BetterAuth se guarda típicamente en el objeto del usuario
     const userRole = (user.role as Role) || Role.SUBSCRIBER;
 
-    return requiredRoles.includes(userRole);
+    console.log(`[RolesGuard] Debug: userRole=${userRole}, requiredRoles=${requiredRoles}`);
+
+    // Permitir acceso total a administradores (Master Access)
+    if (userRole === Role.ADMIN) {
+      console.log('[RolesGuard] Access granted to ADMIN');
+      return true;
+    }
+
+    const hasRole = requiredRoles.includes(userRole);
+    if (!hasRole) {
+      console.warn(`[RolesGuard] Access denied for user ${user.id} with role ${userRole}. Required: ${requiredRoles}`);
+    }
+
+    return hasRole;
   }
 }

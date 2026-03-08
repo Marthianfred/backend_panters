@@ -1,21 +1,28 @@
-import { Controller, Get, Query, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
 import { GetEarningsHistoryHandler } from './get-earnings-history.handler';
 import { EarningsHistoryRequest, EarningsHistoryResponse } from './get-earnings-history.models';
+import { AuthGuard } from '../../auth/guards/auth.guard';
+import { RolesGuard } from '../../../core/auth/guards/roles.guard';
+import { Roles } from '../../../core/auth/decorators/roles.decorator';
+import { Role } from '../../../core/auth/roles.enum';
+import type { AuthenticatedRequest } from '../../auth/types/auth.types';
 
 @Controller('api/v1/earnings')
+@UseGuards(AuthGuard, RolesGuard)
 export class GetEarningsHistoryController {
   constructor(private readonly handler: GetEarningsHistoryHandler) {}
 
   @Get('history')
+  @Roles(Role.PANTER)
   public async getHistory(
-    @Query('creatorId') creatorId: string, // El creatorId vendría del token en un guardia real
+    @Req() req: AuthenticatedRequest,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ): Promise<EarningsHistoryResponse> {
     const request: EarningsHistoryRequest = {
-      creatorId,
+      creatorId: req.user.id,
       page: page ? parseInt(page, 10) : 1,
       limit: limit ? parseInt(limit, 10) : 10,
       startDate: startDate ? new Date(startDate) : undefined,

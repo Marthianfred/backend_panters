@@ -18,6 +18,15 @@ export const BetterAuthProvider: Provider = {
 
     return betterAuth({
       database: pool,
+      user: {
+        additionalFields: {
+          role: {
+            type: 'string',
+            required: false,
+            defaultValue: 'subscriber',
+          },
+        },
+      },
       emailAndPassword: {
         enabled: true,
       },

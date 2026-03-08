@@ -28,6 +28,7 @@ export class AuthMiddleware implements NestMiddleware {
 
       if (sessionResponse && sessionResponse.user) {
         // Autenticación exitosa: inyectamos el usuario y la sesión globalmente
+        console.log('[AuthMiddleware] User found:', JSON.stringify(sessionResponse.user));
         req.user = sessionResponse.user;
         req.session = sessionResponse.session;
       } else {
