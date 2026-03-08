@@ -4,6 +4,15 @@ import { UPLOAD_AVATAR_REPOSITORY } from './interfaces/upload-avatar.repository.
 import { AVATAR_STORAGE_SERVICE } from './interfaces/avatar-storage.service.interface';
 import { AvatarUploadFailedError } from './upload-avatar.models';
 
+const mockWebpBuffer = Buffer.from('mocked-webp-buffer');
+
+jest.mock('sharp', () => {
+  return jest.fn().mockImplementation(() => ({
+    webp: jest.fn().mockReturnThis(),
+    toBuffer: jest.fn().mockResolvedValue(mockWebpBuffer),
+  }));
+});
+
 describe('UploadAvatarHandler', () => {
   let handler: UploadAvatarHandler;
   let mockRepository: { updateAvatarUrl: jest.Mock };
@@ -43,7 +52,7 @@ describe('UploadAvatarHandler', () => {
     };
 
     it('should successfully upload avatar and update repository url', async () => {
-      const mockS3Url = 'https://fake-s3-url.com/avatar.png';
+      const mockS3Url = 'https://fake-s3-url.com/avatar.webp';
       mockStorageService.uploadAvatar.mockResolvedValue(mockS3Url);
       mockRepository.updateAvatarUrl.mockResolvedValue(true);
 
@@ -51,9 +60,10 @@ describe('UploadAvatarHandler', () => {
 
       expect(mockStorageService.uploadAvatar).toHaveBeenCalledWith(
         mockRequest.userId,
-        mockRequest.originalName,
-        mockRequest.mimeType,
-        mockRequest.fileBuffer,
+        // The original name 'image.png' is split and replaced with .webp inside the handler
+        'image.webp', 
+        'image/webp',
+        mockWebpBuffer,
       );
       expect(mockRepository.updateAvatarUrl).toHaveBeenCalledWith(
         mockRequest.userId,
