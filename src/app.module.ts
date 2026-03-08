@@ -9,6 +9,7 @@ import { ProfilesModule } from '@/features/profiles/profiles.module';
 import { ContentModule } from '@/features/content/content.module';
 import { PantersModule } from '@/features/panters/panters.module';
 import { LiveChatModule } from '@/features/live-chat/live-chat.module';
+import { EarningsModule } from '@/features/earnings/earnings.module';
 import { RequestLoggerMiddleware } from '@/core/infrastructure/logger/request-logger.middleware';
 
 @Module({
