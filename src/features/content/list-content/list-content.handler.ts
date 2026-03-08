@@ -21,14 +21,22 @@ export class ListContentHandler {
       creatorId: request.creatorId,
     });
 
-    // Filtros visuales: No mandamos las URLs de video en la lista pública por piratería
+    const purchasedIds = request.subscriberId
+      ? await this.contentRepository.getPurchasedContentIds(
+          request.subscriberId,
+        )
+      : [];
+
     const contentsDTO: ContentItemDTO[] = rawContents.map((content) => ({
       id: content.id,
       title: content.title,
       description: content.description,
+      type: content.type,
       price: content.price,
       creatorId: content.creatorId,
       createdAt: content.createdAt,
+      thumbnailUrl: content.thumbnailUrl || '',
+      isBought: purchasedIds.includes(content.id),
     }));
 
     return { contents: contentsDTO };

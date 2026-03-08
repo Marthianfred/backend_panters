@@ -3,6 +3,7 @@ export interface UploadContentRequest {
   title: string;
   description: string;
   priceInPanterCoins: number;
+  type?: string;
 }
 
 export interface UploadContentResponse {

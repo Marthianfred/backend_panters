@@ -1,6 +1,7 @@
 export interface ListContentRequest {
   creatorId?: string;
   isSubscriber: boolean;
+  subscriberId?: string;
 }
 
 export interface ListContentResponse {
@@ -11,7 +12,10 @@ export interface ContentItemDTO {
   id: string;
   title: string;
   description: string;
+  type: string;
   price: number;
   creatorId: string;
   createdAt: Date;
+  thumbnailUrl: string;
+  isBought?: boolean;
 }

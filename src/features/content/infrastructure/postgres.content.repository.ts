@@ -11,9 +11,11 @@ interface ContentRow {
   creator_id: string;
   title: string;
   description: string;
+  type: string;
   price_coins: string;
   created_at: Date;
   file_url: string;
+  thumbnail: string;
 }
 
 @Injectable()
@@ -29,14 +31,16 @@ export class PostgresContentRepository implements IContentRepository {
   public async saveContent(content: Content): Promise<Content> {
     const query = `
       INSERT INTO content_items (
-        id, creator_id, title, description, type, price_coins, file_url, status
+        id, creator_id, title, description, type, price_coins, file_url, thumbnail, status
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8
+        $1, $2, $3, $4, $5, $6, $7, $8, $9
       ) ON CONFLICT (id) DO UPDATE SET
         title = EXCLUDED.title,
         description = EXCLUDED.description,
         price_coins = EXCLUDED.price_coins,
         file_url = EXCLUDED.file_url,
+        thumbnail = EXCLUDED.thumbnail,
+        type = EXCLUDED.type,
         updated_at = NOW()
       RETURNING *;
     `;
@@ -46,9 +50,10 @@ export class PostgresContentRepository implements IContentRepository {
       content.creatorId,
       content.title,
       content.description,
-      'video', // Por defecto video para cumplir con el esquema
+      content.type || 'photo',
       content.price,
       content.url || '',
+      content.thumbnailUrl || '',
       'published',
     ];
 
@@ -93,9 +98,21 @@ export class PostgresContentRepository implements IContentRepository {
       creatorId: row.creator_id,
       title: row.title,
       description: row.description,
+      type: row.type,
       price: parseFloat(row.price_coins),
       createdAt: row.created_at,
       url: row.file_url,
+      thumbnailUrl: row.thumbnail,
     };
+  }
+
+  public async getPurchasedContentIds(userId: string): Promise<string[]> {
+    const res = await this.pool.query(
+      'SELECT content_item_id FROM content_purchases WHERE user_id = $1',
+      [userId],
+    );
+    return res.rows.map(
+      (row: { content_item_id: string }) => row.content_item_id,
+    );
   }
 }

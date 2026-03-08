@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { json, urlencoded } from 'express';
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -23,14 +23,17 @@ async function bootstrap() {
 
   const limitSize = '10000mb';
 
+  interface RequestWithRawBody extends Request {
+    rawBody?: Buffer;
+  }
+
   const rawBodyBuffer = (
-    req: Request,
-    res: Response,
+    req: RequestWithRawBody,
+    _res: Response,
     buffer: Buffer,
-    encoding: BufferEncoding,
   ) => {
     if (buffer && buffer.length) {
-      req['rawBody'] = buffer;
+      req.rawBody = buffer;
     }
   };
 

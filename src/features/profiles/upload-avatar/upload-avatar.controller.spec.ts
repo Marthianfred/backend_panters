@@ -51,7 +51,11 @@ describe('UploadAvatarController', () => {
     });
 
     it('should return BAD_REQUEST if no file is provided', async () => {
-      await controller.uploadAvatar(mockReq, mockRes, undefined as any);
+      await controller.uploadAvatar(
+        mockReq,
+        mockRes,
+        undefined as unknown as Express.Multer.File,
+      );
 
       expect(mockRes.status).toHaveBeenCalledWith(HttpStatus.BAD_REQUEST);
       expect(mockRes.json).toHaveBeenCalledWith({

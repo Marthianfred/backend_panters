@@ -34,6 +34,7 @@ export class ListContentController {
       const response = await this.handler.execute({
         creatorId,
         isSubscriber: (userRole as Role) === Role.SUBSCRIBER,
+        subscriberId: req.user?.id,
       });
 
       res.status(HttpStatus.OK).json(response);

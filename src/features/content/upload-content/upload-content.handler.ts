@@ -33,7 +33,9 @@ export class UploadContentHandler {
       creatorId: request.creatorId,
       title: request.title,
       description: request.description,
+      type: request.type || 'video',
       price: request.priceInPanterCoins,
+      url: '', // Se llenará cuando se complete la subida
       createdAt: new Date(),
     });
 

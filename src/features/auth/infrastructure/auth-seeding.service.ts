@@ -15,49 +15,122 @@ export class AuthSeedingService implements OnModuleInit {
   ) {}
 
   async onModuleInit(): Promise<void> {
-    this.logger.log('Verificando usuario administrador inicial...');
+    this.logger.log(
+      'Iniciando seeding de usuarios base (Admin, Moderador, Cliente)...',
+    );
+
+    await this.seedUser(
+      'admin@panters.com',
+      'adminPassword123',
+      'Panters Admin',
+      'admin',
+    );
+    await this.seedUser(
+      'moderator@panters.com',
+      'moderatorPassword123',
+      'Panters Moderador',
+      'moderator',
+    );
+    await this.seedUser(
+      'client@panters.com',
+      'clientPassword123',
+      'Panters Cliente',
+      'subscriber',
+    );
+  }
+
+  private async seedUser(
+    email: string,
+    pass: string,
+    name: string,
+    role: string,
+  ) {
     try {
-      // Usamos DataSource en lugar de la instancia de base de datos interna de BetterAuth
-      const adminExists = await this.dataSource.query<{ id: string }[]>(
-        'SELECT id FROM "user" WHERE role = \'admin\' LIMIT 1',
+      const userExists = await this.dataSource.query<{ id: string }[]>(
+        'SELECT id FROM "user" WHERE email = $1 LIMIT 1',
+        [email],
       );
 
-      if (adminExists.length === 0) {
-        this.logger.log('No se encontró administrador. Creando uno inicial...');
+      let userId = '';
 
-        // Better Auth API server-side espera el cuerpo en un objeto 'body'
-        // para emular la estructura de una petición si se usa vía API Genérica
+      if (userExists.length === 0) {
+        this.logger.log(`Creando usuario: ${email} con rol ${role}...`);
+
         try {
+          // Better Auth API server-side espera el cuerpo en un objeto 'body'
           await this.authInstance.api.signUpEmail({
             body: {
-              email: 'admin@panters.com',
-              password: 'adminPassword123',
-              name: 'Panters Admin',
+              email: email,
+              password: pass,
+              name: name,
             },
           });
         } catch {
-          // Si el usuario ya existe (ej. de intentos anteriores fallidos en el rol), ignoramos el error de dupliicado
           this.logger.debug(
-            'Nota: El usuario ya podría existir, procediendo a forzar rol.',
+            `Usuario ${email} tuvo conflicto en Auth (posible intento previo). Forzando sincronización.`,
           );
         }
 
-        // Actualizamos el rol a admin manualmente porque signUpEmail usa el default de la tabla
+        // Recuperar el usuario creado por signUpEmail
+        const user = await this.dataSource.query<{ id: string }[]>(
+          'SELECT id FROM "user" WHERE email = $1 LIMIT 1',
+          [email],
+        );
+
+        if (user.length > 0) {
+          userId = user[0].id;
+          // Forzar el rol
+          await this.dataSource.query(
+            'UPDATE "user" SET role = $1 WHERE email = $2',
+            [role, email],
+          );
+        }
+      } else {
+        userId = userExists[0].id;
+        // Forzar la actualización del rol por si fue modificado
         await this.dataSource.query(
-          'UPDATE "user" SET role = \'admin\' WHERE email = $1',
-          ['admin@panters.com'],
+          'UPDATE "user" SET role = $1 WHERE email = $2',
+          [role, email],
+        );
+        this.logger.log(`Usuario ${email} ya existe. Perfil validado.`);
+      }
+
+      if (userId) {
+        // Asegurar que exista perfil (antigravity_profiles)
+        await this.dataSource.query(
+          `
+          INSERT INTO "antigravity_profiles" (user_id, full_name, avatar_url, bio, is_active)
+          VALUES ($1, $2, $3, $4, true)
+          ON CONFLICT (user_id) DO NOTHING
+        `,
+          [
+            userId,
+            name,
+            `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`,
+            `Perfil del sistema para ${name} (${role})`,
+          ],
+        );
+
+        // Asegurar que exista wallet (antigravity_wallets)
+        // Damos algo de saldo ficticio a todos los usuarios de seeding: 9999 al dev/admin, 500 al cliente normal
+        const startingBalance = role === 'subscriber' ? 500 : 99999;
+        await this.dataSource.query(
+          `
+          INSERT INTO "antigravity_wallets" (user_id, panter_coin_balance)
+          VALUES ($1, $2)
+          ON CONFLICT (user_id) DO NOTHING
+        `,
+          [userId, startingBalance],
         );
 
         this.logger.log(
-          'Usuario administrador inicial sincronizado: admin@panters.com / adminPassword123',
+          `Perfil y Billetera conformados para: ${email} (Rol: ${role})`,
         );
-      } else {
-        this.logger.log('Usuario administrador ya existe.');
       }
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Error desconocido';
-      this.logger.error(`Error en seeding de administrador: ${message}`);
+      this.logger.error(`Error en seeding de usuario ${email}: ${message}`);
     }
   }
 }

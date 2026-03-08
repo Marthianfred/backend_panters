@@ -3,6 +3,8 @@ import type { IContentRepository } from '../interfaces/content.repository.interf
 import { CONTENT_REPOSITORY_TOKEN } from '../interfaces/content.repository.interface';
 import type { IP2PTransactionService } from './interfaces/p2p-transaction.service.interface';
 import { P2P_TRANSACTION_SERVICE_TOKEN } from './interfaces/p2p-transaction.service.interface';
+import { CONTENT_STORAGE_SERVICE } from '../upload-content/interfaces/content-storage.service.interface';
+import type { IContentStorageService } from '../upload-content/interfaces/content-storage.service.interface';
 import type {
   PurchaseContentRequest,
   PurchaseContentResponse,
@@ -19,6 +21,8 @@ export class PurchaseContentHandler {
     private readonly contentRepository: IContentRepository,
     @Inject(P2P_TRANSACTION_SERVICE_TOKEN)
     private readonly p2pTransactionService: IP2PTransactionService,
+    @Inject(CONTENT_STORAGE_SERVICE)
+    private readonly storageService: IContentStorageService,
   ) {}
 
   public async execute(
@@ -45,8 +49,11 @@ export class PurchaseContentHandler {
       throw new InsufficientCoinsError();
     }
 
-    // 3. Generar y entregar AWS CloudFront Signed URL
-    const signedDeliveryUrl = `https://cdn.panters.com/${content.id}?Expires=1672531190&Signature=xyz...`;
+    // 3. Generar y entregar URL firmada real
+    const signedDeliveryUrl = await this.storageService.getPresignedDownloadUrl(
+      content.creatorId,
+      content.id,
+    );
 
     return {
       success: true,

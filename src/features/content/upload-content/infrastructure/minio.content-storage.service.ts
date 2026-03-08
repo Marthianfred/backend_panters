@@ -4,6 +4,7 @@ import {
   S3Client,
   PutObjectCommand,
   PutObjectCommandInput,
+  GetObjectCommand,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { IContentStorageService } from '../interfaces/content-storage.service.interface';
@@ -51,6 +52,21 @@ export class MinioContentStorageService implements IContentStorageService {
     const command = new PutObjectCommand(params);
 
     // Expira en 1 hora (3600 segundos)
+    return await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
+  }
+
+  public async getPresignedDownloadUrl(
+    userId: string,
+    contentId: string,
+  ): Promise<string> {
+    const key = `${userId}/content/${contentId}.mp4`;
+
+    const command = new GetObjectCommand({
+      Bucket: this.bucket,
+      Key: key,
+    });
+
+    // Expira en 1 hora
     return await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
   }
 }

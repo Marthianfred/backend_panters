@@ -27,11 +27,14 @@
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
+    "@nestjs/platform-socket.io": "^11.1.16",
     "@nestjs/typeorm": "^11.0.0",
+    "@nestjs/websockets": "^11.1.16",
     "better-auth": "^1.1.18",
     "pg": "^8.13.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
+    "socket.io": "^4.8.3",
     "typeorm": "^0.3.20"
   },
   "devDependencies": {

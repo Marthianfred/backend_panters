@@ -4,7 +4,7 @@ import { GetPantersResponse } from './get-panters.models';
 // Assuming you have AuthGuard established as described in global rules
 import { AuthGuard } from '../../auth/guards/auth.guard';
 
-@Controller('panters')
+@Controller('api/v1/panters')
 export class GetPantersController {
   constructor(private readonly getPantersHandler: GetPantersHandler) {}
 

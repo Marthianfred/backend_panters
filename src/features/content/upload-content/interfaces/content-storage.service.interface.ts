@@ -6,4 +6,6 @@ export interface IContentStorageService {
     contentId: string,
     mimeType?: string,
   ): Promise<string>;
+
+  getPresignedDownloadUrl(userId: string, contentId: string): Promise<string>;
 }
