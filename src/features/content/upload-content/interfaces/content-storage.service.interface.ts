@@ -8,4 +8,5 @@ export interface IContentStorageService {
   ): Promise<string>;
 
   getPresignedDownloadUrl(userId: string, contentId: string): Promise<string>;
+  deleteContent(userId: string, contentId: string): Promise<void>;
 }

@@ -16,6 +16,9 @@ interface ContentRow {
   created_at: Date;
   file_url: string;
   thumbnail: string;
+  creator_full_name: string;
+  creator_avatar_url: string;
+  creator_is_online: boolean;
 }
 
 @Injectable()
@@ -65,16 +68,25 @@ export class PostgresContentRepository implements IContentRepository {
     creatorId?: string;
     published?: boolean;
   }): Promise<Content[]> {
-    let query = 'SELECT * FROM content_items WHERE 1=1';
+    let query = `
+      SELECT 
+        c.*, 
+        p.full_name as creator_full_name, 
+        p.avatar_url as creator_avatar_url, 
+        p.is_online as creator_is_online 
+      FROM content_items c
+      LEFT JOIN antigravity_profiles p ON c.creator_id = p.user_id
+      WHERE 1=1
+    `;
     const values: string[] = [];
 
     if (params?.creatorId) {
       values.push(params.creatorId);
-      query += ` AND creator_id = $${values.length}`;
+      query += ` AND c.creator_id = $${values.length}`;
     }
 
     if (params?.published) {
-      query += ` AND status = 'published'`;
+      query += ` AND c.status = 'published'`;
     }
 
     const result = await this.pool.query<ContentRow>(query, values);
@@ -103,6 +115,11 @@ export class PostgresContentRepository implements IContentRepository {
       createdAt: row.created_at,
       url: row.file_url,
       thumbnailUrl: row.thumbnail,
+      creatorDetails: {
+        fullName: row.creator_full_name,
+        avatarUrl: row.creator_avatar_url,
+        isOnline: row.creator_is_online,
+      },
     };
   }
 
@@ -114,5 +131,42 @@ export class PostgresContentRepository implements IContentRepository {
     return res.rows.map(
       (row: { content_item_id: string }) => row.content_item_id,
     );
+  }
+
+  public async updateContent(
+    id: string,
+    updates: Partial<Content>,
+  ): Promise<void> {
+    const fields = Object.keys(updates);
+    if (fields.length === 0) return;
+
+    const setClause = fields
+      .map((field, index) => {
+        const column = this.mapToColumn(field);
+        return `${column} = $${index + 2}`;
+      })
+      .join(', ');
+
+    const query = `UPDATE content_items SET ${setClause}, updated_at = NOW() WHERE id = $1`;
+    const values = [id, ...Object.values(updates)];
+
+    await this.pool.query(query, values);
+  }
+
+  public async deleteContent(id: string): Promise<void> {
+    const query = 'DELETE FROM content_items WHERE id = $1';
+    await this.pool.query(query, [id]);
+  }
+
+  private mapToColumn(field: string): string {
+    const mapping: Record<string, string> = {
+      title: 'title',
+      description: 'description',
+      price: 'price_coins',
+      type: 'type',
+      url: 'file_url',
+      thumbnailUrl: 'thumbnail',
+    };
+    return mapping[field] || field;
   }
 }

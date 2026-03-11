@@ -39,6 +39,19 @@ export class ListContentHandler {
       isBought: purchasedIds.includes(content.id),
     }));
 
-    return { contents: contentsDTO };
+    // Extraemos la info del creador desde el primer resultado (si existe) para la cabecera del muro
+    let creatorInfo: { fullName: string; avatarUrl: string; isOnline: boolean } | undefined = undefined;
+    if (rawContents.length > 0 && rawContents[0].creatorDetails) {
+      creatorInfo = {
+        fullName: rawContents[0].creatorDetails.fullName,
+        avatarUrl: rawContents[0].creatorDetails.avatarUrl,
+        isOnline: rawContents[0].creatorDetails.isOnline,
+      };
+    }
+
+    return {
+      creator: creatorInfo,
+      contents: contentsDTO,
+    };
   }
 }

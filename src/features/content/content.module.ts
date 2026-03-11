@@ -13,6 +13,10 @@ import { PostgresP2PTransactionService } from './purchase-content/infrastructure
 
 import { CONTENT_STORAGE_SERVICE } from './upload-content/interfaces/content-storage.service.interface';
 import { MinioContentStorageService } from './upload-content/infrastructure/minio.content-storage.service';
+import { UpdateContentController } from './update-content/update-content.controller';
+import { UpdateContentHandler } from './update-content/update-content.handler';
+import { DeleteContentController } from './delete-content/delete-content.controller';
+import { DeleteContentHandler } from './delete-content/delete-content.handler';
 
 @Module({
   imports: [AuthModule],
@@ -20,11 +24,15 @@ import { MinioContentStorageService } from './upload-content/infrastructure/mini
     UploadContentController,
     ListContentController,
     PurchaseContentController,
+    UpdateContentController,
+    DeleteContentController,
   ],
   providers: [
     UploadContentHandler,
     ListContentHandler,
     PurchaseContentHandler,
+    UpdateContentHandler,
+    DeleteContentHandler,
     {
       provide: CONTENT_REPOSITORY_TOKEN,
       useClass: PostgresContentRepository,

@@ -25,9 +25,16 @@ export class ListContentController {
   public async listContents(
     @Req() req: AuthenticatedRequest,
     @Res() res: Response,
-    @Query('creatorId') creatorId?: string,
+    @Query('creatorId') creatorId: string,
   ): Promise<void> {
     try {
+      if (!creatorId) {
+        res.status(HttpStatus.BAD_REQUEST).json({
+          error: 'El parámetro creatorId es obligatorio.',
+        });
+        return;
+      }
+
       // Obtener rol del usuario autenticado
       const userRole = req.user?.role || Role.SUBSCRIBER;
 

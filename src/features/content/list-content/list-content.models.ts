@@ -1,10 +1,15 @@
 export interface ListContentRequest {
-  creatorId?: string;
+  creatorId: string;
   isSubscriber: boolean;
   subscriberId?: string;
 }
 
 export interface ListContentResponse {
+  creator?: {
+    fullName: string;
+    avatarUrl: string;
+    isOnline: boolean;
+  };
   contents: ContentItemDTO[];
 }
 
