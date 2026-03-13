@@ -5,6 +5,7 @@ export interface Content {
   description: string;
   type: string;
   price: number;
+  accessType: string; // 'free' | 'payment'
   createdAt: Date;
   url: string;
   thumbnailUrl?: string;

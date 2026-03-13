@@ -13,11 +13,11 @@ import { IContentStorageService } from '../interfaces/content-storage.service.in
 @Injectable()
 export class MinioContentStorageService implements IContentStorageService {
   private s3Client: S3Client;
-  private bucketName: string; // Changed from 'bucket' to 'bucketName'
+  private bucketName: string;
   private endpoint: string;
 
   constructor(private readonly configService: ConfigService) {
-    this.bucketName = this.configService.getOrThrow<string>('AWS_BUCKET'); // Changed from 'bucket' to 'bucketName'
+    this.bucketName = this.configService.getOrThrow<string>('AWS_BUCKET');
     this.endpoint = this.configService.getOrThrow<string>('AWS_ENDPOINT');
 
     this.s3Client = new S3Client({
@@ -39,11 +39,13 @@ export class MinioContentStorageService implements IContentStorageService {
     userId: string,
     contentId: string,
     mimeType?: string,
+    folder: string = 'content',
   ): Promise<string> {
-    const key = `${userId}/content/${contentId}.mp4`;
+    const extension = this.getExtension(mimeType);
+    const key = `${userId}/${folder}/${contentId}${extension}`;
 
     const params: PutObjectCommandInput = {
-      Bucket: this.bucketName, // Changed from 'bucket' to 'bucketName'
+      Bucket: this.bucketName,
       Key: key,
     };
     if (mimeType) {
@@ -59,26 +61,48 @@ export class MinioContentStorageService implements IContentStorageService {
   public async getPresignedDownloadUrl(
     userId: string,
     contentId: string,
+    extension: string = '.mp4',
+    folder: string = 'content'
   ): Promise<string> {
-    const key = `${userId}/content/${contentId}.mp4`;
+    const key = `${userId}/${folder}/${contentId}${extension.startsWith('.') ? extension : '.' + extension}`; 
 
     const command = new GetObjectCommand({
-      Bucket: this.bucketName, // Changed from 'bucket' to 'bucketName'
+      Bucket: this.bucketName,
       Key: key,
     });
 
-    // Expira en 1 hora
     return await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
   }
 
   public async deleteContent(
     userId: string,
     contentId: string,
+    extension: string = '.mp4',
+    folder: string = 'content'
   ): Promise<void> {
+    const key = `${userId}/${folder}/${contentId}${extension.startsWith('.') ? extension : '.' + extension}`;
     const command = new DeleteObjectCommand({
       Bucket: this.bucketName,
-      Key: `${userId}/content/${contentId}.mp4`,
+      Key: key,
     });
-    await this.s3Client.send(command);
+    try {
+      await this.s3Client.send(command);
+    } catch (error) {
+      // Si el archivo no existe en S3, ignoramos el error para permitir que el borrado en BDD continúe
+      console.warn(`[StorageService] No se pudo borrar el archivo en S3 (quizás no existe): ${key}`, error.message);
+    }
+  }
+
+  private getExtension(mimeType?: string): string {
+    if (!mimeType) return '.mp4';
+    const mime = mimeType.toLowerCase();
+    if (mime.includes('image/jpeg') || mime.includes('image/jpg')) return '.jpg';
+    if (mime.includes('image/png')) return '.png';
+    if (mime.includes('image/gif')) return '.gif';
+    if (mime.includes('image/webp')) return '.webp';
+    if (mime.includes('video/mp4')) return '.mp4';
+    if (mime.includes('video/quicktime')) return '.mov';
+    if (mime.includes('video/webm')) return '.webm';
+    return '.mp4'; // Default
   }
 }

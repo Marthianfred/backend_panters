@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthModule } from '../auth/auth.module';
+import { ProfilesModule } from '../profiles/profiles.module';
 import { UploadContentController } from './upload-content/upload-content.controller';
 import { UploadContentHandler } from './upload-content/upload-content.handler';
 import { ListContentController } from './list-content/list-content.controller';
@@ -17,15 +18,18 @@ import { UpdateContentController } from './update-content/update-content.control
 import { UpdateContentHandler } from './update-content/update-content.handler';
 import { DeleteContentController } from './delete-content/delete-content.controller';
 import { DeleteContentHandler } from './delete-content/delete-content.handler';
+import { GetMediaUrlController } from './get-media-url/get-media-url.controller';
+import { GetMediaUrlHandler } from './get-media-url/get-media-url.handler';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, ProfilesModule],
   controllers: [
     UploadContentController,
     ListContentController,
     PurchaseContentController,
     UpdateContentController,
     DeleteContentController,
+    GetMediaUrlController,
   ],
   providers: [
     UploadContentHandler,
@@ -33,6 +37,7 @@ import { DeleteContentHandler } from './delete-content/delete-content.handler';
     PurchaseContentHandler,
     UpdateContentHandler,
     DeleteContentHandler,
+    GetMediaUrlHandler,
     {
       provide: CONTENT_REPOSITORY_TOKEN,
       useClass: PostgresContentRepository,

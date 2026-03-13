@@ -47,5 +47,6 @@ import { MinioAvatarStorageService } from './upload-avatar/infrastructure/minio.
       useClass: MinioAvatarStorageService,
     },
   ],
+  exports: [PROFILE_REPOSITORY],
 })
 export class ProfilesModule {}

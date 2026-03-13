@@ -6,6 +6,7 @@ export class UpdateContentRequest {
       title?: string;
       description?: string;
       price?: number;
+      accessType?: string;
     },
   ) {}
 }

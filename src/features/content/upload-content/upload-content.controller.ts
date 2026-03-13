@@ -25,7 +25,7 @@ export class UploadContentController {
   @Roles(Role.PANTER, Role.ADMIN)
   public async upload(
     @Req() req: AuthenticatedRequest,
-    @Body() body: { title: string; description: string; price: number },
+    @Body() body: { title: string; description: string; price: number, type?: string, mimeType: string, thumbnailMimeType?: string, accessType: string },
     @Res() res: Response,
   ): Promise<void> {
     try {
@@ -43,6 +43,10 @@ export class UploadContentController {
         title: body.title,
         description: body.description,
         priceInPanterCoins: body.price,
+        type: body.type,
+        mimeType: body.mimeType,
+        thumbnailMimeType: body.thumbnailMimeType,
+        accessType: body.accessType,
       });
 
       res.status(HttpStatus.CREATED).json(response);
@@ -51,8 +55,9 @@ export class UploadContentController {
         res.status(HttpStatus.BAD_REQUEST).json({ error: error.message });
         return;
       }
+      console.error('[UploadContentController] Error:', error);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Ocurrió un error subiendo metadatos',
+        error: error.message || 'Ocurrió un error subiendo metadatos',
       });
     }
   }

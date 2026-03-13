@@ -50,9 +50,11 @@ export class PurchaseContentHandler {
     }
 
     // 3. Generar y entregar URL firmada real
+    const extension = content.url ? content.url.substring(content.url.lastIndexOf('.')) : '.mp4';
     const signedDeliveryUrl = await this.storageService.getPresignedDownloadUrl(
       content.creatorId,
       content.id,
+      extension,
     );
 
     return {

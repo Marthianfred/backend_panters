@@ -19,6 +19,7 @@ export interface ContentItemDTO {
   description: string;
   type: string;
   price: number;
+  accessType: string;
   creatorId: string;
   createdAt: Date;
   thumbnailUrl: string;

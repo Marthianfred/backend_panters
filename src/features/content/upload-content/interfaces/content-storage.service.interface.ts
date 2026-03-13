@@ -5,8 +5,9 @@ export interface IContentStorageService {
     userId: string,
     contentId: string,
     mimeType?: string,
+    folder?: string,
   ): Promise<string>;
 
-  getPresignedDownloadUrl(userId: string, contentId: string): Promise<string>;
-  deleteContent(userId: string, contentId: string): Promise<void>;
+  getPresignedDownloadUrl(userId: string, contentId: string, extension?: string, folder?: string): Promise<string>;
+  deleteContent(userId: string, contentId: string, extension?: string, folder?: string): Promise<void>;
 }

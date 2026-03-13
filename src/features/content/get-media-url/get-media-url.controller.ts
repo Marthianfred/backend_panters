@@ -1,45 +1,38 @@
 import {
   Controller,
-  Patch,
+  Get,
   Param,
-  Body,
   UseGuards,
   Req,
   HttpStatus,
   Res,
 } from '@nestjs/common';
 import type { Response } from 'express';
-import { UpdateContentHandler } from './update-content.handler';
-import { Roles } from '../../../core/auth/decorators/roles.decorator';
-import { Role } from '../../../core/auth/roles.enum';
-import { RolesGuard } from '../../../core/auth/guards/roles.guard';
+import { GetMediaUrlHandler } from './get-media-url.handler';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import type { AuthenticatedRequest } from '../../auth/types/auth.types';
 import {
+  ContentAccessDeniedError,
   ContentNotFoundError,
-  UnauthorizedUpdateError,
-} from './update-content.models';
+} from './get-media-url.models';
 
 @Controller('api/v1/content')
-@UseGuards(AuthGuard, RolesGuard)
-export class UpdateContentController {
-  constructor(private readonly handler: UpdateContentHandler) {}
+@UseGuards(AuthGuard)
+export class GetMediaUrlController {
+  constructor(private readonly handler: GetMediaUrlHandler) {}
 
-  @Patch(':contentId')
-  @Roles(Role.PANTER, Role.ADMIN)
-  public async updateContent(
+  @Get(':contentId/media')
+  public async getMedia(
     @Req() req: AuthenticatedRequest,
     @Param('contentId') contentId: string,
-    @Body() body: { title?: string; description?: string; price?: number, accessType?: string },
     @Res() res: Response,
   ): Promise<void> {
     try {
-      const creatorId = req.user.id;
+      const subscriberId = req.user.id;
 
       const response = await this.handler.execute({
         contentId,
-        creatorId,
-        updates: body,
+        subscriberId,
       });
 
       res.status(HttpStatus.OK).json(response);
@@ -48,12 +41,14 @@ export class UpdateContentController {
         res.status(HttpStatus.NOT_FOUND).json({ error: error.message });
         return;
       }
-      if (error instanceof UnauthorizedUpdateError) {
+      if (error instanceof ContentAccessDeniedError) {
         res.status(HttpStatus.FORBIDDEN).json({ error: error.message });
         return;
       }
+      
+      console.error('[GetMediaUrlController] Error:', error);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: 'Ocurrió un error al intentar actualizar el contenido.',
+        error: 'Ocurrió un error al intentar obtener el contenido.',
       });
     }
   }

@@ -37,10 +37,27 @@ export class DeleteContentHandler {
     }
 
     // 3. Eliminar de Almacenamiento (S3)
-    await this.storageService.deleteContent(
-      request.creatorId,
-      request.contentId,
-    );
+    // Borrar Media Principal
+    if (content.url) {
+      const extension = content.url.substring(content.url.lastIndexOf('.'));
+      await this.storageService.deleteContent(
+        request.creatorId,
+        request.contentId,
+        extension,
+        'content',
+      );
+    }
+
+    // Borrar Miniatura si existe
+    if (content.thumbnailUrl) {
+      const thumbExt = content.thumbnailUrl.substring(content.thumbnailUrl.lastIndexOf('.'));
+      await this.storageService.deleteContent(
+        request.creatorId,
+        request.contentId,
+        thumbExt,
+        'thumbnails',
+      );
+    }
 
     // 4. Eliminar de BDD
     await this.contentRepository.deleteContent(request.contentId);

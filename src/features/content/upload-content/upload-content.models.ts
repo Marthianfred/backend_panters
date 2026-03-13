@@ -4,13 +4,17 @@ export interface UploadContentRequest {
   description: string;
   priceInPanterCoins: number;
   type?: string;
+  mimeType: string;
+  thumbnailMimeType?: string; // Nuevo campo para la miniatura
+  accessType: string; // 'free' | 'payment'
 }
 
 export interface UploadContentResponse {
   contentId: string;
   status: string;
   message: string;
-  presignedUploadUrl: string; // Para subir el MP4 directo a S3
+  presignedUploadUrl: string; // URL para el video/foto principal
+  presignedThumbnailUploadUrl?: string; // Nueva URL para la miniatura
 }
 
 export class InvalidPriceError extends Error {

@@ -16,6 +16,7 @@ interface ContentRow {
   created_at: Date;
   file_url: string;
   thumbnail: string;
+  access_type: string;
   creator_full_name: string;
   creator_avatar_url: string;
   creator_is_online: boolean;
@@ -34,16 +35,17 @@ export class PostgresContentRepository implements IContentRepository {
   public async saveContent(content: Content): Promise<Content> {
     const query = `
       INSERT INTO content_items (
-        id, creator_id, title, description, type, price_coins, file_url, thumbnail, status
+        id, creator_id, title, description, type, price_coins, file_url, thumbnail, status, access_type
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9
+        $1, $2, $3, $4, $5::content_type, $6, $7, $8, $9::content_status, $10
       ) ON CONFLICT (id) DO UPDATE SET
         title = EXCLUDED.title,
         description = EXCLUDED.description,
         price_coins = EXCLUDED.price_coins,
         file_url = EXCLUDED.file_url,
         thumbnail = EXCLUDED.thumbnail,
-        type = EXCLUDED.type,
+        type = EXCLUDED.type::content_type,
+        access_type = EXCLUDED.access_type,
         updated_at = NOW()
       RETURNING *;
     `;
@@ -58,6 +60,7 @@ export class PostgresContentRepository implements IContentRepository {
       content.url || '',
       content.thumbnailUrl || '',
       'published',
+      content.accessType || 'free',
     ];
 
     const result = await this.pool.query<ContentRow>(query, values);
@@ -82,7 +85,8 @@ export class PostgresContentRepository implements IContentRepository {
 
     if (params?.creatorId) {
       values.push(params.creatorId);
-      query += ` AND c.creator_id = $${values.length}`;
+      // Validamos si es un UUID para filtrar por la columna correcta
+      query += ` AND p.id::text = $${values.length}`;
     }
 
     if (params?.published) {
@@ -112,14 +116,17 @@ export class PostgresContentRepository implements IContentRepository {
       description: row.description,
       type: row.type,
       price: parseFloat(row.price_coins),
+      accessType: row.access_type || 'free',
       createdAt: row.created_at,
       url: row.file_url,
       thumbnailUrl: row.thumbnail,
-      creatorDetails: {
-        fullName: row.creator_full_name,
-        avatarUrl: row.creator_avatar_url,
-        isOnline: row.creator_is_online,
-      },
+      creatorDetails: row.creator_full_name
+        ? {
+            fullName: row.creator_full_name,
+            avatarUrl: row.creator_avatar_url,
+            isOnline: row.creator_is_online,
+          }
+        : undefined,
     };
   }
 
@@ -166,6 +173,7 @@ export class PostgresContentRepository implements IContentRepository {
       type: 'type',
       url: 'file_url',
       thumbnailUrl: 'thumbnail',
+      accessType: 'access_type',
     };
     return mapping[field] || field;
   }
