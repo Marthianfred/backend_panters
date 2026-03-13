@@ -28,19 +28,25 @@ import { PostgresListGiftsRepository } from './list-gifts/infrastructure/postgre
 
 import { LiveChatModule } from '../live-chat/live-chat.module';
 
+// Feature: Create Stream (VSA)
+import { CreateStreamController } from './create-stream/create-stream.controller';
+import { CreateStreamHandler } from './create-stream/create-stream.handler';
+
 @Module({
   imports: [LiveChatModule],
   controllers: [
     GetViewerAccessController,
     SendGiftController,
     RefundGiftController,
-    ListGiftsController
+    ListGiftsController,
+    CreateStreamController,
   ],
   providers: [
     GetViewerAccessHandler,
     SendGiftHandler,
     RefundGiftHandler,
     ListGiftsHandler,
+    CreateStreamHandler,
     {
       provide: STREAM_REPOSITORY,
       useClass: PostgresStreamRepository,
