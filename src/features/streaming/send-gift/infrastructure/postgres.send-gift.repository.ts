@@ -26,6 +26,12 @@ export class PostgresSendGiftRepository implements ISendGiftRepository {
     return result.rows[0] || null;
   }
 
+  public async userExists(userId: string): Promise<boolean> {
+    const query = 'SELECT 1 FROM "user" WHERE id = $1;';
+    const result = await this.pool.query(query, [userId]);
+    return result.rowCount !== null && result.rowCount > 0;
+  }
+
   public async processGiftTransaction(
     userId: string,
     creatorId: string,

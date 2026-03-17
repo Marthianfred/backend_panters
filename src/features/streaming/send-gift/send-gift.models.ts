@@ -5,6 +5,20 @@ export class GiftNotFoundError extends Error {
   }
 }
 
+export class CreatorNotFoundError extends Error {
+  constructor(public readonly creatorId: string) {
+    super(`Creador no encontrado: ${creatorId}`);
+    this.name = 'CreatorNotFoundError';
+  }
+}
+
+export class UserNotFoundError extends Error {
+  constructor(public readonly userId: string) {
+    super(`Usuario no encontrado: ${userId}`);
+    this.name = 'UserNotFoundError';
+  }
+}
+
 export class InsufficientBalanceError extends Error {
   constructor(public readonly userId: string) {
     super(`Saldo insuficiente para el usuario: ${userId}`);

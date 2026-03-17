@@ -8,6 +8,8 @@ import {
   SendGiftRequest,
   SendGiftResponse,
   GiftNotFoundError,
+  CreatorNotFoundError,
+  UserNotFoundError,
   InsufficientBalanceError,
   SendGiftFailedError,
 } from './send-gift.models';
@@ -27,7 +29,19 @@ export class SendGiftHandler {
       throw new GiftNotFoundError(request.giftId);
     }
 
-    // 2. Procesar transacción atómica en DB (PostgreSQL)
+    // 2. Validar que el usuario remitente existe
+    const userExists = await this.repository.userExists(request.userId);
+    if (!userExists) {
+      throw new UserNotFoundError(request.userId);
+    }
+
+    // 3. Validar que el creador destinatario existe
+    const creatorExists = await this.repository.userExists(request.creatorId);
+    if (!creatorExists) {
+      throw new CreatorNotFoundError(request.creatorId);
+    }
+
+    // 4. Procesar transacción atómica en DB (PostgreSQL)
     // Este método maneja el split 70/30 y la deducción de saldo
     const result = await this.repository.processGiftTransaction(
       request.userId,

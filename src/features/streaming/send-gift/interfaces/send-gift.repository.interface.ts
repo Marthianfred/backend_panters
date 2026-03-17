@@ -9,6 +9,11 @@ export interface ISendGiftRepository {
   getGiftById(giftId: string): Promise<GiftDefinition | null>;
   
   /**
+   * Verifica si un usuario existe en el sistema.
+   */
+  userExists(userId: string): Promise<boolean>;
+  
+  /**
    * Ejecuta la transacción atómica de envío de regalo:
    * 1. Verifica saldo.
    * 2. Deduce del balance del usuario.
