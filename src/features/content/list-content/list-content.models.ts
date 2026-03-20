@@ -24,4 +24,6 @@ export interface ContentItemDTO {
   createdAt: Date;
   thumbnailUrl: string;
   isBought?: boolean;
+  panterasCount: number;
+  hasReacted: boolean;
 }

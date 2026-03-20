@@ -20,6 +20,8 @@ interface ContentRow {
   creator_full_name: string;
   creator_avatar_url: string;
   creator_is_online: boolean;
+  panteras_count: string;
+  has_reacted: boolean;
 }
 
 @Injectable()
@@ -70,23 +72,26 @@ export class PostgresContentRepository implements IContentRepository {
   public async listContents(params?: {
     creatorId?: string;
     published?: boolean;
+    subscriberId?: string;
   }): Promise<Content[]> {
     let query = `
       SELECT 
         c.*, 
         p.full_name as creator_full_name, 
         p.avatar_url as creator_avatar_url, 
-        p.is_online as creator_is_online 
+        p.is_online as creator_is_online,
+        (SELECT COUNT(*)::INT FROM public.post_reactions WHERE post_id = c.id) as panteras_count,
+        EXISTS(SELECT 1 FROM public.post_reactions WHERE post_id = c.id AND user_id = $1) as has_reacted
       FROM content_items c
       LEFT JOIN antigravity_profiles p ON c.creator_id = p.user_id
       WHERE 1=1
     `;
-    const values: string[] = [];
+    const values: any[] = [params?.subscriberId || null];
 
     if (params?.creatorId) {
       values.push(params.creatorId);
-      // Validamos si es un UUID para filtrar por la columna correcta
-      query += ` AND p.id::text = $${values.length}`;
+      // El cliente envía el ID del usuario como creador para el filtro del muro.
+      query += ` AND c.creator_id = $${values.length}`;
     }
 
     if (params?.published) {
@@ -120,6 +125,8 @@ export class PostgresContentRepository implements IContentRepository {
       createdAt: row.created_at,
       url: row.file_url,
       thumbnailUrl: row.thumbnail,
+      panterasCount: parseInt(row.panteras_count || '0', 10),
+      hasReacted: row.has_reacted || false,
       creatorDetails: row.creator_full_name
         ? {
             fullName: row.creator_full_name,

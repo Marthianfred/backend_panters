@@ -20,6 +20,8 @@ import { DeleteContentController } from './delete-content/delete-content.control
 import { DeleteContentHandler } from './delete-content/delete-content.handler';
 import { GetMediaUrlController } from './get-media-url/get-media-url.controller';
 import { GetMediaUrlHandler } from './get-media-url/get-media-url.handler';
+import { ShareContentController } from './share-content/share-content.controller';
+import { GetShareInfoHandler } from './share-content/get-share-info.handler';
 
 @Module({
   imports: [AuthModule, ProfilesModule],
@@ -30,6 +32,7 @@ import { GetMediaUrlHandler } from './get-media-url/get-media-url.handler';
     UpdateContentController,
     DeleteContentController,
     GetMediaUrlController,
+    ShareContentController,
   ],
   providers: [
     UploadContentHandler,
@@ -38,6 +41,7 @@ import { GetMediaUrlHandler } from './get-media-url/get-media-url.handler';
     UpdateContentHandler,
     DeleteContentHandler,
     GetMediaUrlHandler,
+    GetShareInfoHandler,
     {
       provide: CONTENT_REPOSITORY_TOKEN,
       useClass: PostgresContentRepository,

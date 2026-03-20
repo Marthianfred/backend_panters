@@ -14,6 +14,8 @@ export interface Content {
     avatarUrl: string;
     isOnline: boolean;
   };
+  panterasCount?: number;
+  hasReacted?: boolean;
 }
 
 export const CONTENT_REPOSITORY_TOKEN = Symbol('CONTENT_REPOSITORY_TOKEN');
@@ -23,6 +25,7 @@ export interface IContentRepository {
   listContents(params?: {
     creatorId?: string;
     published?: boolean;
+    subscriberId?: string;
   }): Promise<Content[]>;
   getContentById(id: string): Promise<Content | null>;
   getPurchasedContentIds(userId: string): Promise<string[]>;

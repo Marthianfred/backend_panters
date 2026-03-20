@@ -23,6 +23,8 @@ export class ListContentHandler {
   ): Promise<ListContentResponse> {
     const rawContents = await this.contentRepository.listContents({
       creatorId: request.creatorId,
+      subscriberId: request.subscriberId,
+      published: true,
     });
 
     const purchasedIds = request.subscriberId
@@ -70,6 +72,8 @@ export class ListContentHandler {
           createdAt: content.createdAt,
           thumbnailUrl: thumbnailUrl,
           isBought,
+          panterasCount: content.panterasCount || 0,
+          hasReacted: content.hasReacted || false,
         };
       }),
     );
