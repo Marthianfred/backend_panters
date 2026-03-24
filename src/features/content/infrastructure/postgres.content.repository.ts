@@ -73,6 +73,9 @@ export class PostgresContentRepository implements IContentRepository {
     creatorId?: string;
     published?: boolean;
     subscriberId?: string;
+    type?: string;
+    page?: number;
+    limit?: number;
   }): Promise<Content[]> {
     let query = `
       SELECT 
@@ -94,12 +97,54 @@ export class PostgresContentRepository implements IContentRepository {
       query += ` AND c.creator_id = $${values.length}`;
     }
 
+    if (params?.type) {
+      values.push(params.type);
+      query += ` AND c.type = $${values.length}::content_type`;
+    }
+
     if (params?.published) {
       query += ` AND c.status = 'published'`;
     }
 
+    // Ordenación por defecto
+    query += ` ORDER BY c.created_at DESC`;
+
+    // Paginación
+    const limit = params?.limit || 20;
+    const page = params?.page || 1;
+    const offset = (page - 1) * limit;
+
+    values.push(limit, offset);
+    query += ` LIMIT $${values.length - 1} OFFSET $${values.length}`;
+
     const result = await this.pool.query<ContentRow>(query, values);
     return result.rows.map((row) => this.mapToDomain(row));
+  }
+
+  public async countContents(params?: {
+    creatorId?: string;
+    published?: boolean;
+    type?: string;
+  }): Promise<number> {
+    let query = `SELECT COUNT(*)::INT FROM content_items c WHERE 1=1`;
+    const values: any[] = [];
+
+    if (params?.creatorId) {
+      values.push(params.creatorId);
+      query += ` AND c.creator_id = $${values.length}`;
+    }
+
+    if (params?.type) {
+      values.push(params.type);
+      query += ` AND c.type = $${values.length}::content_type`;
+    }
+
+    if (params?.published) {
+      query += ` AND c.status = 'published'`;
+    }
+
+    const result = await this.pool.query(query, values);
+    return result.rows[0].count;
   }
 
   public async getContentById(id: string): Promise<Content | null> {

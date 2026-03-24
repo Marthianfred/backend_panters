@@ -26,15 +26,11 @@ export class ListContentController {
     @Req() req: AuthenticatedRequest,
     @Res() res: Response,
     @Query('creatorId') creatorId: string,
+    @Query('type') type: string,
+    @Query('page') page: number,
+    @Query('limit') limit: number,
   ): Promise<void> {
     try {
-      if (!creatorId) {
-        res.status(HttpStatus.BAD_REQUEST).json({
-          error: 'El parámetro creatorId es obligatorio.',
-        });
-        return;
-      }
-
       // Obtener rol del usuario autenticado
       const userRole = req.user?.role || Role.SUBSCRIBER;
 
@@ -42,6 +38,9 @@ export class ListContentController {
         creatorId,
         isSubscriber: (userRole as Role) === Role.SUBSCRIBER,
         subscriberId: req.user?.id,
+        type,
+        page: page ? Number(page) : undefined,
+        limit: limit ? Number(limit) : undefined,
       });
 
       res.status(HttpStatus.OK).json(response);

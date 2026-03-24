@@ -1,7 +1,10 @@
 export interface ListContentRequest {
-  creatorId: string;
+  creatorId?: string;
   isSubscriber: boolean;
   subscriberId?: string;
+  type?: string;
+  page?: number;
+  limit?: number;
 }
 
 export interface ListContentResponse {
@@ -11,6 +14,12 @@ export interface ListContentResponse {
     isOnline: boolean;
   };
   contents: ContentItemDTO[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 export interface ContentItemDTO {

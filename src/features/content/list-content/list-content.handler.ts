@@ -21,10 +21,22 @@ export class ListContentHandler {
   public async execute(
     request: ListContentRequest,
   ): Promise<ListContentResponse> {
+    const page = request.page || 1;
+    const limit = Math.min(request.limit || 20, 20); // Máximo 20 por página
+
     const rawContents = await this.contentRepository.listContents({
       creatorId: request.creatorId,
       subscriberId: request.subscriberId,
       published: true,
+      type: request.type,
+      page,
+      limit,
+    });
+
+    const totalItems = await this.contentRepository.countContents({
+      creatorId: request.creatorId,
+      published: true,
+      type: request.type,
     });
 
     const purchasedIds = request.subscriberId
@@ -73,14 +85,14 @@ export class ListContentHandler {
           thumbnailUrl: thumbnailUrl,
           isBought,
           panterasCount: content.panterasCount || 0,
-          hasReacted: content.hasReacted || false,
+          hasReacted: rowHasReacted(content),
         };
       }),
     );
 
-    // Extraemos la info del creador desde el primer resultado (si existe) para la cabecera del muro
+    // Extraemos la info del creador SOLO si se filtró por uno para la cabecera del muro
     let creatorInfo: { fullName: string; avatarUrl: string; isOnline: boolean } | undefined = undefined;
-    if (rawContents.length > 0 && rawContents[0].creatorDetails) {
+    if (request.creatorId && rawContents.length > 0 && rawContents[0].creatorDetails) {
       const details = rawContents[0].creatorDetails;
       creatorInfo = {
         fullName: details.fullName,
@@ -92,6 +104,17 @@ export class ListContentHandler {
     return {
       creator: creatorInfo,
       contents: contentsDTO,
+      pagination: {
+        page,
+        limit,
+        total: totalItems,
+        totalPages: Math.ceil(totalItems / limit),
+      },
     };
   }
+}
+
+// Función auxiliar para manejar el tipo booleano de hasReacted
+function rowHasReacted(content: any): boolean {
+    return content.hasReacted === true;
 }

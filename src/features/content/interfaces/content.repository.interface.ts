@@ -26,7 +26,15 @@ export interface IContentRepository {
     creatorId?: string;
     published?: boolean;
     subscriberId?: string;
+    type?: string;
+    page?: number;
+    limit?: number;
   }): Promise<Content[]>;
+  countContents(params?: {
+    creatorId?: string;
+    published?: boolean;
+    type?: string;
+  }): Promise<number>;
   getContentById(id: string): Promise<Content | null>;
   getPurchasedContentIds(userId: string): Promise<string[]>;
   updateContent(id: string, updates: Partial<Content>): Promise<void>;
