@@ -5,9 +5,11 @@ import { BetterAuthProvider } from './infrastructure/better-auth.provider';
 import { AuthGuard } from './guards/auth.guard';
 import { AuthSeedingService } from './infrastructure/auth-seeding.service';
 import { AuthMiddleware } from './auth.middleware';
+import { DatabaseModule } from '@/core/database/database.module';
 
 @Global()
 @Module({
+  imports: [DatabaseModule],
   controllers: [AuthController],
   providers: [
     AuthService,

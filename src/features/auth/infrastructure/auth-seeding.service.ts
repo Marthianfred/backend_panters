@@ -1,6 +1,7 @@
 import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
 import { BETTER_AUTH_TOKEN } from '../infrastructure/better-auth.provider';
 import { DataSource } from 'typeorm';
+import { SchemaInitializationService } from '@/core/database/schema-initialization.service';
 
 import type { BetterAuthInstance } from '../types/auth.types';
 
@@ -12,9 +13,12 @@ export class AuthSeedingService implements OnModuleInit {
     @Inject(BETTER_AUTH_TOKEN)
     private readonly authInstance: BetterAuthInstance,
     private readonly dataSource: DataSource,
+    private readonly schemaService: SchemaInitializationService,
   ) {}
 
   async onModuleInit(): Promise<void> {
+    await this.schemaService.ensureInitialized();
+
     this.logger.log(
       'Iniciando seeding de usuarios base (Admin, Moderador, Cliente)...',
     );

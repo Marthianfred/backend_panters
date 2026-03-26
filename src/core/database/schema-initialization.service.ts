@@ -9,7 +9,22 @@ export class SchemaInitializationService implements OnModuleInit {
 
   constructor(private readonly dataSource: DataSource) {}
 
+  private initPromise: Promise<void> | null = null;
+
   async onModuleInit() {
+    this.initPromise = this.initialize();
+    await this.initPromise;
+  }
+
+  async ensureInitialized(): Promise<void> {
+    if (this.initPromise) {
+      await this.initPromise;
+    } else {
+      await this.onModuleInit();
+    }
+  }
+
+  private async initialize() {
     this.logger.log(
       'Iniciando verificación y migración manual de esquema para BetterAuth...',
     );

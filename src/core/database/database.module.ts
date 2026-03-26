@@ -16,5 +16,6 @@ import { SchemaInitializationService } from './schema-initialization.service';
     }),
   ],
   providers: [SchemaInitializationService],
+  exports: [SchemaInitializationService],
 })
 export class DatabaseModule {}
