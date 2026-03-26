@@ -15,21 +15,22 @@ export class SchemaInitializationService implements OnModuleInit {
     );
 
     try {
-      // Ruta al archivo SQL de BetterAuth
-      const sqlPath = path.join(
-        process.cwd(),
-        'src/features/auth/infrastructure/init-schema.sql',
-      );
+      const possiblePaths = [
+        path.join(process.cwd(), 'src/features/auth/infrastructure/init-schema.sql'),
+        path.join(process.cwd(), 'dist/features/auth/infrastructure/init-schema.sql'),
+      ];
 
-      if (!fs.existsSync(sqlPath)) {
-        this.logger.warn(`No se encontró el archivo de esquema en: ${sqlPath}`);
+      const sqlPath = possiblePaths.find((p) => fs.existsSync(p));
+
+      if (!sqlPath) {
+        this.logger.warn(
+          `No se encontró el archivo de esquema en las rutas intentadas: ${possiblePaths.join(', ')}`,
+        );
         return;
       }
 
       const sql = fs.readFileSync(sqlPath, 'utf8');
 
-      // Ejecutamos el SQL directamente usando el DataSource de TypeORM
-      // Esto asegura que las tablas existan sin depender de entidades TypeORM
       await this.dataSource.query(sql);
 
       this.logger.log(

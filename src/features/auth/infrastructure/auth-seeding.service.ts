@@ -57,7 +57,6 @@ export class AuthSeedingService implements OnModuleInit {
         this.logger.log(`Creando usuario: ${email} con rol ${role}...`);
 
         try {
-          // Better Auth API server-side espera el cuerpo en un objeto 'body'
           await this.authInstance.api.signUpEmail({
             body: {
               email: email,
@@ -71,7 +70,6 @@ export class AuthSeedingService implements OnModuleInit {
           );
         }
 
-        // Recuperar el usuario creado por signUpEmail
         const user = await this.dataSource.query<{ id: string }[]>(
           'SELECT id FROM "user" WHERE email = $1 LIMIT 1',
           [email],
@@ -79,7 +77,7 @@ export class AuthSeedingService implements OnModuleInit {
 
         if (user.length > 0) {
           userId = user[0].id;
-          // Forzar el rol
+
           await this.dataSource.query(
             'UPDATE "user" SET role = $1 WHERE email = $2',
             [role, email],
@@ -87,7 +85,7 @@ export class AuthSeedingService implements OnModuleInit {
         }
       } else {
         userId = userExists[0].id;
-        // Forzar la actualización del rol por si fue modificado
+
         await this.dataSource.query(
           'UPDATE "user" SET role = $1 WHERE email = $2',
           [role, email],
@@ -96,7 +94,6 @@ export class AuthSeedingService implements OnModuleInit {
       }
 
       if (userId) {
-        // Asegurar que exista perfil (antigravity_profiles)
         await this.dataSource.query(
           `
           INSERT INTO "antigravity_profiles" (user_id, full_name, avatar_url, bio, is_active)
@@ -111,8 +108,6 @@ export class AuthSeedingService implements OnModuleInit {
           ],
         );
 
-        // Asegurar que exista wallet (antigravity_wallets)
-        // Damos algo de saldo ficticio a todos los usuarios de seeding: 9999 al dev/admin, 500 al cliente normal
         const startingBalance = role === 'subscriber' ? 500 : 99999;
         await this.dataSource.query(
           `
