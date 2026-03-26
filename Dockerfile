@@ -1,52 +1,55 @@
-FROM node:22-alpine AS base
-RUN npm install -g pnpm
+# 1. Etapa de Construcción (Builder)
+# Esta etapa instala todas las dependencias, construye el proyecto y elimina las dependencias de desarrollo.
+FROM node:22-alpine AS builder
 
-FROM base AS deps
 WORKDIR /app
 
-# 1. Copiamos ambos archivos de manifiesto
-COPY package.json pnpm-lock.yaml ./
+# Instala pnpm
+RUN npm install -g pnpm
 
-# 2. Instalamos DEPENDENCIAS PRIMERO (usando caché)
-# --frozen-lockfile: Falla si el lockfile no coincide (asegura versiones exactas)
-RUN pnpm install --no-frozen-lockfile --ignore-scripts
+# Copia los archivos de manifiesto del monorepo
+# El comodín en pnpm-workspace.yaml evita errores si el archivo no existe
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml* ./
 
-# 3. Copiamos el código fuente DESPUÉS de instalar dependencias
+# Instala TODAS las dependencias (dev y prod) para poder construir
+RUN pnpm install --frozen-lockfile
+
+# Copia todo el código fuente del monorepo
 COPY . .
 
-FROM base AS builder
+# Construye la aplicación 'backend_panters'
+# El filtro se basa en el 'name' dentro de backend_panters/package.json
+RUN pnpm --filter backend_panters build
+
+# Mueve la carpeta 'dist' a la raíz para que la etapa de producción la encuentre
+# El build la crea en /app/backend_panters/dist, la movemos a /app/dist
+RUN mv /app/backend_panters/dist /app/dist
+
+# Elimina las dependencias de desarrollo para aligerar node_modules
+RUN pnpm prune --prod
+
+
+# 2. Etapa de Producción (Production)
+# Esta etapa crea la imagen final, copiando solo lo necesario desde la etapa de construcción.
+FROM node:22-alpine AS production
+
+ENV NODE_ENV=production
 WORKDIR /app
 
-COPY --from=deps /app ./
-
-# Nota: Si tu package.json no tiene definido el script "build" con nest,
-# asegúrate de que esto funcione. Si es un entorno aislado, quiza sobre el "--filter backend"
-# pero si te funcionaba antes, déjalo así.
-RUN pnpm --filter backend exec nest build
-
-FROM node:22-alpine
-
-#RUN apk add --no-cache curl tzdata && \
-#    cp /usr/share/zoneinfo/Europe/Madrid /etc/localtime && \
-#    echo "Europe/Madrid" > /etc/timezone
-
+# Instala pnpm para poder ejecutar el comando de inicio
 RUN npm install -g pnpm
 
-WORKDIR /app
+# Copia el package.json específico del backend para poder usar sus scripts ('start:prod')
+COPY --from=builder /app/backend_panters/package.json ./package.json
 
-# ENV NODE_ENV=production
-# ENV TZ=Europe/Madrid
+# Copia la carpeta node_modules ya optimizada (sin dependencias de desarrollo)
+COPY --from=builder /app/node_modules ./node_modules
 
-# 4. AQUI ESTABA EL ERROR:
-# Traemos el lockfile para la instalación de producción
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
-
-# 5. Instalamos solo producción, OBLIGANDO a usar el lockfile
-RUN pnpm install --prod --no-frozen-lockfile --ignore-scripts
-
+# Copia la aplicación ya compilada
 COPY --from=builder /app/dist ./dist
 
+# Expone el puerto en el que la aplicación escucha dentro del contenedor (el default de NestJS es 3000)
 EXPOSE 3001
 
-CMD ["pnpm", "run", "start:prod"]
+# Comando para iniciar la aplicación en modo producción
+CMD ["pnpm", "start:prod"]
