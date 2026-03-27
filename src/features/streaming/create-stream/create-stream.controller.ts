@@ -21,7 +21,7 @@ export class CreateStreamController {
   constructor(private readonly handler: CreateStreamHandler) {}
 
   @Post('create')
-  @Roles(Role.PANTER, Role.ADMIN)
+  @Roles(Role.PANTER, Role.MODEL, Role.ADMIN)
   public async createStream(
     @Req() req: AuthenticatedRequest,
     @Body() body: { title: string },

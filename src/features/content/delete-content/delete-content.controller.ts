@@ -25,7 +25,7 @@ export class DeleteContentController {
   constructor(private readonly handler: DeleteContentHandler) {}
 
   @Delete(':contentId')
-  @Roles(Role.PANTER, Role.ADMIN)
+  @Roles(Role.PANTER, Role.MODEL, Role.ADMIN)
   public async deleteContent(
     @Req() req: AuthenticatedRequest,
     @Param('contentId') contentId: string,

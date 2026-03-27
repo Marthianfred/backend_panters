@@ -20,7 +20,7 @@ export class GetEarningsSummaryController {
   constructor(private readonly handler: GetEarningsSummaryHandler) {}
 
   @Get('summary')
-  @Roles(Role.PANTER) // Solo las Chicas Panters pueden ver sus propios ingresos
+  @Roles(Role.PANTER, Role.MODEL) // Solo las Chicas Panters pueden ver sus propios ingresos
   public async getSummary(
     @Req() req: AuthenticatedRequest,
     @Res() res: Response,

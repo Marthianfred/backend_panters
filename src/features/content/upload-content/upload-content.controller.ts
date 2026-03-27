@@ -22,7 +22,7 @@ export class UploadContentController {
   constructor(private readonly handler: UploadContentHandler) {}
 
   @Post('upload')
-  @Roles(Role.PANTER, Role.ADMIN)
+  @Roles(Role.PANTER, Role.MODEL, Role.ADMIN)
   public async upload(
     @Req() req: AuthenticatedRequest,
     @Body() body: { title: string; description: string; price: number, type?: string, mimeType: string, thumbnailMimeType?: string, accessType: string },
