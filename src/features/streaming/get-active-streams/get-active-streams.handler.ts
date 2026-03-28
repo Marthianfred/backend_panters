@@ -7,6 +7,8 @@ import { S3_SERVICE } from '../get-viewer-access/interfaces/s3.service.interface
 export interface ActiveStream {
   id: string;
   creatorId: string;
+  creatorName?: string;
+  creatorAvatar?: string;
   thumbnailUrl: string;
   region: string;
 }
@@ -33,6 +35,8 @@ export class GetActiveStreamsHandler {
         return {
           id: stream.id,
           creatorId: stream.creatorId,
+          creatorName: stream.creatorName,
+          creatorAvatar: stream.creatorAvatar,
           thumbnailUrl,
           region: stream.region,
         };
