@@ -19,7 +19,7 @@ export class BinanceWebhookHandler {
   ) {}
 
   public async execute(
-    payload: BinanceWebhookPayload,
+    payload: any,
     signature: string,
   ): Promise<WebhookResponse> {
     const isValid = this.signatureValidator.validateSignature(
@@ -31,10 +31,14 @@ export class BinanceWebhookHandler {
       throw new InvalidSignatureError();
     }
 
-    if (payload.bizStatus === 'PAY_SUCCESS') {
-      const userId = payload.metadata.userId;
-      const amount = parseInt(payload.metadata.coinsAmount, 10);
-      const transactionId = payload.bizId;
+    const data: BinanceWebhookPayload = Buffer.isBuffer(payload) 
+      ? JSON.parse(payload.toString('utf-8')) 
+      : (typeof payload === 'string' ? JSON.parse(payload) : payload);
+
+    if (data.bizStatus === 'PAY_SUCCESS') {
+      const userId = data.metadata.userId;
+      const amount = parseInt(data.metadata.coinsAmount, 10);
+      const transactionId = data.bizId;
 
       await this.walletRepository.creditCoinsToUser(
         userId,

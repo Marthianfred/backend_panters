@@ -1,24 +1,61 @@
 import { Injectable } from '@nestjs/common';
 import { ISignatureValidator } from '../interfaces/signature.validator.interface';
+import { ConfigService } from '@nestjs/config';
+import Stripe from 'stripe';
 
 @Injectable()
 export class StripeSignatureValidator implements ISignatureValidator {
-  public validateSignature(payload: unknown, signature: string): boolean {
-    // Aquí integraremos el Stripe SDK con process.env.STRIPE_WEBHOOK_SECRET en el futuro
-    if (!signature || signature.trim() === '') {
+  private stripe: Stripe;
+
+  constructor(private readonly config: ConfigService) {
+    this.stripe = new Stripe(this.config.get<string>('STRIPE_SECRET_KEY') || '', {
+      apiVersion: '2025-01-27' as any,
+    });
+  }
+
+  public validateSignature(payload: any, signature: string): boolean {
+    const endpointSecret = this.config.get<string>('STRIPE_WEBHOOK_SECRET');
+    if (!endpointSecret) {
+      console.warn('[StripeSignatureValidator] No endpoint secret configured, skipping validation (DANGEROUS)');
+      return true;
+    }
+
+    try {
+      // payload must be the raw body (Buffer)
+      this.stripe.webhooks.constructEvent(payload, signature, endpointSecret);
+      return true;
+    } catch (err) {
+      console.error(`[Stripe] Error validando firma del webhook: ${err.message}`);
       return false;
     }
-    return true;
   }
 }
 
+import * as crypto from 'crypto';
+
 @Injectable()
 export class BinanceSignatureValidator implements ISignatureValidator {
-  public validateSignature(payload: unknown, signature: string): boolean {
-    // Aquí integraremos crypto para validar contra public key de Binance Pay en el futuro
-    if (!signature || signature.trim() === '') {
+  constructor(private readonly config: ConfigService) {}
+
+  public validateSignature(payload: any, signature: string): boolean {
+    const binancePublicKey = this.config.get<string>('BINANCE_PAY_PUBLIC_KEY');
+    if (!binancePublicKey) {
+      console.warn('[BinanceSignatureValidator] No public key configured, skipping validation (DANGEROUS)');
+      return true;
+    }
+
+    try {
+      // payload must be the raw body (string) for binance verification
+      const bodyString = Buffer.isBuffer(payload) ? payload.toString('utf-8') : payload;
+      
+      const verifier = crypto.createVerify('SHA256');
+      verifier.update(bodyString);
+      verifier.end();
+
+      return verifier.verify(binancePublicKey, signature, 'base64');
+    } catch (err) {
+      console.error(`[Binance] Error validando firma del webhook: ${err.message}`);
       return false;
     }
-    return true;
   }
 }

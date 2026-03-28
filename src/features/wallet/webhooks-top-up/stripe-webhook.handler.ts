@@ -19,7 +19,7 @@ export class StripeWebhookHandler {
   ) {}
 
   public async execute(
-    payload: StripeWebhookPayload,
+    payload: any,
     signature: string,
   ): Promise<WebhookResponse> {
     const isValid = this.signatureValidator.validateSignature(
@@ -31,13 +31,18 @@ export class StripeWebhookHandler {
       throw new InvalidSignatureError();
     }
 
+    // Si el payload es un Buffer (viniendo de req.rawBody), lo parseamos para procesar
+    const data: StripeWebhookPayload = Buffer.isBuffer(payload) 
+      ? JSON.parse(payload.toString('utf-8')) 
+      : (typeof payload === 'string' ? JSON.parse(payload) : payload);
+
     if (
-      payload.type === 'checkout.session.completed' &&
-      payload.data.object.status === 'complete'
+      data.type === 'checkout.session.completed' &&
+      data.data.object.status === 'complete'
     ) {
-      const userId = payload.data.object.metadata.userId;
-      const amount = parseInt(payload.data.object.metadata.coinsAmount, 10);
-      const transactionId = payload.id;
+      const userId = data.data.object.metadata.userId;
+      const amount = parseInt(data.data.object.metadata.coinsAmount, 10);
+      const transactionId = data.id;
 
       await this.walletRepository.creditCoinsToUser(
         userId,
