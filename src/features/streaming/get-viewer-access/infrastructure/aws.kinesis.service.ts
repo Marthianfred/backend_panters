@@ -61,10 +61,12 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
     });
 
     const response = await this.kvsClient.send(command);
-    const endpoint = response.ResourceEndpointList?.[0]?.ResourceEndpoint;
+    const endpoint = response.ResourceEndpointList?.find((e) =>
+      e.ResourceEndpoint?.startsWith('wss://'),
+    )?.ResourceEndpoint;
 
     if (!endpoint) {
-      throw new Error('No se pudo obtener el endpoint de señalización.');
+      throw new Error('No se pudo obtener el endpoint de señalización WSS.');
     }
 
     return endpoint;
