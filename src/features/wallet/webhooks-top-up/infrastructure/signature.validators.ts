@@ -5,12 +5,17 @@ import Stripe from 'stripe';
 
 @Injectable()
 export class StripeSignatureValidator implements ISignatureValidator {
-  private stripe: Stripe;
+  private stripe: Stripe | null = null;
 
   constructor(private readonly config: ConfigService) {
-    this.stripe = new Stripe(this.config.get<string>('STRIPE_SECRET_KEY') || '', {
-      apiVersion: '2025-01-27' as any,
-    });
+    const secretKey = this.config.get<string>('STRIPE_SECRET_KEY');
+    if (secretKey && secretKey !== 'sk_test_...') {
+      this.stripe = new Stripe(secretKey, {
+        apiVersion: '2025-01-27' as any,
+      });
+    } else {
+      console.warn('[StripeSignatureValidator] Stripe key missing or placeholder. Signature validation will be disabled.');
+    }
   }
 
   public validateSignature(payload: any, signature: string): boolean {
@@ -21,6 +26,11 @@ export class StripeSignatureValidator implements ISignatureValidator {
     }
 
     try {
+      if (!this.stripe) {
+        console.error('[StripeSignatureValidator] Stripe was not initialized. Check your STRIPE_SECRET_KEY.');
+        return false;
+      }
+      
       // payload must be the raw body (Buffer)
       this.stripe.webhooks.constructEvent(payload, signature, endpointSecret);
       return true;
