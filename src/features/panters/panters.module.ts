@@ -17,8 +17,10 @@ import { PostgresPostReactionRepository } from './post-reactions/infrastructure/
 import { POST_REACTION_EVENT_PUBLISHER_TOKEN } from './post-reactions/interfaces/post-reactions-event-publisher.interface';
 import { AwsKinesisWallReactionPublisher } from './post-reactions/infrastructure/aws-kinesis.wall-reaction-publisher';
 
+import { HomeVideosModule } from './home-videos/home-videos.module';
+
 @Module({
-  imports: [DatabaseModule, ConfigModule],
+  imports: [DatabaseModule, ConfigModule, HomeVideosModule],
   controllers: [GetPantersController, RatePanterController, PostReactionsController],
   providers: [
     GetPantersHandler,
