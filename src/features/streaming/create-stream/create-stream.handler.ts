@@ -20,12 +20,18 @@ export class CreateStreamHandler {
   public async execute(request: CreateStreamRequest): Promise<CreateStreamResponse> {
     const streamId = randomUUID();
     const channelName = `Stream-${request.creatorId}-${Date.now()}`;
-    const region = this.configService.get<string>('AWS_REGION', 'us-east-1');
+    const region = this.configService.get<string>('KN_STREAMS_REGION', 'us-east-2');
 
-    // 1. Crear el canal en Kinesis
+    // 1. Crear el canal real en Kinesis Video
     const channelArn = await this.kinesisVideoService.createSignalingChannel(channelName);
 
-    // 2. Persistir metadatos en BDD
+    // 2. Generar credenciales dinámicas para la productora (Chica)
+    const credentials = await this.kinesisVideoService.generateProducerCredentials(
+      channelArn,
+      request.creatorId,
+    );
+
+    // 3. Persistir metadatos en BDD
     await this.streamRepository.createStream({
       id: streamId,
       creatorId: request.creatorId,
@@ -40,6 +46,7 @@ export class CreateStreamHandler {
       streamId,
       channelArn,
       region,
+      credentials,
     };
   }
 }

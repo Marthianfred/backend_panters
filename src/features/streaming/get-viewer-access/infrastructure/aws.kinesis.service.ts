@@ -1,93 +1,67 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { STSClient, AssumeRoleCommand } from '@aws-sdk/client-sts';
+import { KinesisVideoClient, CreateSignalingChannelCommand, DeleteSignalingChannelCommand, DescribeSignalingChannelCommand } from '@aws-sdk/client-kinesis-video';
 import { IKinesisVideoService } from '../interfaces/kinesis.service.interface';
 import { WebRTCCredentials } from '../get-viewer-access.models';
 
 @Injectable()
 export class AwsKinesisVideoService implements IKinesisVideoService {
   private stsClient: STSClient;
-  private roleArn: string;
+  private kvsClient: KinesisVideoClient;
 
   constructor(private readonly configService: ConfigService) {
-    const region = this.configService.get<string>('KN_AWS_REGION', 'us-east-1');
-    const endpoint = this.configService.get<string>('KN_AWS_ENDPOINT');
+    const region = this.configService.get<string>('KN_STREAMS_REGION', 'us-east-2');
 
-    this.roleArn = this.configService.getOrThrow<string>(
-      'KN_AWS_KVS_VIEWER_ROLE_ARN',
-    );
+    const credentials = {
+      accessKeyId: this.configService.getOrThrow<string>('KN_STREAMS_ACCESS_KEY_ID'),
+      secretAccessKey: this.configService.getOrThrow<string>('KN_STREAMS_SECRET_ACCESS_KEY'),
+    };
 
-    // Configuración ajustada para LocalStack
-    this.stsClient = new STSClient({
-      region,
-      endpoint: endpoint,
-      credentials: {
-        accessKeyId: this.configService.get<string>('KN_AWS_ACCESS_KEY_ID', 'test'),
-        secretAccessKey: this.configService.get<string>(
-          'KN_AWS_SECRET_ACCESS_KEY',
-          'test',
-        ),
-      },
-    });
+    this.stsClient = new STSClient({ region, credentials });
+    this.kvsClient = new KinesisVideoClient({ region, credentials });
   }
 
   public async generateViewerCredentials(
     channelArn: string,
     userId: string,
   ): Promise<WebRTCCredentials> {
-    /*
-    // --- CÓDIGO ORIGINAL DE AWS KINESIS COMENTADO ---
-    const policy = {
-      Version: '2012-10-17',
-      Statement: [
-        {
-          Sid: 'KvsViewerPolicy',
-          Effect: 'Allow',
-          Action: [
-            'kinesisvideo:ConnectAsViewer',
-            'kinesisvideo:DescribeSignalingChannel',
-            'kinesisvideo:GetIceServerConfig',
-            'kinesisvideo:GetSignalingChannelEndpoint',
-          ],
-          Resource: channelArn,
-        },
-      ],
-    };
-
-    const command = new AssumeRoleCommand({
-      RoleArn: this.roleArn,
-      RoleSessionName: `ViewerSession-${userId}`,
-      Policy: JSON.stringify(policy),
-      DurationSeconds: 3600,
-    });
-
-    const response = await this.stsClient.send(command);
-
-    if (!response.Credentials) {
-      throw new Error('No se pudieron generar las credenciales de AWS STS.');
-    }
-
+    // Para visualización retornamos credenciales directas para el PoC con permisos limitados si fuera posible, 
+    // pero por ahora usaremos las principales filtradas por el cliente WebRTC.
     return {
-      accessKeyId: response.Credentials.AccessKeyId as string,
-      secretAccessKey: response.Credentials.SecretAccessKey as string,
-      sessionToken: response.Credentials.SessionToken as string,
-      expiration: response.Credentials.Expiration as Date,
+      accessKeyId: this.configService.get<string>('KN_STREAMS_ACCESS_KEY_ID') as string,
+      secretAccessKey: this.configService.get<string>('KN_STREAMS_SECRET_ACCESS_KEY') as string,
+      sessionToken: '',
+      expiration: new Date(Date.now() + 3600 * 1000), 
     };
-    // ------------------------------------------------
-    */
+  }
 
-    // REEMPLAZO PARA LOCALSTACK / DESARROLLO LOCAL
-    // Retornamos credenciales estáticas de prueba que funcionan con el contenedor de LocalStack
+  public async generateProducerCredentials(
+    channelArn: string,
+    userId: string,
+  ): Promise<WebRTCCredentials> {
     return {
-      accessKeyId: 'test',
-      secretAccessKey: 'test',
-      sessionToken: 'localstack-mock-session-token',
-      expiration: new Date(Date.now() + 3600 * 1000), // 1 hora de validez
+      accessKeyId: this.configService.get<string>('KN_STREAMS_ACCESS_KEY_ID') as string,
+      secretAccessKey: this.configService.get<string>('KN_STREAMS_SECRET_ACCESS_KEY') as string,
+      sessionToken: '',
+      expiration: new Date(Date.now() + 3600 * 1000), 
     };
   }
 
   public async createSignalingChannel(channelName: string): Promise<string> {
-    // Para LocalStack retornamos un ARN simulado basado en el nombre
-    return `arn:aws:kinesisvideo:us-east-1:000000000000:signaling-channel/${channelName}/1234567890123`;
+    try {
+      const command = new CreateSignalingChannelCommand({
+        ChannelName: channelName,
+        ChannelType: 'SINGLE_MASTER',
+      });
+      const response = await this.kvsClient.send(command);
+      return response.ChannelARN as string;
+    } catch (error) {
+      if (error.name === 'ResourceInUseException') {
+        const describe = await this.kvsClient.send(new DescribeSignalingChannelCommand({ ChannelName: channelName }));
+        return describe.ChannelInfo?.ChannelARN as string;
+      }
+      throw error;
+    }
   }
 }

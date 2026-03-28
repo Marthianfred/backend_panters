@@ -11,6 +11,7 @@ import { PantersModule } from '@/features/panters/panters.module';
 import { LiveChatModule } from '@/features/live-chat/live-chat.module';
 import { EarningsModule } from '@/features/earnings/earnings.module';
 import { SubscriptionsModule } from '@/features/subscriptions/subscriptions.module';
+import { KinesisDataModule } from '@/core/infrastructure/kinesis-data/kinesis-data.module';
 import { RequestLoggerMiddleware } from '@/core/infrastructure/logger/request-logger.middleware';
 
 @Module({
@@ -34,6 +35,7 @@ import { RequestLoggerMiddleware } from '@/core/infrastructure/logger/request-lo
     LiveChatModule,
     EarningsModule,
     SubscriptionsModule,
+    KinesisDataModule,
   ],
 })
 export class AppModule implements NestModule {

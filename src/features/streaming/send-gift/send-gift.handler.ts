@@ -4,6 +4,7 @@ import type {
 } from './interfaces/send-gift.repository.interface';
 import { SEND_GIFT_REPOSITORY } from './interfaces/send-gift.repository.interface';
 import { LiveChatGateway } from '../../live-chat/infrastructure/live-chat.gateway';
+import { KinesisDataPublisherService } from '@/core/infrastructure/kinesis-data/kinesis-data-publisher.service';
 import {
   SendGiftRequest,
   SendGiftResponse,
@@ -20,6 +21,7 @@ export class SendGiftHandler {
     @Inject(SEND_GIFT_REPOSITORY)
     private readonly repository: ISendGiftRepository,
     private readonly liveChatGateway: LiveChatGateway,
+    private readonly kinesisService: KinesisDataPublisherService,
   ) {}
 
   public async execute(request: SendGiftRequest): Promise<SendGiftResponse> {
@@ -64,6 +66,20 @@ export class SendGiftHandler {
         gift.name,
         gift.iconUrl,
         gift.id
+      );
+      
+      // 4. Emitir evento a Kinesis Data Streams
+      await this.kinesisService.publish(
+        'GIFT_SENT',
+        {
+          transactionId: result.transactionId,
+          userId: request.userId,
+          creatorId: request.creatorId,
+          giftId: gift.id,
+          giftName: gift.name,
+          amount: gift.priceCoins,
+        },
+        request.creatorId, // PartitionKey: Agrupamos por creador para procesamiento ordenado
       );
 
       return {
