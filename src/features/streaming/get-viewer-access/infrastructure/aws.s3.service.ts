@@ -10,7 +10,14 @@ export class AwsS3Service implements IS3Service {
 
   constructor(private readonly configService: ConfigService) {
     const region = this.configService.get<string>('AWS_REGION', 'us-east-1');
-    this.s3Client = new S3Client({ region });
+    const endpoint = this.configService.get<string>('AWS_ENDPOINT');
+    const forcePathStyle = this.configService.get<string>('AWS_USE_PATH_STYLE_ENDPOINT') === 'true';
+
+    this.s3Client = new S3Client({ 
+      region,
+      endpoint,
+      forcePathStyle
+    });
   }
 
   public async getPresignedThumbnailUrl(
