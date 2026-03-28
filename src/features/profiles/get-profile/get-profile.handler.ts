@@ -27,6 +27,7 @@ export class GetProfileHandler {
 
     return {
       id: profileData.id,
+      id_user: profileData.userId,
       fullName: profileData.fullName,
       avatarUrl: profileData.avatarUrl,
       bio: profileData.bio,

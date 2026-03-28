@@ -19,13 +19,14 @@ export class PostgresProfileRepository implements IProfileRepository {
   public async getProfileByUserId(userId: string): Promise<ProfileData | null> {
     const query = `
       SELECT 
-        id as "id",
-        user_id AS "userId", 
-        full_name AS "fullName", 
-        avatar_url AS "avatarUrl", 
-        bio AS "bio"
-      FROM antigravity_profiles 
-      WHERE user_id = $1 AND is_active = true LIMIT 1;
+        p.id AS "id",
+        u.id AS "userId", 
+        p.full_name AS "fullName", 
+        p.avatar_url AS "avatarUrl", 
+        p.bio AS "bio"
+      FROM antigravity_profiles p
+      INNER JOIN "user" u ON p.user_id = u.id
+      WHERE p.user_id = $1 AND p.is_active = true LIMIT 1;
     `;
 
     const result = await this.pool.query(query, [userId]);

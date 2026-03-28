@@ -4,6 +4,7 @@ export interface GetProfileRequest {
 
 export interface GetProfileResponse {
   id: string;
+  id_user: string;
   fullName: string;
   avatarUrl: string | null;
   bio: string | null;
