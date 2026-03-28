@@ -72,8 +72,9 @@ export class PostgresStreamRepository implements IStreamRepository {
         s3_thumbnail_key AS "s3ThumbnailKey",
         is_active AS "isActive"
       FROM antigravity_streams 
-      WHERE is_active = true
-      ORDER BY id DESC;
+      WHERE is_active = true 
+      AND created_at > NOW() - INTERVAL '4 hours'
+      ORDER BY created_at DESC;
     `;
 
     const result = await this.pool.query(query);
