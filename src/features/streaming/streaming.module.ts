@@ -32,6 +32,10 @@ import { LiveChatModule } from '../live-chat/live-chat.module';
 import { CreateStreamController } from './create-stream/create-stream.controller';
 import { CreateStreamHandler } from './create-stream/create-stream.handler';
 
+// Feature: Get Active Streams (VSA)
+import { GetActiveStreamsController } from './get-active-streams/get-active-streams.controller';
+import { GetActiveStreamsHandler } from './get-active-streams/get-active-streams.handler';
+
 @Module({
   imports: [LiveChatModule],
   controllers: [
@@ -40,6 +44,7 @@ import { CreateStreamHandler } from './create-stream/create-stream.handler';
     RefundGiftController,
     ListGiftsController,
     CreateStreamController,
+    GetActiveStreamsController,
   ],
   providers: [
     GetViewerAccessHandler,
@@ -47,6 +52,7 @@ import { CreateStreamHandler } from './create-stream/create-stream.handler';
     RefundGiftHandler,
     ListGiftsHandler,
     CreateStreamHandler,
+    GetActiveStreamsHandler,
     {
       provide: STREAM_REPOSITORY,
       useClass: PostgresStreamRepository,

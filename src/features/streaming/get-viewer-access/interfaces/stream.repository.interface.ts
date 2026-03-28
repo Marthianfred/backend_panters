@@ -13,4 +13,5 @@ export interface StreamMetadata {
 export interface IStreamRepository {
   getStreamMetadataById(streamId: string): Promise<StreamMetadata | null>;
   createStream(stream: StreamMetadata): Promise<void>;
+  getActiveStreams(): Promise<StreamMetadata[]>;
 }

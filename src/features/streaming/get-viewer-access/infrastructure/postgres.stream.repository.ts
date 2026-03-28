@@ -60,4 +60,23 @@ export class PostgresStreamRepository implements IStreamRepository {
 
     await this.pool.query(query, values);
   }
+
+  public async getActiveStreams(): Promise<StreamMetadata[]> {
+    const query = `
+      SELECT 
+        id,
+        creator_id AS "creatorId",
+        channel_arn AS "channelArn", 
+        aws_region AS "region", 
+        s3_thumbnail_bucket AS "s3ThumbnailBucket", 
+        s3_thumbnail_key AS "s3ThumbnailKey",
+        is_active AS "isActive"
+      FROM antigravity_streams 
+      WHERE is_active = true
+      ORDER BY id DESC;
+    `;
+
+    const result = await this.pool.query(query);
+    return result.rows as StreamMetadata[];
+  }
 }
