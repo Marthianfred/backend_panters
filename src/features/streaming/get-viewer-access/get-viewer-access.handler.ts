@@ -39,19 +39,27 @@ export class GetViewerAccessHandler {
         request.userId,
       );
 
+    const signalingEndpointPromise =
+      this.kinesisVideoService.getSignalingEndpoint(
+        streamMetadata.channelArn,
+        'VIEWER',
+      );
+
     const thumbnailUrlPromise = this.s3Service.getPresignedThumbnailUrl(
       streamMetadata.s3ThumbnailBucket,
       streamMetadata.s3ThumbnailKey,
     );
 
-    const [credentials, thumbnailUrl] = await Promise.all([
+    const [credentials, thumbnailUrl, signalingEndpoint] = await Promise.all([
       credentialsPromise,
       thumbnailUrlPromise,
+      signalingEndpointPromise,
     ]);
 
     return {
       channelArn: streamMetadata.channelArn,
       region: streamMetadata.region,
+      signalingEndpoint: signalingEndpoint,
       thumbnailUrl: thumbnailUrl,
       credentials: credentials,
     };

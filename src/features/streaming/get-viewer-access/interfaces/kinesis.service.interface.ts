@@ -11,5 +11,9 @@ export interface IKinesisVideoService {
     channelArn: string,
     userId: string,
   ): Promise<WebRTCCredentials>;
-  createSignalingChannel(channelName: string): Promise<string>; // Retorna el ARN
+  getSignalingEndpoint(
+    channelArn: string,
+    role: 'MASTER' | 'VIEWER',
+  ): Promise<string>;
+  createSignalingChannel(channelName: string): Promise<string>;
 }

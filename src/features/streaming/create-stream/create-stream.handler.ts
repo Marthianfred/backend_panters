@@ -31,7 +31,13 @@ export class CreateStreamHandler {
       request.creatorId,
     );
 
-    // 3. Persistir metadatos en BDD
+    // 3. Obtener el endpoint de señalización para que el front se conecte
+    const signalingEndpoint = await this.kinesisVideoService.getSignalingEndpoint(
+      channelArn,
+      'MASTER',
+    );
+
+    // 4. Persistir metadatos en BDD
     await this.streamRepository.createStream({
       id: streamId,
       creatorId: request.creatorId,
@@ -46,6 +52,7 @@ export class CreateStreamHandler {
       streamId,
       channelArn,
       region,
+      signalingEndpoint,
       credentials,
     };
   }

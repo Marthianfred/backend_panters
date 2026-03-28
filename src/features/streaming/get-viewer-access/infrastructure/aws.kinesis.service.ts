@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { STSClient, AssumeRoleCommand } from '@aws-sdk/client-sts';
-import { KinesisVideoClient, CreateSignalingChannelCommand, DeleteSignalingChannelCommand, DescribeSignalingChannelCommand } from '@aws-sdk/client-kinesis-video';
+import { KinesisVideoClient, CreateSignalingChannelCommand, DeleteSignalingChannelCommand, DescribeSignalingChannelCommand, GetSignalingChannelEndpointCommand } from '@aws-sdk/client-kinesis-video';
 import { IKinesisVideoService } from '../interfaces/kinesis.service.interface';
 import { WebRTCCredentials } from '../get-viewer-access.models';
 
@@ -46,6 +46,28 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
       sessionToken: '',
       expiration: new Date(Date.now() + 3600 * 1000), 
     };
+  }
+
+  public async getSignalingEndpoint(
+    channelArn: string,
+    role: 'MASTER' | 'VIEWER',
+  ): Promise<string> {
+    const command = new GetSignalingChannelEndpointCommand({
+      ChannelARN: channelArn,
+      SingleMasterChannelEndpointConfiguration: {
+        Protocols: ['WSS', 'HTTPS'],
+        Role: role,
+      },
+    });
+
+    const response = await this.kvsClient.send(command);
+    const endpoint = response.ResourceEndpointList?.[0]?.ResourceEndpoint;
+
+    if (!endpoint) {
+      throw new Error('No se pudo obtener el endpoint de señalización.');
+    }
+
+    return endpoint;
   }
 
   public async createSignalingChannel(channelName: string): Promise<string> {

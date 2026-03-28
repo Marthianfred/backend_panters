@@ -9,5 +9,6 @@ export interface CreateStreamResponse {
   streamId: string;
   channelArn: string;
   region: string;
+  signalingEndpoint: string;
   credentials: WebRTCCredentials;
 }

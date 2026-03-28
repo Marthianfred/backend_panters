@@ -13,6 +13,7 @@ export interface WebRTCCredentials {
 export interface GetViewerAccessResponse {
   channelArn: string;
   region: string;
+  signalingEndpoint: string;
   thumbnailUrl: string;
   credentials: WebRTCCredentials;
 }
