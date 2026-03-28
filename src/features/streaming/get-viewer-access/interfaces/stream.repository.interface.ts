@@ -8,10 +8,14 @@ export interface StreamMetadata {
   s3ThumbnailBucket: string;
   s3ThumbnailKey: string;
   isActive: boolean;
+  creatorName?: string;
+  creatorAvatar?: string;
 }
 
 export interface IStreamRepository {
   getStreamMetadataById(streamId: string): Promise<StreamMetadata | null>;
   createStream(stream: StreamMetadata): Promise<void>;
   getActiveStreams(): Promise<StreamMetadata[]>;
+  deactivateStream(streamId: string): Promise<void>;
+  deactivateAllStreamsByCreator(creatorId: string): Promise<void>;
 }

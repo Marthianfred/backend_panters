@@ -19,8 +19,11 @@ export class CreateStreamHandler {
 
   public async execute(request: CreateStreamRequest): Promise<CreateStreamResponse> {
     const streamId = randomUUID();
-    const channelName = `Stream-${request.creatorId}-${Date.now()}`;
     const region = this.configService.get<string>('KN_STREAMS_REGION', 'us-east-2');
+    const channelName = `Stream-${request.creatorId}-${Date.now()}`;
+
+    // 0. Limpiar sesiones antiguas de esta modelo para evitar duplicados (zombies)
+    await this.streamRepository.deactivateAllStreamsByCreator(request.creatorId);
 
     // 1. Crear el canal real en Kinesis Video
     const channelArn = await this.kinesisVideoService.createSignalingChannel(channelName);

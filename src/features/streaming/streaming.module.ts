@@ -36,6 +36,10 @@ import { CreateStreamHandler } from './create-stream/create-stream.handler';
 import { GetActiveStreamsController } from './get-active-streams/get-active-streams.controller';
 import { GetActiveStreamsHandler } from './get-active-streams/get-active-streams.handler';
 
+// Feature: Stop Stream (VSA)
+import { StopStreamController } from './stop-stream/stop-stream.controller';
+import { StopStreamHandler } from './stop-stream/stop-stream.handler';
+
 @Module({
   imports: [LiveChatModule],
   controllers: [
@@ -45,6 +49,7 @@ import { GetActiveStreamsHandler } from './get-active-streams/get-active-streams
     ListGiftsController,
     CreateStreamController,
     GetActiveStreamsController,
+    StopStreamController,
   ],
   providers: [
     GetViewerAccessHandler,
@@ -53,6 +58,7 @@ import { GetActiveStreamsHandler } from './get-active-streams/get-active-streams
     ListGiftsHandler,
     CreateStreamHandler,
     GetActiveStreamsHandler,
+    StopStreamHandler,
     {
       provide: STREAM_REPOSITORY,
       useClass: PostgresStreamRepository,
