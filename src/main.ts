@@ -21,6 +21,12 @@ async function bootstrap() {
     ],
   });
 
+  // Global Middleware for Cross-Origin Resource Policy (CORP) to avoid image blocking
+  app.use((_req: Request, res: Response, next: any) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    next();
+  });
+
   const limitSize = '10000mb';
 
   interface RequestWithRawBody extends Request {
