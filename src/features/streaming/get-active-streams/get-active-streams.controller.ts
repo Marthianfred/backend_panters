@@ -3,7 +3,7 @@ import { GetActiveStreamsHandler, ActiveStream } from './get-active-streams.hand
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('Streaming')
-@Controller('streaming')
+@Controller('api/v1/streaming')
 export class GetActiveStreamsController {
   constructor(private readonly handler: GetActiveStreamsHandler) {}
 
