@@ -39,7 +39,28 @@ export class PostgresPantersRepository implements IPantersRepository {
     `;
 
     const result = await this.pool.query(query);
+    return result.rows as PanterData[];
+  }
 
+  public async getRanking(limit: number = 6): Promise<PanterData[]> {
+    const query = `
+      SELECT 
+        p.id as "id",
+        p.user_id AS "userId", 
+        p.full_name AS "fullName", 
+        p.avatar_url AS "avatarUrl", 
+        p.is_online AS "isOnline",
+        p.reviews_count AS "reviewsCount",
+        p.is_vip AS "isVip",
+        p.services AS "services"
+      FROM antigravity_profiles p
+      INNER JOIN "user" u ON p.user_id = u.id
+      WHERE p.is_active = true AND u.role = 'model'
+      ORDER BY p.is_vip DESC, p.reviews_count DESC
+      LIMIT $1;
+    `;
+
+    const result = await this.pool.query(query, [limit]);
     return result.rows as PanterData[];
   }
 }

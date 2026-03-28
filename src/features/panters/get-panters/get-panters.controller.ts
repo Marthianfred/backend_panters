@@ -9,11 +9,14 @@ export class GetPantersController {
   constructor(private readonly getPantersHandler: GetPantersHandler) {}
 
   @Get()
-  // Depending on requirements, to list panters it could be public,
-  // but let's assume authenticated users can query this for now.
   @UseGuards(AuthGuard)
   public async getPanters(): Promise<GetPantersResponse> {
-    // Send an empty request for now, or you could pass filters from queries
     return this.getPantersHandler.execute({});
+  }
+
+  @Get('ranking')
+  @UseGuards(AuthGuard)
+  public async getRanking(): Promise<GetPantersResponse> {
+    return this.getPantersHandler.getRanking(6);
   }
 }

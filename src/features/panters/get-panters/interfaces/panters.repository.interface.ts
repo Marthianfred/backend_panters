@@ -19,4 +19,5 @@ export const PANTERS_REPOSITORY = 'PANTERS_REPOSITORY';
 
 export interface IPantersRepository {
   getAllPanters(): Promise<PanterData[]>;
+  getRanking(limit?: number): Promise<PanterData[]>;
 }

@@ -50,4 +50,21 @@ export class GetPantersHandler {
 
     return { panters };
   }
+
+  public async getRanking(limit: number = 6): Promise<GetPantersResponse> {
+    const rawPanters = await this.pantersRepository.getRanking(limit);
+
+    const panters = rawPanters.map((panter) => ({
+      id: panter.id,
+      userId: panter.userId,
+      fullName: panter.fullName,
+      avatarUrl: panter.avatarUrl,
+      isOnline: Boolean(panter.isOnline),
+      reviewsCount: Number(panter.reviewsCount) || 0,
+      isVip: Boolean(panter.isVip),
+      services: [], // Services might not be needed for ranking display
+    }));
+
+    return { panters };
+  }
 }
