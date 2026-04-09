@@ -1,5 +1,5 @@
 import { Injectable, Inject, OnModuleInit, Logger } from '@nestjs/common';
-import { BETTER_AUTH_TOKEN } from '../infrastructure/better-auth.provider';
+import { BETTER_AUTH_TOKEN } from './auth.constants';
 import { DataSource } from 'typeorm';
 import { SchemaInitializationService } from '@/core/database/schema-initialization.service';
 

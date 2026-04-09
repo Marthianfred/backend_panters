@@ -13,6 +13,7 @@ import { EarningsModule } from '@/features/earnings/earnings.module';
 import { SubscriptionsModule } from '@/features/subscriptions/subscriptions.module';
 import { KinesisDataModule } from '@/core/infrastructure/kinesis-data/kinesis-data.module';
 import { RequestLoggerMiddleware } from '@/core/infrastructure/logger/request-logger.middleware';
+import { CreatorsModule } from '@/features/creators/creators.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { RequestLoggerMiddleware } from '@/core/infrastructure/logger/request-lo
     EarningsModule,
     SubscriptionsModule,
     KinesisDataModule,
+    CreatorsModule,
   ],
 })
 export class AppModule implements NestModule {

@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { toNodeHandler } from 'better-auth/node';
-import { BETTER_AUTH_TOKEN } from '../infrastructure/better-auth.provider';
+import { BETTER_AUTH_TOKEN } from '../infrastructure/auth.constants';
 import type { BetterAuthInstance } from '../types/auth.types';
 
 @Injectable()
