@@ -14,6 +14,7 @@ import { SubscriptionsModule } from '@/features/subscriptions/subscriptions.modu
 import { KinesisDataModule } from '@/core/infrastructure/kinesis-data/kinesis-data.module';
 import { RequestLoggerMiddleware } from '@/core/infrastructure/logger/request-logger.middleware';
 import { CreatorsModule } from '@/features/creators/creators.module';
+import { UsersManagementModule } from '@/features/users/management/users-management.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { CreatorsModule } from '@/features/creators/creators.module';
     SubscriptionsModule,
     KinesisDataModule,
     CreatorsModule,
+    UsersManagementModule,
   ],
 })
 export class AppModule implements NestModule {

@@ -5,6 +5,7 @@ import { AuthService } from './application/auth.service';
 import { RegisterClientService } from './register-client/register-client.service';
 import { BetterAuthProvider } from './infrastructure/better-auth.provider';
 import { AuthGuard } from './guards/auth.guard';
+import { RolesGuard } from './guards/roles.guard';
 import { AuthSeedingService } from './infrastructure/auth-seeding.service';
 import { AuthMiddleware } from './auth.middleware';
 import { DatabaseModule } from '@/core/database/database.module';
@@ -18,10 +19,11 @@ import { DatabaseModule } from '@/core/database/database.module';
     RegisterClientService,
     BetterAuthProvider,
     AuthGuard,
+    RolesGuard,
     AuthSeedingService,
     AuthMiddleware,
   ],
-  exports: [AuthService, AuthGuard, BetterAuthProvider, RegisterClientService],
+  exports: [AuthService, AuthGuard, RolesGuard, BetterAuthProvider, RegisterClientService],
 })
 export class AuthModule implements NestModule {
   public configure(consumer: MiddlewareConsumer): void {

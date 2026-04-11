@@ -15,7 +15,9 @@ CREATE TABLE IF NOT EXISTS "user" (
     image TEXT,
     "createdAt" TIMESTAMP NOT NULL,
     "updatedAt" TIMESTAMP NOT NULL,
-    role TEXT DEFAULT 'subscriber'
+    role TEXT DEFAULT 'subscriber',
+    is_active BOOLEAN DEFAULT true,
+    must_change_password BOOLEAN DEFAULT false
 );
 
 CREATE TABLE IF NOT EXISTS "session" (
@@ -122,7 +124,7 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
-    CREATE TYPE content_status AS ENUM ('draft', 'published', 'archived');
+    CREATE TYPE content_status AS ENUM ('draft', 'published', 'archived', 'blocked');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;

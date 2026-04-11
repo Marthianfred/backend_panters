@@ -42,7 +42,7 @@ export class PostgresCreatorsRankingsRepository implements ICreatorsRankingsRepo
         JOIN public.post_reactions pr ON pr.post_id = ci.id
         GROUP BY ci.creator_id
       ) reaction_counts ON reaction_counts.creator_id = u.id
-      WHERE u.role = 'creator'
+      WHERE u.role IN ('model', 'creator')
       ORDER BY "totalReactions" DESC
       LIMIT $1;
     `;
