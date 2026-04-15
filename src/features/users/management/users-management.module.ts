@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { UsersManagementController } from './users-management.controller';
 import { AdminCreateUserHandler } from './admin-create-user/admin-create-user.handler';
 import { ListUsersHandler } from './list-users/list-users.handler';
-import { DeactivateUserHandler } from './deactivate-user/deactivate-user.handler';
+import { UpdateUserStatusHandler } from './update-user-status/update-user-status.handler';
 import { ChangeRoleHandler } from './change-role/change-role.handler';
 import { GetUserDetailsHandler } from './get-user-details/get-user-details.handler';
 import { ModerateContentHandler } from './moderate-content/moderate-content.handler';
@@ -16,7 +16,7 @@ import { AuthModule } from '../../auth/auth.module';
     PostgresUsersManagementRepository,
     AdminCreateUserHandler,
     ListUsersHandler,
-    DeactivateUserHandler,
+    UpdateUserStatusHandler,
     ChangeRoleHandler,
     GetUserDetailsHandler,
     ModerateContentHandler,

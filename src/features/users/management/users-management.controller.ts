@@ -15,7 +15,8 @@ import { AdminCreateUserHandler } from './admin-create-user/admin-create-user.ha
 import { AdminCreateUserRequest, AdminCreateUserResponse } from './admin-create-user/admin-create-user.models';
 import { ListUsersHandler } from './list-users/list-users.handler';
 import { ListUsersQuery, ListUsersResponse } from './list-users/list-users.models';
-import { DeactivateUserHandler } from './deactivate-user/deactivate-user.handler';
+import { UpdateUserStatusHandler } from './update-user-status/update-user-status.handler';
+import { UpdateUserStatusRequest } from './update-user-status/update-user-status.models';
 import { ChangeRoleHandler } from './change-role/change-role.handler';
 import { ChangeRoleRequest } from './change-role/change-role.models';
 import { GetUserDetailsHandler } from './get-user-details/get-user-details.handler';
@@ -31,7 +32,7 @@ export class UsersManagementController {
   constructor(
     private readonly createUserHandler: AdminCreateUserHandler,
     private readonly listUsersHandler: ListUsersHandler,
-    private readonly deactivateUserHandler: DeactivateUserHandler,
+    private readonly updateUserStatusHandler: UpdateUserStatusHandler,
     private readonly changeRoleHandler: ChangeRoleHandler,
     private readonly getUserDetailsHandler: GetUserDetailsHandler,
     private readonly moderateContentHandler: ModerateContentHandler,
@@ -49,9 +50,9 @@ export class UsersManagementController {
     return this.createUserHandler.handle(request);
   }
 
-  @Patch('users/:id/deactivate')
-  async deactivateUser(@Param('id') id: string) {
-    return this.deactivateUserHandler.handle(id);
+  @Patch('users/:id/status')
+  async updateUserStatus(@Param('id') id: string, @Body() request: UpdateUserStatusRequest) {
+    return this.updateUserStatusHandler.handle(id, request);
   }
 
   @Patch('users/:id/role')

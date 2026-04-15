@@ -35,15 +35,15 @@ export class PostgresUsersManagementRepository {
     });
   }
 
-  async deactivateUser(userId: string): Promise<void> {
+  async updateUserStatus(userId: string, isActive: boolean): Promise<void> {
     await this.pool.query(
-      'UPDATE public."user" SET is_active = false WHERE id = $1',
-      [userId],
+      'UPDATE public."user" SET is_active = $1 WHERE id = $2',
+      [isActive, userId],
     );
-    // También desactivamos el perfil para consistencia
+    // También actualizamos el perfil para consistencia
     await this.pool.query(
-      'UPDATE public.antigravity_profiles SET is_active = false WHERE user_id = $1',
-      [userId],
+      'UPDATE public.antigravity_profiles SET is_active = $1 WHERE user_id = $2',
+      [isActive, userId],
     );
   }
 
