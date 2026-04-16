@@ -1,6 +1,6 @@
 import { Provider } from '@nestjs/common';
 import { betterAuth } from 'better-auth';
-import { username } from 'better-auth/plugins';
+import { username, captcha } from 'better-auth/plugins';
 import { Pool } from 'pg';
 import { ConfigService } from '@nestjs/config';
 
@@ -12,6 +12,7 @@ export const BetterAuthProvider: Provider = {
     const databaseUrl = configService.getOrThrow<string>('DATABASE_URL');
     const baseUrl = configService.getOrThrow<string>('BASE_URL');
     const secret = configService.getOrThrow<string>('BETTER_AUTH_SECRET');
+    const turnstileSecretKey = configService.getOrThrow<string>('TURNSTILE_SECRET_KEY');
 
     const pool = new Pool({
       connectionString: databaseUrl,
@@ -47,7 +48,13 @@ export const BetterAuthProvider: Provider = {
       emailAndPassword: {
         enabled: true,
       },
-      plugins: [username()],
+      plugins: [
+        username(),
+        captcha({
+          provider: 'cloudflare-turnstile',
+          secretKey: turnstileSecretKey,
+        }),
+      ],
       emailVerification: {
         async sendVerificationEmail({ user, url }) {
           // TODO: Integrar con servicio de correo real (Resend/SendGrid)
