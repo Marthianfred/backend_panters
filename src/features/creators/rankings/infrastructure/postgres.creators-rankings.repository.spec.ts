@@ -51,7 +51,7 @@ describe('PostgresCreatorsRankingsRepository', () => {
     const result = await repository.getTopCreators(5);
 
     expect(pool.query).toHaveBeenCalledWith(
-      expect.stringContaining("WHERE u.role IN ('model', 'creator')"),
+      expect.stringContaining("WHERE r.name = 'model'"),
       [5]
     );
     expect(result).toHaveLength(1);

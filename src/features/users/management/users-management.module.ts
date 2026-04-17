@@ -6,6 +6,7 @@ import { UpdateUserStatusHandler } from './update-user-status/update-user-status
 import { ChangeRoleHandler } from './change-role/change-role.handler';
 import { GetUserDetailsHandler } from './get-user-details/get-user-details.handler';
 import { ModerateContentHandler } from './moderate-content/moderate-content.handler';
+import { ListRolesHandler } from './list-roles/list-roles.handler';
 import { PostgresUsersManagementRepository } from './infrastructure/postgres.users-management.repository';
 import { AuthModule } from '../../auth/auth.module';
 
@@ -20,6 +21,7 @@ import { AuthModule } from '../../auth/auth.module';
     ChangeRoleHandler,
     GetUserDetailsHandler,
     ModerateContentHandler,
+    ListRolesHandler,
   ],
   exports: [PostgresUsersManagementRepository],
 })

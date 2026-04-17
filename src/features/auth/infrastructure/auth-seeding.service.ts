@@ -20,26 +20,57 @@ export class AuthSeedingService implements OnModuleInit {
     await this.schemaService.ensureInitialized();
 
     this.logger.log(
-      'Iniciando seeding de usuarios base (Admin, Moderador, Cliente)...',
+      'Iniciando seeding de usuarios por roles (Admin, Moderator, Model, Subscriber)...',
     );
 
     await this.seedUser(
       'admin@panters.com',
       'adminPassword123',
       'Panters Admin',
-      'admin',
+      'c901e6a7-f58c-493e-b567-5d554a32ac46',
+      'admin'
     );
     await this.seedUser(
       'moderator@panters.com',
       'moderatorPassword123',
       'Panters Moderador',
-      'moderator',
+      'e3519c28-98e9-4467-bd77-083da23d249f',
+      'moderator'
+    );
+    await this.seedUser(
+      'model@panters.com',
+      'modelPassword123',
+      'Panters Model',
+      'f88b9012-bd7c-47ea-a2a9-c70a84d2f831',
+      'model'
+    );
+    await this.seedUser(
+      'model1@panters.com',
+      'model1Password123',
+      'Panters Model 1',
+      'f88b9012-bd7c-47ea-a2a9-c70a84d2f831',
+      'model'
+    );
+    await this.seedUser(
+      'model2@panters.com',
+      'model2Password123',
+      'Panters Model 2',
+      'f88b9012-bd7c-47ea-a2a9-c70a84d2f831',
+      'model'
+    );
+    await this.seedUser(
+      'model3@panters.com',
+      'model3Password123',
+      'Panters Model 3',
+      'f88b9012-bd7c-47ea-a2a9-c70a84d2f831',
+      'model'
     );
     await this.seedUser(
       'client@panters.com',
       'clientPassword123',
       'Panters Cliente',
-      'subscriber',
+      'd80b1a31-4521-4ec0-9329-30d4d1adc025',
+      'subscriber'
     );
   }
 
@@ -47,7 +78,8 @@ export class AuthSeedingService implements OnModuleInit {
     email: string,
     pass: string,
     name: string,
-    role: string,
+    roleId: string,
+    roleName: string,
   ) {
     try {
       const userExists = await this.dataSource.query<{ id: string }[]>(
@@ -58,7 +90,7 @@ export class AuthSeedingService implements OnModuleInit {
       let userId = '';
 
       if (userExists.length === 0) {
-        this.logger.log(`Creando usuario: ${email} con rol ${role}...`);
+        this.logger.log(`Creando usuario: ${email} con ID de rol ${roleId}...`);
 
         try {
           await this.authInstance.api.signUpEmail({
@@ -83,16 +115,16 @@ export class AuthSeedingService implements OnModuleInit {
           userId = user[0].id;
 
           await this.dataSource.query(
-            'UPDATE "user" SET role = $1 WHERE email = $2',
-            [role, email],
+            'UPDATE "user" SET "roleId" = $1, "role" = $2 WHERE email = $3',
+            [roleId, roleName, email],
           );
         }
       } else {
         userId = userExists[0].id;
 
         await this.dataSource.query(
-          'UPDATE "user" SET role = $1 WHERE email = $2',
-          [role, email],
+          'UPDATE "user" SET "roleId" = $1, "role" = $2 WHERE email = $3',
+          [roleId, roleName, email],
         );
         this.logger.log(`Usuario ${email} ya existe. Perfil validado.`);
       }
@@ -108,11 +140,11 @@ export class AuthSeedingService implements OnModuleInit {
             userId,
             name,
             `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`,
-            `Perfil del sistema para ${name} (${role})`,
+            `Perfil del sistema para ${name} (${roleName})`,
           ],
         );
 
-        const startingBalance = role === 'subscriber' ? 500 : 99999;
+        const startingBalance = roleName === 'subscriber' ? 500 : 99999;
         await this.dataSource.query(
           `
           INSERT INTO "antigravity_wallets" (user_id, panter_coin_balance)
@@ -123,7 +155,7 @@ export class AuthSeedingService implements OnModuleInit {
         );
 
         this.logger.log(
-          `Perfil y Billetera conformados para: ${email} (Rol: ${role})`,
+          `Perfil y Billetera conformados para: ${email} (Rol: ${roleName})`,
         );
       }
     } catch (error) {

@@ -1,7 +1,6 @@
-import { IsString, IsEnum } from 'class-validator';
-import { UserRoleFlag } from '../admin-create-user/admin-create-user.models';
+import { IsUUID } from 'class-validator';
 
 export class ChangeRoleRequest {
-  @IsEnum(UserRoleFlag)
-  role!: UserRoleFlag;
+  @IsUUID()
+  roleId!: string;
 }

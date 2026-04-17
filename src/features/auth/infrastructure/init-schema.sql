@@ -7,6 +7,22 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 -- ===========================================================================
 -- 1. BETTER AUTH (Nucleo de Usuarios y Sesiones)
 -- ===========================================================================
+CREATE TABLE IF NOT EXISTS "roles" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL UNIQUE,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
+
+-- Roles Iniciales
+INSERT INTO "roles" (id, name, description) VALUES 
+('c901e6a7-f58c-493e-b567-5d554a32ac46', 'admin', 'Administrador con acceso total al sistema'),
+('e3519c28-98e9-4467-bd77-083da23d249f', 'moderator', 'Moderador de contenido y usuarios'),
+('f88b9012-bd7c-47ea-a2a9-c70a84d2f831', 'model', 'Usuario con capacidades de creación de contenido premium'),
+('d80b1a31-4521-4ec0-9329-30d4d1adc025', 'subscriber', 'Usuario consumidor de contenido')
+ON CONFLICT (id) DO NOTHING;
+
 CREATE TABLE IF NOT EXISTS "user" (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
@@ -15,7 +31,7 @@ CREATE TABLE IF NOT EXISTS "user" (
     image TEXT,
     "createdAt" TIMESTAMP NOT NULL,
     "updatedAt" TIMESTAMP NOT NULL,
-    role TEXT DEFAULT 'subscriber',
+    "roleId" UUID NOT NULL REFERENCES "roles"(id) DEFAULT 'd80b1a31-4521-4ec0-9329-30d4d1adc025',
     is_active BOOLEAN DEFAULT true,
     must_change_password BOOLEAN DEFAULT false
 );

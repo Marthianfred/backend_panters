@@ -22,6 +22,11 @@ export const BetterAuthProvider: Provider = {
       database: pool,
       user: {
         additionalFields: {
+          roleId: {
+            type: 'string', // Los UUID se manejan como string en Better Auth config pero mapean a UUID en PG
+            required: false,
+            defaultValue: 'd80b1a31-4521-4ec0-9329-30d4d1adc025',
+          },
           role: {
             type: 'string',
             required: false,

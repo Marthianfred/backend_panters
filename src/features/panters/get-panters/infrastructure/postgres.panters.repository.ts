@@ -35,7 +35,8 @@ export class PostgresPantersRepository implements IPantersRepository {
         p.services AS "services"
       FROM antigravity_profiles p
       INNER JOIN "user" u ON p.user_id = u.id
-      WHERE p.is_active = true AND u.role = 'model';
+      INNER JOIN roles r ON r.id = u."roleId"
+      WHERE p.is_active = true AND r.name = 'model';
     `;
 
     const result = await this.pool.query(query);
@@ -55,7 +56,8 @@ export class PostgresPantersRepository implements IPantersRepository {
         p.services AS "services"
       FROM antigravity_profiles p
       INNER JOIN "user" u ON p.user_id = u.id
-      WHERE p.is_active = true AND u.role = 'model'
+      INNER JOIN roles r ON r.id = u."roleId"
+      WHERE p.is_active = true AND r.name = 'model'
       ORDER BY p.is_vip DESC, p.reviews_count DESC
       LIMIT $1;
     `;

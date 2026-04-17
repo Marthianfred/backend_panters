@@ -2,11 +2,20 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 
+export interface RoleRecord {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
 export interface UserManagementDetails {
   id: string;
   email: string;
   name: string;
-  role: string;
+  role: {
+    id: string | null;
+    name: string | null;
+  };
   isActive: boolean;
   mustChangePassword: boolean;
   createdAt: Date;
@@ -35,6 +44,17 @@ export class PostgresUsersManagementRepository {
     });
   }
 
+  async listRoles(): Promise<RoleRecord[]> {
+    const result = await this.pool.query(
+      'SELECT id, name, description FROM public.roles ORDER BY name ASC',
+    );
+    return result.rows.map((row) => ({
+      id: row.id,
+      name: row.name,
+      description: row.description,
+    }));
+  }
+
   async updateUserStatus(userId: string, isActive: boolean): Promise<void> {
     await this.pool.query(
       'UPDATE public."user" SET is_active = $1 WHERE id = $2',
@@ -47,23 +67,28 @@ export class PostgresUsersManagementRepository {
     );
   }
 
-  async updateUserRole(userId: string, newRole: string): Promise<void> {
+  async updateUserRole(userId: string, roleId: string): Promise<void> {
+    // Obtenemos el nombre del rol para mantener la sincronización con la columna redundante
+    const roleRes = await this.pool.query('SELECT name FROM public.roles WHERE id = $1', [roleId]);
+    const roleName = roleRes.rows[0]?.name || 'subscriber';
+
     await this.pool.query(
-      'UPDATE public."user" SET role = $1 WHERE id = $2',
-      [newRole, userId],
+      'UPDATE public."user" SET "roleId" = $1, "role" = $2 WHERE id = $3',
+      [roleId, roleName, userId],
     );
   }
 
   async getUserDetails(userId: string): Promise<UserManagementDetails | null> {
     const userQuery = `
       SELECT 
-        u.id, u.email, u.name, u.role, u.is_active as "isActive", 
+        u.id, u.email, u.name, u."roleId" as "roleId", r.name as "roleName", u.is_active as "isActive", 
         u.must_change_password as "mustChangePassword", u."createdAt",
         ap.full_name as "fullName", ap.avatar_url as "avatarUrl", ap.bio,
         aw.panter_coin_balance as "walletBalance",
         cw.total_earned as "totalEarned", cw.net_balance as "netBalance",
         (SELECT COUNT(*) FROM public.content_items WHERE creator_id = u.id) as "contentCount"
       FROM public."user" u
+      LEFT JOIN public.roles r ON r.id = u."roleId"
       LEFT JOIN public.antigravity_profiles ap ON ap.user_id = u.id
       LEFT JOIN public.antigravity_wallets aw ON aw.user_id = u.id
       LEFT JOIN public.creator_wallets cw ON cw.creator_id = u.id
@@ -78,21 +103,29 @@ export class PostgresUsersManagementRepository {
       id: row.id,
       email: row.email,
       name: row.name,
-      role: row.role,
+      role: {
+        id: row.roleId,
+        name: row.roleName,
+      },
       isActive: row.isActive,
       mustChangePassword: row.mustChangePassword,
       createdAt: row.createdAt,
-      profile: row.fullName ? {
-        fullName: row.fullName,
-        avatarUrl: row.avatarUrl,
-        bio: row.bio,
-      } : null,
-      wallet: row.walletBalance !== null ? {
-        balance: parseFloat(row.walletBalance),
-      } : null,
+      profile: row.fullName
+        ? {
+            fullName: row.fullName,
+            avatarUrl: row.avatarUrl,
+            bio: row.bio,
+          }
+        : null,
+      wallet:
+        row.walletBalance !== null
+          ? {
+              balance: parseFloat(row.walletBalance),
+            }
+          : null,
     };
 
-    if (row.role === 'model' || row.role === 'creator') {
+    if (row.roleName === 'model' || row.roleName === 'creator') {
       details.creatorStats = {
         totalEarned: parseFloat(row.totalEarned || '0'),
         netBalance: parseFloat(row.netBalance || '0'),
@@ -103,14 +136,20 @@ export class PostgresUsersManagementRepository {
     return details;
   }
 
-  async moderateUserContent(contentId: string, status: 'archived' | 'blocked'): Promise<void> {
+  async moderateUserContent(
+    contentId: string,
+    status: 'archived' | 'blocked',
+  ): Promise<void> {
     await this.pool.query(
       'UPDATE public.content_items SET status = $1, updated_at = NOW() WHERE id = $2',
       [status, contentId],
     );
   }
 
-  async setMustChangePassword(userId: string, mustChange: boolean): Promise<void> {
+  async setMustChangePassword(
+    userId: string,
+    mustChange: boolean,
+  ): Promise<void> {
     await this.pool.query(
       'UPDATE public."user" SET must_change_password = $1 WHERE id = $2',
       [mustChange, userId],
@@ -118,11 +157,26 @@ export class PostgresUsersManagementRepository {
   }
 
   async exists(userId: string): Promise<boolean> {
-    const result = await this.pool.query('SELECT 1 FROM public."user" WHERE id = $1', [userId]);
+    const result = await this.pool.query(
+      'SELECT 1 FROM public."user" WHERE id = $1',
+      [userId],
+    );
     return result.rows.length > 0;
   }
 
-  async listUsers(page: number, limit: number, search?: string): Promise<{ users: UserManagementDetails[], total: number }> {
+  async existsRole(roleId: string): Promise<boolean> {
+    const result = await this.pool.query(
+      'SELECT 1 FROM public.roles WHERE id = $1',
+      [roleId],
+    );
+    return result.rows.length > 0;
+  }
+
+  async listUsers(
+    page: number,
+    limit: number,
+    search?: string,
+  ): Promise<{ users: UserManagementDetails[]; total: number }> {
     const offset = (page - 1) * limit;
     let whereClause = '';
     const params: any[] = [limit, offset];
@@ -134,11 +188,12 @@ export class PostgresUsersManagementRepository {
 
     const query = `
       SELECT 
-        u.id, u.email, u.name, u.role, u.is_active as "isActive", 
+        u.id, u.email, u.name, u."roleId" as "roleId", r.name as "roleName", u.is_active as "isActive", 
         u.must_change_password as "mustChangePassword", u."createdAt",
         ap.full_name as "fullName", ap.avatar_url as "avatarUrl", ap.bio,
         aw.panter_coin_balance as "walletBalance"
       FROM public."user" u
+      LEFT JOIN public.roles r ON r.id = u."roleId"
       LEFT JOIN public.antigravity_profiles ap ON ap.user_id = u.id
       LEFT JOIN public.antigravity_wallets aw ON aw.user_id = u.id
       ${whereClause}
@@ -153,22 +208,30 @@ export class PostgresUsersManagementRepository {
       this.pool.query(countQuery, search ? [`%${search}%`] : []),
     ]);
 
-    const users = usersRes.rows.map(row => ({
+    const users = usersRes.rows.map((row) => ({
       id: row.id,
       email: row.email,
       name: row.name,
-      role: row.role,
+      role: {
+        id: row.roleId,
+        name: row.roleName,
+      },
       isActive: row.isActive,
       mustChangePassword: row.mustChangePassword,
       createdAt: row.createdAt,
-      profile: row.fullName ? {
-        fullName: row.fullName,
-        avatarUrl: row.avatarUrl,
-        bio: row.bio,
-      } : null,
-      wallet: row.walletBalance !== null ? {
-        balance: parseFloat(row.walletBalance),
-      } : null,
+      profile: row.fullName
+        ? {
+            fullName: row.fullName,
+            avatarUrl: row.avatarUrl,
+            bio: row.bio,
+          }
+        : null,
+      wallet:
+        row.walletBalance !== null
+          ? {
+              balance: parseFloat(row.walletBalance),
+            }
+          : null,
     }));
 
     return {

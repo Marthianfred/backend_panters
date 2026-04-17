@@ -35,6 +35,7 @@ export class PostgresCreatorsRankingsRepository implements ICreatorsRankingsRepo
         ap.avatar_url as "avatarUrl",
         COALESCE(reaction_counts.cnt, 0)::INT as "totalReactions"
       FROM public."user" u
+      JOIN public.roles r ON r.id = u."roleId"
       JOIN public.antigravity_profiles ap ON ap.user_id = u.id
       LEFT JOIN (
         SELECT ci.creator_id, COUNT(pr.id) as cnt
@@ -42,7 +43,7 @@ export class PostgresCreatorsRankingsRepository implements ICreatorsRankingsRepo
         JOIN public.post_reactions pr ON pr.post_id = ci.id
         GROUP BY ci.creator_id
       ) reaction_counts ON reaction_counts.creator_id = u.id
-      WHERE u.role IN ('model', 'creator')
+      WHERE r.name = 'model'
       ORDER BY "totalReactions" DESC
       LIMIT $1;
     `;

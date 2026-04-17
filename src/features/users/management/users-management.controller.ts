@@ -23,6 +23,8 @@ import { GetUserDetailsHandler } from './get-user-details/get-user-details.handl
 import { UserDetailsResponse } from './get-user-details/get-user-details.models';
 import { ModerateContentHandler } from './moderate-content/moderate-content.handler';
 import { ModerateContentRequest } from './moderate-content/moderate-content.models';
+import { ListRolesHandler } from './list-roles/list-roles.handler';
+import { ListRolesResponse } from './list-roles/list-roles.models';
 import { Query } from '@nestjs/common';
 
 @Controller('api/v1/management')
@@ -36,11 +38,17 @@ export class UsersManagementController {
     private readonly changeRoleHandler: ChangeRoleHandler,
     private readonly getUserDetailsHandler: GetUserDetailsHandler,
     private readonly moderateContentHandler: ModerateContentHandler,
+    private readonly listRolesHandler: ListRolesHandler,
   ) {}
 
   @Get('users')
   async listUsers(@Query() query: ListUsersQuery): Promise<ListUsersResponse> {
     return this.listUsersHandler.handle(query);
+  }
+
+  @Get('roles')
+  async listRoles(): Promise<ListRolesResponse> {
+    return this.listRolesHandler.handle();
   }
 
   @Post('users')

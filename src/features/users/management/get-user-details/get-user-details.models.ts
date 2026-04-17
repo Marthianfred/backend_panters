@@ -2,7 +2,10 @@ export class UserDetailsResponse {
   id!: string;
   email!: string;
   name!: string;
-  role!: string;
+  role!: {
+    id: string | null;
+    name: string | null;
+  };
   isActive!: boolean;
   mustChangePassword!: boolean;
   createdAt!: Date;
