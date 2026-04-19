@@ -79,7 +79,9 @@ export class PostgresStreamRepository implements IStreamRepository {
       LEFT JOIN "antigravity_profiles" p ON s.creator_id = p.user_id
       WHERE s.is_active = true 
       AND s.created_at > NOW() - INTERVAL '4 hours'
+      AND s.channel_arn IS NOT NULL
       ORDER BY s.created_at DESC;
+
     `;
 
     const result = await this.pool.query(query);
