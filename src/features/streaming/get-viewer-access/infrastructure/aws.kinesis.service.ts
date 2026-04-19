@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { STSClient, AssumeRoleCommand } from '@aws-sdk/client-sts';
-import { KinesisVideoClient, CreateSignalingChannelCommand, DeleteSignalingChannelCommand, DescribeSignalingChannelCommand, GetSignalingChannelEndpointCommand } from '@aws-sdk/client-kinesis-video';
+import {
+  KinesisVideoClient,
+  CreateSignalingChannelCommand,
+  DescribeSignalingChannelCommand,
+  GetSignalingChannelEndpointCommand,
+} from '@aws-sdk/client-kinesis-video';
 import { IKinesisVideoService } from '../interfaces/kinesis.service.interface';
 import { WebRTCCredentials } from '../get-viewer-access.models';
 
@@ -11,41 +16,89 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
   private kvsClient: KinesisVideoClient;
 
   constructor(private readonly configService: ConfigService) {
-    const region = this.configService.get<string>('KN_STREAMS_REGION', 'us-east-2');
+    const region = this.configService.get<string>(
+      'KN_STREAMS_REGION',
+      'us-east-2',
+    );
 
     const credentials = {
-      accessKeyId: this.configService.getOrThrow<string>('KN_STREAMS_ACCESS_KEY_ID'),
-      secretAccessKey: this.configService.getOrThrow<string>('KN_STREAMS_SECRET_ACCESS_KEY'),
+      accessKeyId: this.configService.getOrThrow<string>(
+        'KN_STREAMS_ACCESS_KEY_ID',
+      ),
+      secretAccessKey: this.configService.getOrThrow<string>(
+        'KN_STREAMS_SECRET_ACCESS_KEY',
+      ),
     };
 
     this.stsClient = new STSClient({ region, credentials });
     this.kvsClient = new KinesisVideoClient({ region, credentials });
   }
 
+  private async assumeRole(
+    channelArn: string,
+    role: 'MASTER' | 'VIEWER',
+    userId: string,
+  ): Promise<WebRTCCredentials> {
+    const roleArn = this.configService.get<string>('KN_STREAMS_ROLE_ARN');
+
+    if (!roleArn) {
+      return {
+        accessKeyId: this.configService.get<string>(
+          'KN_STREAMS_ACCESS_KEY_ID',
+        ) as string,
+        secretAccessKey: this.configService.get<string>(
+          'KN_STREAMS_SECRET_ACCESS_KEY',
+        ) as string,
+        sessionToken: '',
+        expiration: new Date(Date.now() + 3600 * 1000),
+      };
+    }
+
+    const policy = JSON.stringify({
+      Version: '2012-10-17',
+      Statement: [
+        {
+          Effect: 'Allow',
+          Action: [
+            role === 'MASTER'
+              ? 'kinesisvideo:ConnectAsMaster'
+              : 'kinesisvideo:ConnectAsViewer',
+            'kinesisvideo:GetSignalingChannelEndpoint',
+          ],
+          Resource: channelArn,
+        },
+      ],
+    });
+
+    const command = new AssumeRoleCommand({
+      RoleArn: roleArn,
+      RoleSessionName: `Kinesis-WebRTC-${role}-${userId.substring(0, 10)}`,
+      DurationSeconds: 3600,
+      Policy: policy,
+    });
+
+    const response = await this.stsClient.send(command);
+
+    return {
+      accessKeyId: response.Credentials?.AccessKeyId as string,
+      secretAccessKey: response.Credentials?.SecretAccessKey as string,
+      sessionToken: response.Credentials?.SessionToken as string,
+      expiration: response.Credentials?.Expiration as Date,
+    };
+  }
+
   public async generateViewerCredentials(
     channelArn: string,
     userId: string,
   ): Promise<WebRTCCredentials> {
-    // Para visualización retornamos credenciales directas para el PoC con permisos limitados si fuera posible, 
-    // pero por ahora usaremos las principales filtradas por el cliente WebRTC.
-    return {
-      accessKeyId: this.configService.get<string>('KN_STREAMS_ACCESS_KEY_ID') as string,
-      secretAccessKey: this.configService.get<string>('KN_STREAMS_SECRET_ACCESS_KEY') as string,
-      sessionToken: '',
-      expiration: new Date(Date.now() + 3600 * 1000), 
-    };
+    return this.assumeRole(channelArn, 'VIEWER', userId);
   }
 
   public async generateProducerCredentials(
     channelArn: string,
     userId: string,
   ): Promise<WebRTCCredentials> {
-    return {
-      accessKeyId: this.configService.get<string>('KN_STREAMS_ACCESS_KEY_ID') as string,
-      secretAccessKey: this.configService.get<string>('KN_STREAMS_SECRET_ACCESS_KEY') as string,
-      sessionToken: '',
-      expiration: new Date(Date.now() + 3600 * 1000), 
-    };
+    return this.assumeRole(channelArn, 'MASTER', userId);
   }
 
   public async getSignalingEndpoint(
@@ -82,10 +135,13 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
       return response.ChannelARN as string;
     } catch (error) {
       if (error.name === 'ResourceInUseException') {
-        const describe = await this.kvsClient.send(new DescribeSignalingChannelCommand({ ChannelName: channelName }));
+        const describe = await this.kvsClient.send(
+          new DescribeSignalingChannelCommand({ ChannelName: channelName }),
+        );
         return describe.ChannelInfo?.ChannelARN as string;
       }
       throw error;
     }
   }
 }
+
