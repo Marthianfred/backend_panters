@@ -11,11 +11,12 @@ import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
   cors: {
-    origin: '*',
+    origin: true,
     methods: ['GET', 'POST'],
     credentials: true,
   },
 })
+
 export class LiveChatGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
