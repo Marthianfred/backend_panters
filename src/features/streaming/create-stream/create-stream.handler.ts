@@ -18,7 +18,12 @@ export class CreateStreamHandler {
   ) {}
 
   public async execute(request: CreateStreamRequest): Promise<CreateStreamResponse> {
+    if (!request.title || request.title.trim().length === 0) {
+      throw new Error('El título de la transmisión es obligatorio.');
+    }
+
     const streamId = randomUUID();
+
     const region = this.configService.get<string>('KN_STREAMS_REGION', 'us-east-2');
     const channelName = `Stream-${request.creatorId}-${Date.now()}`;
 
