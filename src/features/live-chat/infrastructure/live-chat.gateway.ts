@@ -53,22 +53,26 @@ export class LiveChatGateway
 
   @SubscribeMessage('sendChatMessage')
   handleSendMessage(
-    @MessageBody() data: { creatorId: string; username: string; text: string },
+    @MessageBody()
+    data: {
+      creatorId: string;
+      username: string;
+      text: string;
+      id?: string;
+    },
   ) {
     const room = `live_${data.creatorId}`;
     const messagePayload = {
-      id: Date.now().toString(),
+      id: data.id || Date.now().toString(),
       username: data.username,
       text: data.text,
-      time: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
+      time: new Date().toISOString(),
       isGift: false,
     };
 
     this.server.to(room).emit('receiveChatMessage', messagePayload);
   }
+
 
   @SubscribeMessage('sendGiftAnimation')
   handleSendGiftAnimation(
