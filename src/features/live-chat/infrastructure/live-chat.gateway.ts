@@ -11,7 +11,7 @@ import { Server, Socket } from 'socket.io';
 
 @WebSocketGateway({
   cors: {
-    origin: '*', // En producción limitar al frontend URL
+    origin: '*',
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -66,8 +66,6 @@ export class LiveChatGateway
       isGift: false,
     };
 
-    // Retransmitir a todos los clientes unidos a la sala, excepto al remitente (Broadcast a otros)
-    // O retransmitir a todos incluyendo al remitente. Hagámoslo a todos para simplificar la UI reactiva.
     this.server.to(room).emit('receiveChatMessage', messagePayload);
   }
 
@@ -91,10 +89,6 @@ export class LiveChatGateway
     );
   }
 
-  // Las notificaciones de Regalos serán despachadas desde la API REST (send-gift) hacia este Gateway.
-  // Pero también podríamos permitir emitir regalos por WebSockets si lo preferimos,
-  // aunque es más seguro validarlo con el backend HTTP transaccional primero,
-  // y luego desde el Handler del SendGift inyectar el gateway y hacer 'emit'.
   broadcastGift(
     creatorId: string,
     username: string,
@@ -116,7 +110,6 @@ export class LiveChatGateway
       iconUrl,
     };
 
-    // Emitimos el evento de chat y también uno especial para animación
     this.server.to(room).emit('receiveChatMessage', giftPayload);
     this.server.to(room).emit('receiveGiftAnimation', {
       name: giftName,
@@ -124,3 +117,4 @@ export class LiveChatGateway
     });
   }
 }
+
