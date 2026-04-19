@@ -66,8 +66,9 @@ export class PostgresStreamRepository implements IStreamRepository {
       SELECT 
         s.id,
         s.creator_id AS "creatorId",
-        u.name AS "creatorName",
+        COALESCE(p.username, p.full_name, u.name, 'Modelo') AS "creatorName",
         p.avatar_url AS "creatorAvatar",
+
         s.channel_arn AS "channelArn", 
         s.aws_region AS "region", 
         s.s3_thumbnail_bucket AS "s3ThumbnailBucket", 
