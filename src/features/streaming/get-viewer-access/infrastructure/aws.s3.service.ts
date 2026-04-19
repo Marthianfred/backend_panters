@@ -11,12 +11,19 @@ export class AwsS3Service implements IS3Service {
   constructor(private readonly configService: ConfigService) {
     const region = this.configService.get<string>('AWS_REGION', 'us-east-1');
     const endpoint = this.configService.get<string>('AWS_ENDPOINT');
-    const forcePathStyle = this.configService.get<string>('AWS_USE_PATH_STYLE_ENDPOINT') === 'true';
+    const forcePathStyle =
+      this.configService.get<string>('AWS_USE_PATH_STYLE_ENDPOINT') === 'true';
 
-    this.s3Client = new S3Client({ 
+    this.s3Client = new S3Client({
       region,
       endpoint,
-      forcePathStyle
+      forcePathStyle,
+      credentials: {
+        accessKeyId: this.configService.getOrThrow<string>('AWS_ACCESS_KEY_ID'),
+        secretAccessKey: this.configService.getOrThrow<string>(
+          'AWS_SECRET_ACCESS_KEY',
+        ),
+      },
     });
   }
 
@@ -29,7 +36,7 @@ export class AwsS3Service implements IS3Service {
       Key: key,
     });
 
-    const url = await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
-    return url;
+    return getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
   }
 }
+
