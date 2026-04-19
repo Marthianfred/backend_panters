@@ -56,12 +56,19 @@ export class GetViewerAccessHandler {
       signalingEndpointPromise,
     ]);
 
+    const iceServers = await this.kinesisVideoService.getIceServers(
+      streamMetadata.channelArn,
+      credentials,
+    );
+
     return {
       channelArn: streamMetadata.channelArn,
       region: streamMetadata.region,
       signalingEndpoint: signalingEndpoint,
       thumbnailUrl: thumbnailUrl,
       credentials: credentials,
+      iceServers: iceServers,
     };
+
   }
 }

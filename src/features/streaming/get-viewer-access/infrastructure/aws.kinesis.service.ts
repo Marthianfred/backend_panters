@@ -7,6 +7,10 @@ import {
   DescribeSignalingChannelCommand,
   GetSignalingChannelEndpointCommand,
 } from '@aws-sdk/client-kinesis-video';
+import {
+  KinesisVideoSignalingClient,
+  GetIceServerConfigCommand,
+} from '@aws-sdk/client-kinesis-video-signaling';
 import { IKinesisVideoService } from '../interfaces/kinesis.service.interface';
 import { WebRTCCredentials } from '../get-viewer-access.models';
 
@@ -33,6 +37,7 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
     this.stsClient = new STSClient({ region, credentials });
     this.kvsClient = new KinesisVideoClient({ region, credentials });
   }
+
 
   private async assumeRole(
     channelArn: string,
@@ -64,7 +69,9 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
               ? 'kinesisvideo:ConnectAsMaster'
               : 'kinesisvideo:ConnectAsViewer',
             'kinesisvideo:GetSignalingChannelEndpoint',
+            'kinesisvideo:GetIceServerConfig',
           ],
+
           Resource: channelArn,
         },
       ],
@@ -125,7 +132,41 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
     return endpoint;
   }
 
+  public async getIceServers(
+    channelArn: string,
+    credentials: WebRTCCredentials,
+  ): Promise<any[]> {
+    const region = this.configService.get<string>(
+      'KN_STREAMS_REGION',
+      'us-east-2',
+    );
+
+    const signalingClient = new KinesisVideoSignalingClient({
+      region,
+      credentials: {
+        accessKeyId: credentials.accessKeyId,
+        secretAccessKey: credentials.secretAccessKey,
+        sessionToken: credentials.sessionToken,
+      },
+    });
+
+    const command = new GetIceServerConfigCommand({
+      ChannelARN: channelArn,
+    });
+
+    const response = await signalingClient.send(command);
+
+    return (
+      response.IceServerList?.map((server) => ({
+        urls: server.Uris,
+        username: server.Username,
+        credential: server.Password,
+      })) || []
+    );
+  }
+
   public async createSignalingChannel(channelName: string): Promise<string> {
+
     try {
       const command = new CreateSignalingChannelCommand({
         ChannelName: channelName,
