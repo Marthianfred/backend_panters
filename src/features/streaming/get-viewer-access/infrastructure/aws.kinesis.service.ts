@@ -141,8 +141,28 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
       'us-east-2',
     );
 
+    // 1. Obtener el endpoint HTTPS para Signaling
+    const getEndpointCommand = new GetSignalingChannelEndpointCommand({
+      ChannelARN: channelArn,
+      SingleMasterChannelEndpointConfiguration: {
+        Protocols: ['HTTPS'],
+        Role: 'VIEWER',
+      },
+    });
+
+    const endpointResponse = await this.kvsClient.send(getEndpointCommand);
+    const httpsEndpoint = endpointResponse.ResourceEndpointList?.find((e) =>
+      e.ResourceEndpoint?.startsWith('https://'),
+    )?.ResourceEndpoint;
+
+    if (!httpsEndpoint) {
+      throw new Error('No se pudo obtener el endpoint HTTPS para ICE Servers.');
+    }
+
+    // 2. Usar el endpoint específico para pedir los ICE Servers
     const signalingClient = new KinesisVideoSignalingClient({
       region,
+      endpoint: httpsEndpoint,
       credentials: {
         accessKeyId: credentials.accessKeyId,
         secretAccessKey: credentials.secretAccessKey,
@@ -164,6 +184,7 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
       })) || []
     );
   }
+
 
   public async createSignalingChannel(channelName: string): Promise<string> {
 
