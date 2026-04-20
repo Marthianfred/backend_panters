@@ -72,10 +72,11 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
             'kinesisvideo:GetIceServerConfig',
           ],
 
-          Resource: channelArn,
+          Resource: '*',
         },
       ],
     });
+
 
     const command = new AssumeRoleCommand({
       RoleArn: roleArn,
