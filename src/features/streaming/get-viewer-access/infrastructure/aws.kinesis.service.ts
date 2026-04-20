@@ -160,16 +160,20 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
       throw new Error('No se pudo obtener el endpoint HTTPS para ICE Servers.');
     }
 
-    // 2. Usar el endpoint específico para pedir los ICE Servers
+    // 2. Usar las credenciales maestras del servicio para pedir los ICE Servers
     const signalingClient = new KinesisVideoSignalingClient({
       region,
       endpoint: httpsEndpoint,
       credentials: {
-        accessKeyId: credentials.accessKeyId,
-        secretAccessKey: credentials.secretAccessKey,
-        sessionToken: credentials.sessionToken,
+        accessKeyId: this.configService.getOrThrow<string>(
+          'KN_STREAMS_ACCESS_KEY_ID',
+        ),
+        secretAccessKey: this.configService.getOrThrow<string>(
+          'KN_STREAMS_SECRET_ACCESS_KEY',
+        ),
       },
     });
+
 
     const command = new GetIceServerConfigCommand({
       ChannelARN: channelArn,
