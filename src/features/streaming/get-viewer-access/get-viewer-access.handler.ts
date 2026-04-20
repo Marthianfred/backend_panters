@@ -61,10 +61,15 @@ export class GetViewerAccessHandler {
       signalingEndpointPromise,
     ]);
 
-    const iceServers = await this.kinesisVideoService.getIceServers(
-      streamMetadata.channelArn,
-      credentials,
-    );
+    let iceServers: any[] = [];
+    try {
+      iceServers = await this.kinesisVideoService.getIceServers(
+        streamMetadata.channelArn,
+        credentials,
+      );
+    } catch (e) {
+      console.warn('[ViewerAccess] No se pudieron obtener ICE servers de AWS (posible falta de permisos IAM), usando configuración básica:', e.message);
+    }
 
     return {
       channelArn: streamMetadata.channelArn,
@@ -74,6 +79,7 @@ export class GetViewerAccessHandler {
       credentials: credentials,
       iceServers: iceServers,
     };
+
 
   }
 }
