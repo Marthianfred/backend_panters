@@ -25,13 +25,18 @@ export class GetViewerAccessHandler {
   public async execute(
     request: GetViewerAccessRequest,
   ): Promise<GetViewerAccessResponse> {
+    console.log(`[ViewerAccess] Buscando metadatos para streamId: ${request.streamId}`);
     const streamMetadata = await this.streamRepository.getStreamMetadataById(
       request.streamId,
     );
 
     if (!streamMetadata) {
+      console.warn(`[ViewerAccess] Stream no encontrado o inactivo: ${request.streamId}`);
       throw new StreamNotFoundError(request.streamId);
     }
+
+    console.log(`[ViewerAccess] Transmisión encontrada para creador: ${streamMetadata.creatorId}`);
+
 
     const credentialsPromise =
       this.kinesisVideoService.generateViewerCredentials(
