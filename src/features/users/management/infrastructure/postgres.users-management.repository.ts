@@ -12,6 +12,8 @@ export interface UserManagementDetails {
   id: string;
   email: string;
   name: string;
+  username: string | null;
+  displayUsername: string | null;
   role: {
     id: string | null;
     name: string | null;
@@ -81,7 +83,7 @@ export class PostgresUsersManagementRepository {
   async getUserDetails(userId: string): Promise<UserManagementDetails | null> {
     const userQuery = `
       SELECT 
-        u.id, u.email, u.name, u."roleId" as "roleId", r.name as "roleName", u.is_active as "isActive", 
+        u.id, u.email, u.name, u.username, u."displayUsername", u."roleId" as "roleId", r.name as "roleName", u.is_active as "isActive", 
         u.must_change_password as "mustChangePassword", u."createdAt",
         ap.full_name as "fullName", ap.avatar_url as "avatarUrl", ap.bio,
         aw.panter_coin_balance as "walletBalance",
@@ -103,6 +105,8 @@ export class PostgresUsersManagementRepository {
       id: row.id,
       email: row.email,
       name: row.name,
+      username: row.username,
+      displayUsername: row.displayUsername,
       role: {
         id: row.roleId,
         name: row.roleName,
@@ -188,7 +192,7 @@ export class PostgresUsersManagementRepository {
 
     const query = `
       SELECT 
-        u.id, u.email, u.name, u."roleId" as "roleId", r.name as "roleName", u.is_active as "isActive", 
+        u.id, u.email, u.name, u.username, u."displayUsername", u."roleId" as "roleId", r.name as "roleName", u.is_active as "isActive", 
         u.must_change_password as "mustChangePassword", u."createdAt",
         ap.full_name as "fullName", ap.avatar_url as "avatarUrl", ap.bio,
         aw.panter_coin_balance as "walletBalance"
@@ -212,6 +216,8 @@ export class PostgresUsersManagementRepository {
       id: row.id,
       email: row.email,
       name: row.name,
+      username: row.username,
+      displayUsername: row.displayUsername,
       role: {
         id: row.roleId,
         name: row.roleName,

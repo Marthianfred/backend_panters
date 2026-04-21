@@ -4,8 +4,11 @@ export interface AuthenticatedUser {
   id: string;
   email: string;
   name: string;
+  username?: string;
+  displayUsername?: string;
   emailVerified: boolean;
   image?: string;
+  roleId?: string;
   role?: string;
   createdAt: Date;
   updatedAt: Date;

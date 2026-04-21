@@ -8,6 +8,7 @@ import {
   ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { LiveChatService } from '../application/live-chat.service';
 
 @WebSocketGateway({
   cors: {
@@ -16,12 +17,13 @@ import { Server, Socket } from 'socket.io';
     credentials: true,
   },
 })
-
 export class LiveChatGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
   @WebSocketServer()
   server: Server;
+
+  constructor(private readonly liveChatService: LiveChatService) {}
 
   handleConnection(client: Socket) {
     console.log(`Cliente conectado al Live Chat WS: ${client.id}`);
@@ -52,7 +54,7 @@ export class LiveChatGateway
   }
 
   @SubscribeMessage('sendChatMessage')
-  handleSendMessage(
+  async handleSendMessage(
     @MessageBody()
     data: {
       creatorId: string;
@@ -60,22 +62,16 @@ export class LiveChatGateway
       text: string;
       id?: string;
     },
+    @ConnectedSocket() client: Socket,
   ) {
     const room = `live_${data.creatorId}`;
-    const messagePayload = {
-      id: data.id || Date.now().toString(),
-      username: data.username,
-      text: data.text,
-      time: new Date().toISOString(),
-      isGift: false,
-    };
+    const messagePayload = await this.liveChatService.createMessagePayload(client, data);
 
     this.server.to(room).emit('receiveChatMessage', messagePayload);
   }
 
-
   @SubscribeMessage('sendGiftAnimation')
-  handleSendGiftAnimation(
+  async handleSendGiftAnimation(
     @MessageBody()
     data: {
       creatorId: string;
@@ -84,41 +80,40 @@ export class LiveChatGateway
       iconUrl?: string;
       giftId?: string;
     },
+    @ConnectedSocket() client: Socket,
   ) {
-    this.broadcastGift(
+    await this.broadcastGift(
       data.creatorId,
       data.username,
       data.giftName,
       data.iconUrl,
       data.giftId,
+      client,
     );
   }
 
-  broadcastGift(
+  async broadcastGift(
     creatorId: string,
     username: string,
     giftName: string,
     iconUrl?: string,
     giftId?: string,
+    client: Socket | null = null,
   ) {
     const room = `live_${creatorId}`;
-    const giftPayload = {
-      id: Date.now().toString(),
-      username: username,
-      text: `¡Envió un ${giftName}! ${iconUrl === 'rose' ? '🌹' : iconUrl === 'diamond' ? '💎' : '🎁'}`,
-      time: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      isGift: true,
-      giftType: giftId || giftName,
+    const giftPayload = await this.liveChatService.createGiftPayload(
+      client,
+      username,
+      giftName,
       iconUrl,
-    };
+      giftId,
+    );
 
     this.server.to(room).emit('receiveChatMessage', giftPayload);
     this.server.to(room).emit('receiveGiftAnimation', {
       name: giftName,
       icon: iconUrl || giftId,
+      username: giftPayload.username,
     });
   }
 }
