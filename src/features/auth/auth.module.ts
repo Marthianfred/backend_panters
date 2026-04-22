@@ -1,8 +1,7 @@
 import { Module, Global, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { AuthController } from './api/auth.controller';
-import { RegisterClientController } from './register-client/register-client.controller';
 import { AuthService } from './application/auth.service';
-import { RegisterClientService } from './register-client/register-client.service';
+import { RegisterClientService } from './application/register-client.service';
 import { BetterAuthProvider } from './infrastructure/better-auth.provider';
 import { AuthGuard } from './guards/auth.guard';
 import { RolesGuard } from './guards/roles.guard';
@@ -13,7 +12,7 @@ import { DatabaseModule } from '@/core/database/database.module';
 @Global()
 @Module({
   imports: [DatabaseModule],
-  controllers: [AuthController, RegisterClientController],
+  controllers: [AuthController],
   providers: [
     AuthService,
     RegisterClientService,

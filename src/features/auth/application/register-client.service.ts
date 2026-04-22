@@ -1,7 +1,7 @@
 import { Injectable, Inject, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { BETTER_AUTH_TOKEN } from '../infrastructure/auth.constants';
 import type { BetterAuthInstance } from '../types/auth.types';
-import { RegisterClientRequest, RegisterClientResponse, VerifyEmailRequest } from './register-client.models';
+import { RegisterClientRequest, RegisterClientResponse, VerifyEmailRequest } from '../domain/register-client.models';
 
 @Injectable()
 export class RegisterClientService {
