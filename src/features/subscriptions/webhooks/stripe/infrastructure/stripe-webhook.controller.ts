@@ -1,6 +1,6 @@
 import { Controller, Post, Headers, Req, BadRequestException, RawBodyRequest, Logger } from '@nestjs/common';
 import { Request } from 'express';
-import { StripeService } from '@/features/subscriptions/infrastructure/stripe.service';
+import { StripeService } from '@/core/infrastructure/stripe/stripe.service';
 import { HandleStripeWebhookUseCase } from '../application/handle-stripe-webhook.use-case';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 
@@ -27,6 +27,7 @@ export class StripeWebhookController {
     try {
       // Usamos el rawBody que ya viene configurado en main.ts
       const event = this.stripeService.constructEvent(request.rawBody, signature);
+
       
       await this.handleStripeWebhookUseCase.execute(event);
       

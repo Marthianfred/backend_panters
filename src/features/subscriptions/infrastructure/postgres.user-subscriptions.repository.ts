@@ -100,4 +100,32 @@ export class PostgresUserSubscriptionsRepository implements IUserSubscriptionsRe
     const result = await this.pool.query(query, [id]);
     return result.rows[0] || null;
   }
+
+  async findByExternalId(externalId: string): Promise<UserSubscriptionDto | null> {
+    const query = `
+      SELECT 
+        id, user_id as "userId", plan_id as "planId", status, 
+        payment_gateway as "paymentGateway", external_subscription_id as "externalSubscriptionId", 
+        starts_at as "startsAt", ends_at as "endsAt", created_at as "createdAt", updated_at as "updatedAt"
+      FROM user_subscriptions
+      WHERE external_subscription_id = $1
+      LIMIT 1;
+    `;
+    const result = await this.pool.query(query, [externalId]);
+    return result.rows[0] || null;
+  }
+
+  async updatePeriod(id: string, startsAt: Date, endsAt: Date): Promise<UserSubscriptionDto> {
+    const query = `
+      UPDATE user_subscriptions
+      SET starts_at = $2, ends_at = $3, status = 'active', updated_at = NOW()
+      WHERE id = $1
+      RETURNING 
+        id, user_id as "userId", plan_id as "planId", status, 
+        payment_gateway as "paymentGateway", external_subscription_id as "externalSubscriptionId", 
+        starts_at as "startsAt", ends_at as "endsAt", created_at as "createdAt", updated_at as "updatedAt";
+    `;
+    const result = await this.pool.query(query, [id, startsAt, endsAt]);
+    return result.rows[0];
+  }
 }

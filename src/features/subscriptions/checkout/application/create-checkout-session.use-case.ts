@@ -2,7 +2,7 @@ import { Injectable, Inject, NotFoundException, BadRequestException } from '@nes
 import { ConfigService } from '@nestjs/config';
 import * as userSubscriptionsRepositoryInterface from '@/features/subscriptions/interfaces/user.subscriptions.repository.interface';
 import * as subscriptionPlansRepositoryInterface from '@/features/subscriptions/interfaces/subscription.plans.repository.interface';
-import { StripeService } from '@/features/subscriptions/infrastructure/stripe.service';
+import { StripeService } from '@/core/infrastructure/stripe/stripe.service';
 
 export interface CreateCheckoutSessionDto {
   subscriptionId: string;
@@ -46,8 +46,6 @@ export class CreateCheckoutSessionUseCase {
     const cancelUrl = this.configService.getOrThrow<string>('STRIPE_CANCEL_URL');
 
     // 4. Crear la sesión en Stripe
-    // Nota: Podríamos buscar al cliente en Stripe por email si ya existe, 
-    // pero por ahora dejamos que Stripe maneje la creación/vínculo por email.
     try {
       const session = await this.stripeService.createCheckoutSession({
         priceId: plan.stripePriceId,

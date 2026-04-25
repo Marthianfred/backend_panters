@@ -1,7 +1,6 @@
 import {
   Controller,
   Post,
-  Body,
   Headers,
   HttpCode,
   HttpStatus,
@@ -27,24 +26,20 @@ export class WebhooksTopUpController {
     private readonly binanceHandler: BinanceWebhookHandler,
   ) {}
 
+  /**
+   * @deprecated Usar api/v1/payments/webhooks/stripe (Dispatcher Unificado)
+   */
   @Post('stripe')
   @HttpCode(HttpStatus.OK)
   public async handleStripe(
     @Req() req: RequestWithRawBody,
     @Headers('stripe-signature') signature: string,
   ): Promise<WebhookResponse> {
-    try {
-      // Usamos req.rawBody para validación de firma y req.body para datos
-      return await this.stripeHandler.execute(req.rawBody || req.body, signature || '');
-    } catch (error) {
-      if (error instanceof InvalidSignatureError) {
-        throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
-      }
-      throw new HttpException(
-        `Error procesando webhook de Stripe: ${error.message}`,
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
+    // Redirigir o lanzar error para forzar migración a dispatcher unificado
+    throw new HttpException(
+      'Este endpoint está deprecado. Use el dispatcher unificado en api/v1/payments/webhooks/stripe',
+      HttpStatus.GONE,
+    );
   }
 
   @Post('binance')

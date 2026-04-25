@@ -10,7 +10,7 @@ export class StripeService {
   constructor(private readonly configService: ConfigService) {
     const secretKey = this.configService.getOrThrow<string>('STRIPE_SECRET_KEY');
     this.stripe = new Stripe(secretKey, {
-      apiVersion: '2025-01-27.acacia' as any, // Ajustado a la versión más reciente compatible
+      apiVersion: '2025-01-27.acacia' as any,
     });
   }
 
@@ -32,13 +32,6 @@ export class StripeService {
    */
   async getCheckoutSession(sessionId: string): Promise<Stripe.Checkout.Session> {
     return this.stripe.checkout.sessions.retrieve(sessionId);
-  }
-
-  /**
-   * Obtiene los metadatos de una sesión.
-   */
-  getMetadata(session: Stripe.Checkout.Session): Record<string, string> {
-    return (session.metadata as Record<string, string>) || {};
   }
 
   /**
@@ -68,7 +61,43 @@ export class StripeService {
       cancel_url: params.cancelUrl,
       metadata: {
         subscriptionId: params.subscriptionId,
+        type: 'subscription',
         ...params.metadata,
+      },
+    });
+  }
+
+  /**
+   * Crea una sesión de Checkout para recarga de Wallet (Panter Coins).
+   */
+  async createWalletTopUpSession(params: {
+    userId: string;
+    coinsAmount: number;
+    amountInCents: number;
+    successUrl: string;
+    cancelUrl: string;
+  }): Promise<Stripe.Checkout.Session> {
+    return this.stripe.checkout.sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      line_items: [
+        {
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: `${params.coinsAmount} Panter Coins`,
+            },
+            unit_amount: params.amountInCents,
+          },
+          quantity: 1,
+        },
+      ],
+      success_url: params.successUrl,
+      cancel_url: params.cancelUrl,
+      metadata: {
+        userId: params.userId,
+        coinsAmount: params.coinsAmount.toString(),
+        type: 'wallet_top_up',
       },
     });
   }

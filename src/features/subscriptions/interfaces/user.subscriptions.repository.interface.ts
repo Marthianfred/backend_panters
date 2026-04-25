@@ -8,4 +8,6 @@ export interface IUserSubscriptionsRepository {
   findActiveByUserId(userId: string): Promise<UserSubscriptionDto | null>;
   updateStatus(id: string, status: string, externalId?: string): Promise<UserSubscriptionDto>;
   findById(id: string): Promise<UserSubscriptionDto | null>;
+  findByExternalId(externalId: string): Promise<UserSubscriptionDto | null>;
+  updatePeriod(id: string, startsAt: Date, endsAt: Date): Promise<UserSubscriptionDto>;
 }

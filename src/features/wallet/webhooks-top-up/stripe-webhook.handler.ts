@@ -1,16 +1,18 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, Logger } from '@nestjs/common';
 import type { IWalletRepository } from './interfaces/wallet.repository.interface';
 import { WALLET_REPOSITORY_TOKEN } from './interfaces/wallet.repository.interface';
 import type { ISignatureValidator } from './interfaces/signature.validator.interface';
 import { STRIPE_VALIDATOR_TOKEN } from './interfaces/signature.validator.interface';
-import type {
+import {
   StripeWebhookPayload,
   WebhookResponse,
+  InvalidSignatureError,
 } from './webhooks-top-up.models';
-import { InvalidSignatureError } from './webhooks-top-up.models';
 
 @Injectable()
 export class StripeWebhookHandler {
+  private readonly logger = new Logger(StripeWebhookHandler.name);
+
   constructor(
     @Inject(WALLET_REPOSITORY_TOKEN)
     private readonly walletRepository: IWalletRepository,
@@ -22,27 +24,35 @@ export class StripeWebhookHandler {
     payload: any,
     signature: string,
   ): Promise<WebhookResponse> {
-    const isValid = this.signatureValidator.validateSignature(
-      payload,
-      signature,
-    );
-
-    if (!isValid) {
-      throw new InvalidSignatureError();
+    // Si la firma es 'VALIDATED_BY_DISPATCHER', saltamos la validación local
+    if (signature !== 'VALIDATED_BY_DISPATCHER') {
+      const isValid = this.signatureValidator.validateSignature(payload, signature);
+      if (!isValid) {
+        throw new InvalidSignatureError();
+      }
     }
 
-    // Si el payload es un Buffer (viniendo de req.rawBody), lo parseamos para procesar
+    // Si el payload es un Buffer (viniendo de req.rawBody), lo parseamos
     const data: StripeWebhookPayload = Buffer.isBuffer(payload) 
       ? JSON.parse(payload.toString('utf-8')) 
       : (typeof payload === 'string' ? JSON.parse(payload) : payload);
 
+    // Lógica de negocio: Recarga de Wallet
     if (
       data.type === 'checkout.session.completed' &&
       data.data.object.status === 'complete'
     ) {
-      const userId = data.data.object.metadata.userId;
-      const amount = parseInt(data.data.object.metadata.coinsAmount, 10);
+      const metadata = data.data.object.metadata || {};
+      const userId = metadata.userId;
+      const amount = parseInt(metadata.coinsAmount, 10);
       const transactionId = data.id;
+
+      if (!userId || isNaN(amount)) {
+        this.logger.warn(`Evento ${data.id} no contiene metadata suficiente para recarga: userId=${userId}, amount=${amount}`);
+        return { success: false, message: 'Metadata insuficiente' };
+      }
+
+      this.logger.log(`Acreditando ${amount} Panter Coins al usuario ${userId} [Evento: ${transactionId}]`);
 
       await this.walletRepository.creditCoinsToUser(
         userId,
@@ -51,6 +61,6 @@ export class StripeWebhookHandler {
       );
     }
 
-    return { success: true, message: 'Stripe Webhook procesado exitosamente' };
+    return { success: true, message: 'Stripe Webhook (Wallet) procesado exitosamente' };
   }
 }

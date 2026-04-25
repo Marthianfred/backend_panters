@@ -16,5 +16,6 @@ import { WebhooksTopUpModule } from './webhooks-top-up/webhooks-top-up.module';
       useClass: PostgresWalletRepository,
     },
   ],
+  exports: [WebhooksTopUpModule], // Exportado para que PaymentsModule acceda a los handlers de Stripe
 })
 export class WalletModule {}

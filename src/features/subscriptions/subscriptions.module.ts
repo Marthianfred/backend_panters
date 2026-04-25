@@ -17,9 +17,7 @@ import { PreRegistrationUseCase } from './pre-registration/application/pre-regis
 import { USER_SUBSCRIPTIONS_REPOSITORY } from './interfaces/user.subscriptions.repository.interface';
 import { PostgresUserSubscriptionsRepository } from './infrastructure/postgres.user-subscriptions.repository';
 
-// Stripe Integration
-import { StripeService } from './infrastructure/stripe.service';
-import { StripeWebhookController } from './webhooks/stripe/infrastructure/stripe-webhook.controller';
+// Webhooks
 import { HandleStripeWebhookUseCase } from './webhooks/stripe/application/handle-stripe-webhook.use-case';
 
 // Checkout Slice
@@ -31,7 +29,11 @@ import { SubscriptionGuard } from './guards/subscription.guard';
 
 @Module({
   imports: [ConfigModule, DatabaseModule, AuthModule],
-  controllers: [PlansController, PreRegistrationController, StripeWebhookController, CheckoutController],
+  controllers: [
+    PlansController, 
+    PreRegistrationController, 
+    CheckoutController
+  ],
   providers: [
     ListPlansHandler,
     CreatePlanHandler,
@@ -39,7 +41,6 @@ import { SubscriptionGuard } from './guards/subscription.guard';
     UpdatePlanHandler,
     DeletePlanHandler,
     PreRegistrationUseCase,
-    StripeService,
     HandleStripeWebhookUseCase,
     CreateCheckoutSessionUseCase,
     SubscriptionGuard,
@@ -52,6 +53,11 @@ import { SubscriptionGuard } from './guards/subscription.guard';
       useClass: PostgresUserSubscriptionsRepository,
     },
   ],
-  exports: [SUBSCRIPTION_PLANS_REPOSITORY, USER_SUBSCRIPTIONS_REPOSITORY],
+  exports: [
+    SUBSCRIPTION_PLANS_REPOSITORY, 
+    USER_SUBSCRIPTIONS_REPOSITORY,
+    HandleStripeWebhookUseCase, // Exportado para ser usado por el dispatcher unificado
+    CreateCheckoutSessionUseCase
+  ],
 })
 export class SubscriptionsModule {}

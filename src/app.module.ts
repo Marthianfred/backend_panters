@@ -15,6 +15,7 @@ import { KinesisDataModule } from '@/core/infrastructure/kinesis-data/kinesis-da
 import { RequestLoggerMiddleware } from '@/core/infrastructure/logger/request-logger.middleware';
 import { CreatorsModule } from '@/features/creators/creators.module';
 import { UsersManagementModule } from '@/features/users/management/users-management.module';
+import { PaymentsModule } from '@/features/payments/payments.module';
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { UsersManagementModule } from '@/features/users/management/users-managem
     LiveChatModule,
     EarningsModule,
     SubscriptionsModule,
+    PaymentsModule, // Agregado para centralizar la infraestructura de pagos
     KinesisDataModule,
     CreatorsModule,
     UsersManagementModule,
