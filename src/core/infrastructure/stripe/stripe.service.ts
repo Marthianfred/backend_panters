@@ -48,7 +48,7 @@ export class StripeService {
   }): Promise<Stripe.Checkout.Session> {
     return this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      mode: 'subscription',
+      mode: 'payment',
       customer: params.customerId,
       customer_email: params.customerId ? undefined : params.customerEmail,
       line_items: [
@@ -65,6 +65,27 @@ export class StripeService {
         ...params.metadata,
       },
     });
+  }
+
+  /**
+   * Busca o crea un cliente en Stripe por su email.
+   */
+  async getOrCreateCustomer(email: string, name?: string): Promise<string> {
+    const customers = await this.stripe.customers.list({
+      email: email,
+      limit: 1,
+    });
+
+    if (customers.data.length > 0) {
+      return customers.data[0].id;
+    }
+
+    const customer = await this.stripe.customers.create({
+      email: email,
+      name: name,
+    });
+
+    return customer.id;
   }
 
   /**
