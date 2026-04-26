@@ -38,7 +38,7 @@ export class HandleUnifiedStripeWebhookUseCase {
       // 3. Enrutar según el tipo de evento
       switch (event.type) {
         case 'checkout.session.completed':
-          await this.handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
+          await this.handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session, eventId);
           break;
         
         case 'invoice.paid':
@@ -62,19 +62,21 @@ export class HandleUnifiedStripeWebhookUseCase {
     }
   }
 
-  private async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session): Promise<void> {
+  private async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, originalEventId: string): Promise<void> {
     const metadata = session.metadata || {};
     const type = metadata.type;
 
-    // En el checkout, usamos metadata para saber si es suscripción o wallet
-    if (type === 'subscription' || metadata.subscriptionId) {
-      this.logger.log('Delegando checkout a la vertical de Suscripciones...');
-      const event: any = { type: 'checkout.session.completed', data: { object: session } };
-      await this.subscriptionWebhookUseCase.execute(event);
-    } 
-    else if (type === 'wallet_top_up' || metadata.coinsAmount) {
+    // 1. Priorizamos Wallet y PTC
+    if (type === 'wallet_top_up' || type === 'ptc_purchase' || metadata.coinsAmount) {
       this.logger.log('Delegando checkout a la vertical de Wallet...');
-      await this.walletWebhookHandler.execute(session, 'VALIDATED_BY_DISPATCHER');
+      const event: any = { id: originalEventId, type: 'checkout.session.completed', data: { object: session } };
+      await this.walletWebhookHandler.execute(event, 'VALIDATED_BY_DISPATCHER');
+    }
+    // 2. Luego Suscripciones
+    else if (type === 'subscription' || metadata.subscriptionId) {
+      this.logger.log('Delegando checkout a la vertical de Suscripciones...');
+      const event: any = { id: originalEventId, type: 'checkout.session.completed', data: { object: session } };
+      await this.subscriptionWebhookUseCase.execute(event);
     }
     else {
       this.logger.warn('Evento checkout.session.completed sin tipo definido en metadata. No se puede enrutar.');

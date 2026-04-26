@@ -41,7 +41,7 @@ export class StripeService {
     customerId?: string;
     customerEmail?: string;
     priceId: string;
-    subscriptionId: string;
+    subscriptionId?: string;
     successUrl: string;
     cancelUrl: string;
     metadata?: Record<string, string>;
@@ -60,8 +60,8 @@ export class StripeService {
       success_url: params.successUrl,
       cancel_url: params.cancelUrl,
       metadata: {
-        subscriptionId: params.subscriptionId,
         type: 'subscription',
+        ...(params.subscriptionId ? { subscriptionId: params.subscriptionId } : {}),
         ...params.metadata,
       },
     });

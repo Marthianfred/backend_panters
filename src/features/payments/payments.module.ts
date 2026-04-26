@@ -6,6 +6,7 @@ import { StripeWebhookController } from './webhooks/infrastructure/stripe-webhoo
 import { HandleUnifiedStripeWebhookUseCase } from './webhooks/application/handle-stripe-webhook.use-case';
 import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
 import { WalletModule } from '../wallet/wallet.module';
+import { PurchasePtcModule } from './purchase-ptc/purchase-ptc.module';
 
 @Global()
 @Module({
@@ -14,6 +15,7 @@ import { WalletModule } from '../wallet/wallet.module';
     // Importamos los módulos que contienen los handlers específicos
     SubscriptionsModule,
     WalletModule,
+    PurchasePtcModule,
   ],
   controllers: [StripeWebhookController],
   providers: [
