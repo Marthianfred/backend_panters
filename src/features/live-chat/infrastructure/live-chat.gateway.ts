@@ -116,5 +116,10 @@ export class LiveChatGateway
       username: giftPayload.username,
     });
   }
+
+  notifyPrivateChatRequest(creatorId: string, data: any) {
+    const room = `live_${creatorId}`;
+    this.server.to(room).emit('privateChatRequest', data);
+  }
 }
 

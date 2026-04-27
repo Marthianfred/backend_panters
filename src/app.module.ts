@@ -17,6 +17,8 @@ import { CreatorsModule } from '@/features/creators/creators.module';
 import { UsersManagementModule } from '@/features/users/management/users-management.module';
 import { PaymentsModule } from '@/features/payments/payments.module';
 
+import { VideoChatModule } from '@/features/video-chat/video-chat.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -42,6 +44,7 @@ import { PaymentsModule } from '@/features/payments/payments.module';
     KinesisDataModule,
     CreatorsModule,
     UsersManagementModule,
+    VideoChatModule,
   ],
 })
 export class AppModule implements NestModule {
