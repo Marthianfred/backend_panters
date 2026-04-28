@@ -29,12 +29,12 @@ export class AuthMiddleware implements NestMiddleware {
         req.user = sessionResponse.user;
         req.session = sessionResponse.session;
       } else {
-        req.user = null;
-        req.session = null;
+        req.user = null as any;
+        req.session = null as any;
       }
     } catch {
-      req.user = null;
-      req.session = null;
+      req.user = null as any;
+      req.session = null as any;
     }
 
     next();
