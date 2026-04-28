@@ -14,7 +14,7 @@ export class AdminCreateUserHandler {
 
   async handle(request: AdminCreateUserRequest): Promise<AdminCreateUserResponse> {
     try {
-      // 1. Crear usuario en Better Auth
+      
       const authResult = (await this.authInstance.api.signUpEmail({
         body: {
           email: request.email,
@@ -31,7 +31,7 @@ export class AdminCreateUserHandler {
 
       const userId = authResult.user.id;
 
-      // 2. Establecer el rol y la bandera de forzar cambio de contraseña
+      
       await this.repository.updateUserRole(userId, request.role);
       await this.repository.setMustChangePassword(userId, true);
 

@@ -22,9 +22,7 @@ export class StripeEventRepository {
     });
   }
 
-  /**
-   * Verifica si un evento ya ha sido procesado o está en proceso.
-   */
+  
   async findById(id: string): Promise<StripeEventRecord | null> {
     const query = `
       SELECT id, type, status, metadata, created_at as "createdAt", updated_at as "updatedAt"
@@ -35,9 +33,7 @@ export class StripeEventRepository {
     return result.rows[0] || null;
   }
 
-  /**
-   * Registra el inicio del procesamiento de un evento.
-   */
+  
   async recordProcessing(id: string, type: string, metadata?: any): Promise<void> {
     const query = `
       INSERT INTO stripe_processed_events (id, type, status, metadata)
@@ -47,9 +43,7 @@ export class StripeEventRepository {
     await this.pool.query(query, [id, type, metadata ? JSON.stringify(metadata) : null]);
   }
 
-  /**
-   * Marca un evento como completado con éxito.
-   */
+  
   async markAsCompleted(id: string): Promise<void> {
     const query = `
       UPDATE stripe_processed_events
@@ -59,9 +53,7 @@ export class StripeEventRepository {
     await this.pool.query(query, [id]);
   }
 
-  /**
-   * Marca un evento como fallido.
-   */
+  
   async markAsFailed(id: string): Promise<void> {
     const query = `
       UPDATE stripe_processed_events

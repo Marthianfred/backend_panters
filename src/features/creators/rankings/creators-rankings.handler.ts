@@ -10,10 +10,7 @@ export class CreatorsRankingsHandler {
     private readonly repository: ICreatorsRankingsRepository,
   ) {}
 
-  /**
-   * Obtiene la lista de creadoras con mayor rating basado en reacciones.
-   * El cálculo es exacto y se basa en la agregación en tiempo real de la tabla post_reactions.
-   */
+  
   async handle(limit: number = 10): Promise<CreatorRankingResponse[]> {
     const rankings = await this.repository.getTopCreators(limit);
 
@@ -23,7 +20,7 @@ export class CreatorsRankingsHandler {
       fullName: ranking.fullName,
       avatarUrl: ranking.avatarUrl || undefined,
       totalReactions: ranking.totalReactions,
-      rating: ranking.totalReactions, // Se define el rating como el score de reacciones sociales
+      rating: ranking.totalReactions, 
     }));
   }
 }

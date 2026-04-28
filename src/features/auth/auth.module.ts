@@ -26,8 +26,8 @@ import { DatabaseModule } from '@/core/database/database.module';
 })
 export class AuthModule implements NestModule {
   public configure(consumer: MiddlewareConsumer): void {
-    // Registramos el middleware para que se ejecute en todas las rutas
-    // Esto permite que todos los endpoints identifiquen al usuario si está logueado
+    
+    
     consumer.apply(AuthMiddleware).forRoutes('*');
   }
 }

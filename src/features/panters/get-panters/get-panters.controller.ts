@@ -1,7 +1,7 @@
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { GetPantersHandler } from './get-panters.handler';
 import { GetPantersResponse } from './get-panters.models';
-// Assuming you have AuthGuard established as described in global rules
+
 import { AuthGuard } from '../../auth/guards/auth.guard';
 
 @Controller('api/v1/panters')

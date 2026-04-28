@@ -21,9 +21,7 @@ export class PtcPackageRepository {
     });
   }
 
-  /**
-   * Obtiene todos los paquetes de PTC activos.
-   */
+  
   async findAllActive(): Promise<PtcPackage[]> {
     const query = `
       SELECT 
@@ -46,9 +44,7 @@ export class PtcPackageRepository {
     }
   }
 
-  /**
-   * Busca un paquete por su stripe_price_id.
-   */
+  
   async findByPriceId(priceId: string): Promise<PtcPackage | null> {
     const query = `
       SELECT 

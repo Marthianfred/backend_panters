@@ -16,7 +16,7 @@ export class AuthService {
   }
 
   public async handleAuthRequest(req: Request, res: Response): Promise<void> {
-    // Cast temporal a unknown para satisfacer la firma de toNodeHandler que requiere un tipo específico de Better Auth
+    
     const handler = toNodeHandler(
       this.authInstance as unknown as Parameters<typeof toNodeHandler>[0],
     );

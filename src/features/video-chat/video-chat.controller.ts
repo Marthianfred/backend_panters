@@ -1,5 +1,5 @@
 import { Controller, Post, Body, Req, Param } from '@nestjs/common';
-import type { RequestPrivateChatHandler } from './request-chat/request-private-chat.handler';
+import { RequestPrivateChatHandler } from './request-chat/request-private-chat.handler';
 import { JoinPrivateChatHandler } from './join-chat/join-private-chat.handler';
 import { RequestPrivateChatDto } from './request-chat/request-private-chat.models';
 

@@ -28,7 +28,7 @@ export class PurchaseContentHandler {
   public async execute(
     request: PurchaseContentRequest,
   ): Promise<PurchaseContentResponse> {
-    // 1. Validar existencia del contenido
+    
     const content = await this.contentRepository.getContentById(
       request.contentId,
     );
@@ -37,7 +37,7 @@ export class PurchaseContentHandler {
       throw new ContentNotFoundError();
     }
 
-    // 2. Ejecutar Transacción P2P Billetera-Creadora (SPLIT 30/70 Interno)
+    
     const txSuccess = await this.p2pTransactionService.executeContentPurchase(
       request.subscriberId,
       content.creatorId,
@@ -49,7 +49,7 @@ export class PurchaseContentHandler {
       throw new InsufficientCoinsError();
     }
 
-    // 3. Generar y entregar URL firmada real
+    
     const extension = content.url ? content.url.substring(content.url.lastIndexOf('.')) : '.mp4';
     const signedDeliveryUrl = await this.storageService.getPresignedDownloadUrl(
       content.creatorId,

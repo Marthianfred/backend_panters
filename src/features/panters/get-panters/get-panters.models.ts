@@ -1,6 +1,6 @@
 import { PanterServiceItem } from './interfaces/panters.repository.interface';
 
-// Using Record<string, never> instead of empty interface for strict typing
+
 export type GetPantersRequest = Record<string, never>;
 
 export interface PanterSummary {

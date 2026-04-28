@@ -34,7 +34,7 @@ export class PostgresTopUpWalletRepository implements IWalletRepository {
     try {
       await client.query('BEGIN');
 
-      // 1. Obtener o crear billetera
+      
       const walletRes = await client.query<WalletRow>(
         'SELECT id, panter_coin_balance FROM antigravity_wallets WHERE user_id = $1 FOR UPDATE',
         [userId],
@@ -61,7 +61,7 @@ export class PostgresTopUpWalletRepository implements IWalletRepository {
         );
       }
 
-      // 2. Registrar transacción de crédito
+      
       await client.query(
         `INSERT INTO wallet_transactions (wallet_id, type, amount, description, reference_id) 
          VALUES ($1, $2, $3, $4, $5)

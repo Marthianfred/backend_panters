@@ -36,8 +36,8 @@ export class KinesisDataPublisherService implements OnModuleInit {
     try {
       await this.client.send(command);
     } catch (error) {
-      // In a real scenario, we could use a custom logger or throw a specific exception
-      // Failures in events should not break the main business logic if not critical
+      
+      
     }
   }
 }

@@ -17,8 +17,8 @@ export class ShareContentController {
     @Param('id') contentId: string,
     @Request() req: AuthenticatedRequest
   ): Promise<ShareInfoResponse> {
-    // Si el usuario no está logueado por Better Auth, req.user será null.
-    // El frontend pasa el token si lo tiene, para verificar si ya es dueño.
+    
+    
     const userId = req.user?.id;
     return await this.handler.execute(contentId, userId);
   }

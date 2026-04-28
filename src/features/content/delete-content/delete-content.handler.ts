@@ -22,7 +22,7 @@ export class DeleteContentHandler {
   public async execute(
     request: DeleteContentRequest,
   ): Promise<DeleteContentResponse> {
-    // 1. Validar existencia
+    
     const content = await this.contentRepository.getContentById(
       request.contentId,
     );
@@ -31,13 +31,13 @@ export class DeleteContentHandler {
       throw new ContentNotFoundError();
     }
 
-    // 2. Validar propiedad (Solo la modelo creadora puede borrarlo)
+    
     if (content.creatorId !== request.creatorId) {
       throw new UnauthorizedDeleteError();
     }
 
-    // 3. Eliminar de Almacenamiento (S3)
-    // Borrar Media Principal
+    
+    
     if (content.url) {
       const extension = content.url.substring(content.url.lastIndexOf('.'));
       await this.storageService.deleteContent(
@@ -48,7 +48,7 @@ export class DeleteContentHandler {
       );
     }
 
-    // Borrar Miniatura si existe
+    
     if (content.thumbnailUrl) {
       const thumbExt = content.thumbnailUrl.substring(content.thumbnailUrl.lastIndexOf('.'));
       await this.storageService.deleteContent(
@@ -59,11 +59,11 @@ export class DeleteContentHandler {
       );
     }
 
-    // 4. Eliminar de BDD
+    
     await this.contentRepository.deleteContent(request.contentId);
 
-    // 5. Emitir evento de dominio (Opcional/Placeholder)
-    // console.log(`Evento: CONTENT_DELETED | ID: ${request.contentId}`);
+    
+    
 
     return new DeleteContentResponse(
       true,

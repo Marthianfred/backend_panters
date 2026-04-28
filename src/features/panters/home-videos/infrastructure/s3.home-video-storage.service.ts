@@ -44,13 +44,13 @@ export class S3HomeVideoStorageService implements IHomeVideoStorageService {
 
     await this.s3Client.send(command);
     
-    // Devolvemos la URL pública si el bucket es público o construimos la URL base
+    
     const endpoint = this.configService.getOrThrow<string>('AWS_ENDPOINT');
-    // Para entornos locales/minio con path style
+    
     if (this.configService.get<string>('AWS_USE_PATH_STYLE_ENDPOINT') === 'true') {
       return `${endpoint}/${this.bucketName}/${key}`;
     }
-    // Para S3 estándar
+    
     return `https://${this.bucketName}.s3.amazonaws.com/${key}`;
   }
 
@@ -67,7 +67,7 @@ export class S3HomeVideoStorageService implements IHomeVideoStorageService {
       Bucket: this.bucketName,
       Key: key,
     });
-    // Expira en 1 hora
+    
     return await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
   }
 }

@@ -17,14 +17,14 @@ export class PreRegistrationUseCase {
   ) {}
 
   async execute(dto: PreRegistrationRequestDto): Promise<PreRegistrationResponseDto> {
-    // 1. Verificar que el plan exista
+    
     const plan = await this.plansRepository.findById(dto.planId);
     if (!plan || !plan.isActive) {
       throw new NotFoundException('El plan de suscripción seleccionado no existe o no está activo.');
     }
 
-    // 2. Registrar al usuario como cliente (subscriber)
-    // El RegisterClientService ya maneja la creación en Better Auth y el envío de correo de verificación
+    
+    
     const registerResult = await this.registerClientService.register({
       email: dto.email,
       password: dto.password,
@@ -41,21 +41,21 @@ export class PreRegistrationUseCase {
     
     const userId = registerResult.user.id;
 
-    // 3. Crear el registro de suscripción en estado 'pending'
-    // Se establece el acceso bloqueado hasta que el pago sea confirmado via Webhook (Stripe/PayPal)
+    
+    
     const subscription = await this.userSubscriptionsRepository.create({
       userId: userId,
       planId: plan.id,
       status: 'pending',
-      paymentGateway: 'stripe', // Por defecto para este flujo inicial
+      paymentGateway: 'stripe', 
     });
 
-    // 4. Generar la sesión de pago automáticamente
+    
     const checkout = await this.createCheckoutSessionUseCase.execute({
       subscriptionId: subscription.id,
     });
 
-    // 5. Retornar los datos para redirigir al pago en el frontend
+    
     return {
       success: true,
       message: 'Usuario registrado con éxito. Redirigiendo a la pasarela de pago...',

@@ -5,16 +5,16 @@ export interface UploadContentRequest {
   priceInPanterCoins: number;
   type?: string;
   mimeType: string;
-  thumbnailMimeType?: string; // Nuevo campo para la miniatura
-  accessType: string; // 'free' | 'payment'
+  thumbnailMimeType?: string; 
+  accessType: string; 
 }
 
 export interface UploadContentResponse {
   contentId: string;
   status: string;
   message: string;
-  presignedUploadUrl: string; // URL para el video/foto principal
-  presignedThumbnailUploadUrl?: string; // Nueva URL para la miniatura
+  presignedUploadUrl: string; 
+  presignedThumbnailUploadUrl?: string; 
 }
 
 export class InvalidPriceError extends Error {

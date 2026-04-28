@@ -56,7 +56,7 @@ describe('HandleStripeWebhookUseCase', () => {
       data: { object: mockSession },
     } as any;
 
-    // No debe lanzar error pero sí registrarlo (el log se puede verificar si fuera necesario)
+    
     await useCase.execute(mockEvent);
 
     expect(userSubscriptionsRepository.updateStatus).not.toHaveBeenCalled();

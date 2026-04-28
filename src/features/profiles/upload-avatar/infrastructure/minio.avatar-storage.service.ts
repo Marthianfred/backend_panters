@@ -34,8 +34,8 @@ export class MinioAvatarStorageService implements IAvatarStorageService {
     mimeType: string,
     fileBuffer: Buffer,
   ): Promise<string> {
-    // Usar siempre el mismo nombre por identificador de usuario 
-    // Esto fuerza a S3/MinIO a sobrescribir la antigua en vez de almacenar miles de copias.
+    
+    
     const key = `${userId}/avatars/profile_picture.webp`;
 
     const command = new PutObjectCommand({
@@ -43,7 +43,7 @@ export class MinioAvatarStorageService implements IAvatarStorageService {
       Key: key,
       Body: fileBuffer,
       ContentType: mimeType,
-      CacheControl: 'max-age=0, no-cache, no-store, must-revalidate', // Evitar que S3 retenga la vieja a nivel proxy
+      CacheControl: 'max-age=0, no-cache, no-store, must-revalidate', 
     });
 
     await this.s3Client.send(command);
@@ -51,7 +51,7 @@ export class MinioAvatarStorageService implements IAvatarStorageService {
     const publicUrlBase = this.configService.get<string>('AWS_URL');
 
     if (publicUrlBase) {
-      // Remove trailing slash if it exists
+      
       const formattedBase = publicUrlBase.endsWith('/')
         ? publicUrlBase.slice(0, -1)
         : publicUrlBase;

@@ -78,7 +78,7 @@ describe('ListContentHandler', () => {
       });
       expect(result.contents).toHaveLength(2);
       expect(result.pagination).toEqual({ page: 1, limit: 10, total: 2, totalPages: 1 });
-      expect(result.creator).toBeUndefined(); // En modo discovery no hay info de cabecera de un único creador
+      expect(result.creator).toBeUndefined(); 
     });
 
     it('debe filtrar por tipo de contenido si se especifica', async () => {

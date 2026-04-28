@@ -17,7 +17,7 @@ export class HandleUnifiedStripeWebhookUseCase {
   async execute(event: Stripe.Event): Promise<void> {
     const eventId = event.id;
     
-    // 1. Verificar idempotencia
+    
     const existingEvent = await this.stripeEventRepository.findById(eventId);
     if (existingEvent && existingEvent.status === 'completed') {
       this.logger.warn(`Evento de Stripe ${eventId} ya fue procesado anteriormente.`);
@@ -29,13 +29,13 @@ export class HandleUnifiedStripeWebhookUseCase {
       return;
     }
 
-    // 2. Registrar inicio de procesamiento
+    
     await this.stripeEventRepository.recordProcessing(eventId, event.type, event.data.object['metadata']);
 
     try {
       this.logger.log(`Iniciando despacho de evento: ${event.type} [${eventId}]`);
 
-      // 3. Enrutar según el tipo de evento
+      
       switch (event.type) {
         case 'checkout.session.completed':
           await this.handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session, eventId);
@@ -44,7 +44,7 @@ export class HandleUnifiedStripeWebhookUseCase {
         case 'invoice.paid':
         case 'customer.subscription.deleted':
         case 'customer.subscription.updated':
-          // Estos eventos son exclusivos de suscripciones
+          
           await this.subscriptionWebhookUseCase.execute(event);
           break;
         
@@ -52,7 +52,7 @@ export class HandleUnifiedStripeWebhookUseCase {
           this.logger.warn(`Evento de Stripe no manejado por el despachador unificado: ${event.type}`);
       }
 
-      // 4. Marcar como completado
+      
       await this.stripeEventRepository.markAsCompleted(eventId);
       this.logger.log(`Evento ${eventId} procesado y marcado como completado.`);
     } catch (error) {
@@ -66,13 +66,13 @@ export class HandleUnifiedStripeWebhookUseCase {
     const metadata = session.metadata || {};
     const type = metadata.type;
 
-    // 1. Priorizamos Wallet y PTC
+    
     if (type === 'wallet_top_up' || type === 'ptc_purchase' || metadata.coinsAmount) {
       this.logger.log('Delegando checkout a la vertical de Wallet...');
       const event: any = { id: originalEventId, type: 'checkout.session.completed', data: { object: session } };
       await this.walletWebhookHandler.execute(event, 'VALIDATED_BY_DISPATCHER');
     }
-    // 2. Luego Suscripciones
+    
     else if (type === 'subscription' || metadata.subscriptionId) {
       this.logger.log('Delegando checkout a la vertical de Suscripciones...');
       const event: any = { id: originalEventId, type: 'checkout.session.completed', data: { object: session } };

@@ -8,19 +8,19 @@ import { STREAM_REPOSITORY } from './get-viewer-access/interfaces/stream.reposit
 import { KINESIS_VIDEO_SERVICE } from './get-viewer-access/interfaces/kinesis.service.interface';
 import { S3_SERVICE } from './get-viewer-access/interfaces/s3.service.interface';
 
-// Feature: Send Gift (VSA)
+
 import { SendGiftController } from './send-gift/send-gift.controller';
 import { SendGiftHandler } from './send-gift/send-gift.handler';
 import { SEND_GIFT_REPOSITORY } from './send-gift/interfaces/send-gift.repository.interface';
 import { PostgresSendGiftRepository } from './send-gift/infrastructure/postgres.send-gift.repository';
 
-// Feature: Refund Gift (VSA)
+
 import { RefundGiftController } from './refund-gift/refund-gift.controller';
 import { RefundGiftHandler } from './refund-gift/refund-gift.handler';
 import { REFUND_GIFT_REPOSITORY } from './refund-gift/interfaces/refund-gift.repository.interface';
 import { PostgresRefundGiftRepository } from './refund-gift/infrastructure/postgres.refund-gift.repository';
 
-// Feature: List Gifts (VSA)
+
 import { ListGiftsController } from './list-gifts/list-gifts.controller';
 import { ListGiftsHandler } from './list-gifts/list-gifts.handler';
 import { LIST_GIFTS_REPOSITORY } from './list-gifts/interfaces/list-gifts.repository.interface';
@@ -28,15 +28,15 @@ import { PostgresListGiftsRepository } from './list-gifts/infrastructure/postgre
 
 import { LiveChatModule } from '../live-chat/live-chat.module';
 
-// Feature: Create Stream (VSA)
+
 import { CreateStreamController } from './create-stream/create-stream.controller';
 import { CreateStreamHandler } from './create-stream/create-stream.handler';
 
-// Feature: Get Active Streams (VSA)
+
 import { GetActiveStreamsController } from './get-active-streams/get-active-streams.controller';
 import { GetActiveStreamsHandler } from './get-active-streams/get-active-streams.handler';
 
-// Feature: Stop Stream (VSA)
+
 import { StopStreamController } from './stop-stream/stop-stream.controller';
 import { StopStreamHandler } from './stop-stream/stop-stream.handler';
 

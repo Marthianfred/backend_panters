@@ -13,14 +13,11 @@ export class PurchasePtcService {
     private readonly ptcPackageRepository: PtcPackageRepository,
   ) {}
 
-  /**
-   * Crea una sesión de Checkout de Stripe para la compra de PTC.
-   * Valida dinámicamente el priceId contra la base de datos.
-   */
+  
   async createSession(userId: string, priceId: string) {
     this.logger.log(`Iniciando creación de sesión de pago para usuario ${userId} con priceId ${priceId}`);
 
-    // Validamos el priceId contra la configuración en la base de datos
+    
     const ptcPackage = await this.ptcPackageRepository.findByPriceId(priceId);
     
     if (!ptcPackage) {
@@ -55,9 +52,7 @@ export class PurchasePtcService {
     }
   }
 
-  /**
-   * Obtiene todos los paquetes de PTC disponibles para que el frontend los muestre.
-   */
+  
   async getAvailablePackages() {
     return await this.ptcPackageRepository.findAllActive();
   }

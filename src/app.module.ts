@@ -27,7 +27,7 @@ import { VideoChatModule } from '@/features/video-chat/video-chat.module';
     }),
     MulterModule.register({
       limits: {
-        fileSize: 10000 * 1024 * 1024, // 10 GB para asegurar cero errores 413 a nivel global
+        fileSize: 10000 * 1024 * 1024, 
       },
     }),
     DatabaseModule,
@@ -40,7 +40,7 @@ import { VideoChatModule } from '@/features/video-chat/video-chat.module';
     LiveChatModule,
     EarningsModule,
     SubscriptionsModule,
-    PaymentsModule, // Agregado para centralizar la infraestructura de pagos
+    PaymentsModule, 
     KinesisDataModule,
     CreatorsModule,
     UsersManagementModule,

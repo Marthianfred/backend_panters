@@ -27,25 +27,25 @@ export class CreateStreamHandler {
     const region = this.configService.get<string>('KN_STREAMS_REGION', 'us-east-2');
     const channelName = `Stream-${request.creatorId}-${Date.now()}`;
 
-    // 0. Limpiar sesiones antiguas de esta modelo para evitar duplicados (zombies)
+    
     await this.streamRepository.deactivateAllStreamsByCreator(request.creatorId);
 
-    // 1. Crear el canal real en Kinesis Video
+    
     const channelArn = await this.kinesisVideoService.createSignalingChannel(channelName);
 
-    // 2. Generar credenciales dinámicas para la productora (Chica)
+    
     const credentials = await this.kinesisVideoService.generateProducerCredentials(
       channelArn,
       request.creatorId,
     );
 
-    // 3. Obtener el endpoint de señalización para que el front se conecte
+    
     const signalingEndpoint = await this.kinesisVideoService.getSignalingEndpoint(
       channelArn,
       'MASTER',
     );
 
-    // 4. Persistir metadatos en BDD
+    
     await this.streamRepository.createStream({
       id: streamId,
       creatorId: request.creatorId,

@@ -32,9 +32,7 @@ export class HandleStripeWebhookUseCase {
     }
   }
 
-  /**
-   * Maneja el éxito inicial del checkout.
-   */
+  
   private async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session): Promise<void> {
     const metadata = session.metadata;
     const subscriptionId = metadata?.subscriptionId;
@@ -61,9 +59,7 @@ export class HandleStripeWebhookUseCase {
     }
   }
 
-  /**
-   * Maneja renovaciones automáticas (cobros recurrentes exitosos).
-   */
+  
   private async handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
     const externalSubscriptionId = (invoice as any).subscription as string;
     
@@ -72,7 +68,7 @@ export class HandleStripeWebhookUseCase {
       return;
     }
 
-    // Buscamos nuestra suscripción local por el ID de Stripe
+    
     const subscription = await this.userSubscriptionsRepository.findByExternalId(externalSubscriptionId);
     
     if (!subscription) {
@@ -80,8 +76,8 @@ export class HandleStripeWebhookUseCase {
       return;
     }
 
-    // Calculamos el nuevo periodo basado en la factura
-    // Stripe usa segundos (Unix timestamp), convertimos a milisegundos para Date
+    
+    
     const periodStart = new Date(invoice.period_start * 1000);
     const periodEnd = new Date(invoice.period_end * 1000);
 
@@ -100,9 +96,7 @@ export class HandleStripeWebhookUseCase {
     }
   }
 
-  /**
-   * Maneja la cancelación o expiración de la suscripción.
-   */
+  
   private async handleSubscriptionDeleted(stripeSubscription: Stripe.Subscription): Promise<void> {
     const externalId = stripeSubscription.id;
     

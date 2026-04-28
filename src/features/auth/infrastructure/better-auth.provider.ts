@@ -23,7 +23,7 @@ export const BetterAuthProvider: Provider = {
       user: {
         additionalFields: {
           roleId: {
-            type: 'string', // Los UUID se manejan como string en Better Auth config pero mapean a UUID en PG
+            type: 'string', 
             required: false,
             defaultValue: 'd80b1a31-4521-4ec0-9329-30d4d1adc025',
           },
@@ -62,7 +62,7 @@ export const BetterAuthProvider: Provider = {
       ],
       emailVerification: {
         async sendVerificationEmail({ user, url }) {
-          // TODO: Integrar con servicio de correo real (Resend/SendGrid)
+          
           console.log(`[EMAIL VERIFICATION] Para: ${user.email}`);
           console.log(`[EMAIL VERIFICATION] URL: ${url}`);
         },
@@ -72,7 +72,7 @@ export const BetterAuthProvider: Provider = {
         user: {
           create: {
             after: async (user) => {
-              // Inicializar perfil y wallet mediante SQL directo para asegurar atomicidad o consistencia inicial
+              
               try {
                 const userData = user as any;
                 await pool.query(

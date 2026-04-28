@@ -22,7 +22,7 @@ export class ListContentHandler {
     request: ListContentRequest,
   ): Promise<ListContentResponse> {
     const page = request.page || 1;
-    const limit = Math.min(request.limit || 20, 20); // Máximo 20 por página
+    const limit = Math.min(request.limit || 20, 20); 
 
     const rawContents = await this.contentRepository.listContents({
       creatorId: request.creatorId,
@@ -52,8 +52,8 @@ export class ListContentHandler {
 
         let thumbnailUrl: string = '';
 
-        // 1. Generar URL de miniatura (siempre visible para el muro)
-        // Si hay miniatura guardada, la cargamos desde la carpeta 'thumbnails'
+        
+        
         if (content.thumbnailUrl) {
           const thumbExt = content.thumbnailUrl.substring(content.thumbnailUrl.lastIndexOf('.'));
           thumbnailUrl = await this.storageService.getPresignedDownloadUrl(
@@ -63,7 +63,7 @@ export class ListContentHandler {
             'thumbnails',
           );
         } else if (content.type === 'photo' && content.url) {
-          // Fallback solo para fotos: usar la imagen original como thumb
+          
           const imgExt = content.url.substring(content.url.lastIndexOf('.'));
           thumbnailUrl = await this.storageService.getPresignedDownloadUrl(
             content.creatorId,
@@ -90,7 +90,7 @@ export class ListContentHandler {
       }),
     );
 
-    // Extraemos la info del creador SOLO si se filtró por uno para la cabecera del muro
+    
     let creatorInfo: { fullName: string; avatarUrl: string; isOnline: boolean } | undefined = undefined;
     if (request.creatorId && rawContents.length > 0 && rawContents[0].creatorDetails) {
       const details = rawContents[0].creatorDetails;
@@ -114,7 +114,7 @@ export class ListContentHandler {
   }
 }
 
-// Función auxiliar para manejar el tipo booleano de hasReacted
+
 function rowHasReacted(content: any): boolean {
     return content.hasReacted === true;
 }

@@ -18,7 +18,7 @@ export class UploadHomeVideoController {
   @UseInterceptors(
     FileInterceptor('video', {
       limits: {
-        fileSize: 100 * 1024 * 1024, // 100 MB
+        fileSize: 100 * 1024 * 1024, 
       },
     }),
   )

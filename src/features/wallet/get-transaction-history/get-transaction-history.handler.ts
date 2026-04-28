@@ -16,7 +16,7 @@ export class GetTransactionHistoryHandler {
   public async execute(
     request: GetTransactionHistoryRequest,
   ): Promise<GetTransactionHistoryResponse> {
-    const limit = 10; // Límite fijo según requerimiento
+    const limit = 10; 
     const { transactions, total } = await this.transactionRepository.getTransactionsByUserId(
       request.userId,
       request.page,

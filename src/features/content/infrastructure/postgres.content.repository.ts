@@ -93,7 +93,7 @@ export class PostgresContentRepository implements IContentRepository {
 
     if (params?.creatorId) {
       values.push(params.creatorId);
-      // El cliente envía el ID del usuario como creador para el filtro del muro.
+      
       query += ` AND c.creator_id = $${values.length}`;
     }
 
@@ -106,10 +106,10 @@ export class PostgresContentRepository implements IContentRepository {
       query += ` AND c.status = 'published'`;
     }
 
-    // Ordenación por defecto
+    
     query += ` ORDER BY c.created_at DESC`;
 
-    // Paginación
+    
     const limit = params?.limit || 20;
     const page = params?.page || 1;
     const offset = (page - 1) * limit;

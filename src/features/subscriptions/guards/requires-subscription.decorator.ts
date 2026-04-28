@@ -3,10 +3,7 @@ import { AuthGuard } from '@/features/auth/guards/auth.guard';
 import { SubscriptionGuard } from './subscription.guard';
 import { ApiForbiddenResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
-/**
- * Decorador compuesto que asegura que el usuario esté autenticado
- * y tenga una suscripción activa.
- */
+
 export function RequiresSubscription() {
   return applyDecorators(
     UseGuards(AuthGuard, SubscriptionGuard),

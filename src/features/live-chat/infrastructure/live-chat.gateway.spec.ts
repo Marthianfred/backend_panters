@@ -4,7 +4,7 @@ import { LiveChatService } from '../application/live-chat.service';
 import { AuthService } from '../../auth/application/auth.service';
 import { Server, Socket } from 'socket.io';
 
-// Mock de better-auth/node para evitar errores de ESM en Jest
+
 jest.mock('better-auth/node', () => ({
   fromNodeHeaders: jest.fn(),
   toNodeHandler: jest.fn(),

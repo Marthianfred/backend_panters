@@ -20,28 +20,28 @@ export class AuthMiddleware implements NestMiddleware {
     next: NextFunction,
   ): Promise<void> {
     try {
-      // Forzamos el tipado para evitar errores de linter con tipos complejos de Better Auth
+      
       const instance = this.authInstance;
       const sessionResponse = await instance.api.getSession({
         headers: fromNodeHeaders(req.headers),
       });
 
       if (sessionResponse && sessionResponse.user) {
-        // Autenticación exitosa: inyectamos el usuario y la sesión globalmente
+        
         req.user = sessionResponse.user;
         req.session = sessionResponse.session;
       } else {
-        // Autenticación opcional / No logueado
-        // @ts-expect-error - Explicitly setting to null for optional auth
+        
+        
         req.user = null;
-        // @ts-expect-error - Explicitly setting to null for optional auth
+        
         req.session = null;
       }
     } catch {
-      // Falla silenciosa para permitir endpoints públicos con tokens inválidos
-      // @ts-expect-error - Fallback to null on error
+      
+      
       req.user = null;
-      // @ts-expect-error - Fallback to null on error
+      
       req.session = null;
     }
 

@@ -50,7 +50,7 @@ describe('CreatorsRankingsHandler', () => {
     expect(result).toHaveLength(2);
     expect(result[0].userId).toBe('girl-1');
     expect(result[0].totalReactions).toBe(500);
-    expect(result[0].rating).toBe(500); // El rating es proporcional al total de reacciones en este MVP
+    expect(result[0].rating).toBe(500); 
     expect(repository.getTopCreators).toHaveBeenCalledWith(2);
   });
 

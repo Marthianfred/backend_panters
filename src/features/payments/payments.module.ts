@@ -12,7 +12,7 @@ import { PurchasePtcModule } from './purchase-ptc/purchase-ptc.module';
 @Module({
   imports: [
     ConfigModule,
-    // Importamos los módulos que contienen los handlers específicos
+    
     SubscriptionsModule,
     WalletModule,
     PurchasePtcModule,

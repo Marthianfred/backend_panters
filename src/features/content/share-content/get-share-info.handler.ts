@@ -14,24 +14,24 @@ export class GetShareInfoHandler {
     const post = await this.contentRepository.getContentById(contentId);
     if (!post) throw new NotFoundException('Publicación no encontrada.');
 
-    // Buscamos si el usuario ya compró el contenido (si está logueado)
+    
     let isPurchased = false;
     if (loggedUserId) {
         const boughtIds = await this.contentRepository.getPurchasedContentIds(loggedUserId);
         isPurchased = boughtIds.includes(contentId);
     }
 
-    // Aquí asumimos que el usuario es "Subscriber" si su suscripción no es nula.
-    // Como Tech Lead, simplifico la lógica para este prototipo de enlace:
-    // Si la publicación es GRATUITA o YA COMPRADA, canView = true.
+    
+    
+    
     const isFree = post.accessType === 'free' || post.price === 0;
     const canView = isFree || isPurchased;
 
-    // Determinar la acción requerida para el usuario invitado
+    
     let action: 'NONE' | 'LOGIN' | 'SUBSCRIBE' | 'BUY_COINS' | 'BUY_CONTENT' = 'NONE';
     if (!loggedUserId) action = 'LOGIN';
     else if (!isPurchased && !isFree) {
-        // Si no lo compró, invitamos a comprar contenido o monedas según corresponda en el front
+        
         action = post.price > 0 ? 'BUY_CONTENT' : 'SUBSCRIBE';
     }
 
@@ -40,7 +40,7 @@ export class GetShareInfoHandler {
         id: post.id,
         title: post.title,
         description: post.description,
-        thumbnailUrl: post.thumbnailUrl || '', // Para Social Cards
+        thumbnailUrl: post.thumbnailUrl || '', 
         type: post.type,
         price: post.price,
         accessType: post.accessType,
@@ -53,7 +53,7 @@ export class GetShareInfoHandler {
       },
       accessStatus: {
         isLoggedIn: !!loggedUserId,
-        isSubscribed: !!loggedUserId, // Refinar con lógica de suscripción real si existe
+        isSubscribed: !!loggedUserId, 
         isPurchased,
         canView,
         requiredAction: action,

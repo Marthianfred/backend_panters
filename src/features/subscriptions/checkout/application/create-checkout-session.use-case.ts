@@ -27,7 +27,7 @@ export class CreateCheckoutSessionUseCase {
   ) {}
 
   async execute(dto: CreateCheckoutSessionDto): Promise<CheckoutSessionResponse> {
-    // 1. Buscar la suscripción
+    
     const subscription = await this.userSubscriptionsRepository.findById(dto.subscriptionId);
     if (!subscription) {
       throw new NotFoundException('Suscripción no encontrada.');
@@ -37,26 +37,26 @@ export class CreateCheckoutSessionUseCase {
       throw new BadRequestException('Esta suscripción ya está activa.');
     }
 
-    // 2. Buscar el plan asociado para obtener el Stripe Price ID
+    
     const plan = await this.plansRepository.findById(subscription.planId);
     if (!plan || !plan.stripePriceId) {
       throw new BadRequestException('El plan seleccionado no tiene configurada una pasarela de pago válida.');
     }
 
-    // 3. Obtener URLs de retorno desde la configuración
+    
     const successUrl = this.configService.getOrThrow<string>('STRIPE_SUCCESS_URL');
     const cancelUrl = this.configService.getOrThrow<string>('STRIPE_CANCEL_URL');
 
-    // 4. Obtener datos del usuario para Stripe (Requerido para Accounts V2 en TestMode)
+    
     const user = await this.usersRepository.getUserDetails(subscription.userId);
     if (!user) {
       throw new NotFoundException('Usuario no encontrado para la suscripción.');
     }
 
-    // 5. Asegurar cliente en Stripe
+    
     const stripeCustomerId = await this.stripeService.getOrCreateCustomer(user.email, user.name);
 
-    // 6. Crear la sesión en Stripe
+    
     try {
       const session = await this.stripeService.createCheckoutSession({
         priceId: plan.stripePriceId,

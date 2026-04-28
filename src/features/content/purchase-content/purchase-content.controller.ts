@@ -20,7 +20,7 @@ import {
 } from './purchase-content.models';
 
 @Controller('api/v1/content')
-@UseGuards(AuthGuard, RolesGuard) // El orden importa, AuthGuard carga el usuario
+@UseGuards(AuthGuard, RolesGuard) 
 export class PurchaseContentController {
   constructor(private readonly handler: PurchaseContentHandler) {}
 
@@ -32,7 +32,7 @@ export class PurchaseContentController {
     @Res() res: Response,
   ): Promise<void> {
     try {
-      // Tomamos el usuario real inyectado por el guard
+      
       const subscriberId = req.user.id;
 
       if (!subscriberId) {

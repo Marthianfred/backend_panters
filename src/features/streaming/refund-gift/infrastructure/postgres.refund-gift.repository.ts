@@ -23,7 +23,7 @@ export class PostgresRefundGiftRepository implements IRefundGiftRepository {
     try {
       await client.query('BEGIN');
 
-      // 1. Buscar la transacción original en gift_transactions para obtener detalles
+      
       const checkQuery = `
         SELECT gt.user_id, gt.creator_id, gt.gift_id, gt.coins_spent, wt.id as original_wallet_id, wt.wallet_id
         FROM gift_transactions gt
@@ -41,7 +41,7 @@ export class PostgresRefundGiftRepository implements IRefundGiftRepository {
 
       const original = originalRes.rows[0];
 
-      // 2. Verificar si ya existe un reembolso para esta transacción
+      
       const refundCheckQuery = `
         SELECT id FROM wallet_transactions 
         WHERE type = 'credit' AND description LIKE $1;
@@ -57,7 +57,7 @@ export class PostgresRefundGiftRepository implements IRefundGiftRepository {
       const netToCreator = amountToRefund * 0.70;
       const platformCommission = amountToRefund * 0.30;
 
-      // 3. Devolver saldo al usuario
+      
       const updateUserWallet = `
         UPDATE antigravity_wallets
         SET panter_coin_balance = panter_coin_balance + $1,
@@ -69,7 +69,7 @@ export class PostgresRefundGiftRepository implements IRefundGiftRepository {
       const newBalance = parseFloat(walletRes.rows[0].panter_coin_balance);
       const walletId = walletRes.rows[0].wallet_id;
 
-      // 4. Descontar de la wallet de la creadora (Revertir Split 70/30)
+      
       const updateCreatorWallet = `
         UPDATE creator_wallets
         SET total_earned = total_earned - $1,
@@ -80,7 +80,7 @@ export class PostgresRefundGiftRepository implements IRefundGiftRepository {
       `;
       await client.query(updateCreatorWallet, [netToCreator, platformCommission, original.creator_id]);
 
-      // 5. Registrar la transacción de crédito (Reembolso)
+      
       const logRefundQuery = `
         INSERT INTO wallet_transactions (wallet_id, type, amount, description, reference_id, created_at)
         VALUES ($1, 'credit', $2, $3, $4, CURRENT_TIMESTAMP)

@@ -22,15 +22,15 @@ export class GetMediaUrlHandler {
   public async execute(
     request: GetMediaUrlRequest,
   ): Promise<GetMediaUrlResponse> {
-    // 1. Obtener el contenido de la base de datos
+    
     const content = await this.contentRepository.getContentById(request.contentId);
 
     if (!content) {
       throw new ContentNotFoundError();
     }
 
-    // 2. Validar acceso (Lógica de "Middleware" de negocio)
-    // El acceso se permite si: es free, el usuario lo compró, o el usuario es el creador
+    
+    
     const isOwner = content.creatorId === request.subscriberId;
     
     let hasPurchased = false;
@@ -45,7 +45,7 @@ export class GetMediaUrlHandler {
       throw new ContentAccessDeniedError();
     }
 
-    // 3. Generar la URL firmada de S3 para el medio completo
+    
     const extension = content.url.substring(content.url.lastIndexOf('.'));
     const mediaUrl = await this.storageService.getPresignedDownloadUrl(
       content.creatorId,

@@ -31,7 +31,7 @@ export class StripeSignatureValidator implements ISignatureValidator {
         return false;
       }
       
-      // payload must be the raw body (Buffer)
+      
       this.stripe.webhooks.constructEvent(payload, signature, endpointSecret);
       return true;
     } catch (err) {
@@ -55,7 +55,7 @@ export class BinanceSignatureValidator implements ISignatureValidator {
     }
 
     try {
-      // payload must be the raw body (string) for binance verification
+      
       const bodyString = Buffer.isBuffer(payload) ? payload.toString('utf-8') : payload;
       
       const verifier = crypto.createVerify('SHA256');

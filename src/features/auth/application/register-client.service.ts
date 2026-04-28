@@ -7,12 +7,10 @@ import { RegisterClientRequest, RegisterClientResponse, VerifyEmailRequest } fro
 export class RegisterClientService {
   constructor(
     @Inject(BETTER_AUTH_TOKEN)
-    private readonly authInstance: any, // Usamos any temporalmente para acceder a plugins
+    private readonly authInstance: any, 
   ) {}
 
-  /**
-   * Registra un nuevo cliente y dispara el correo de verificación.
-   */
+  
   async register(data: RegisterClientRequest): Promise<RegisterClientResponse> {
     try {
       const result = await this.authInstance.api.signUpEmail({
@@ -61,15 +59,13 @@ export class RegisterClientService {
     }
   }
 
-  /**
-   * Verifica el token de correo electrónico.
-   */
+  
   async verify(data: VerifyEmailRequest): Promise<{ success: boolean; message: string }> {
     try {
-      // Better Auth maneja la verificación mediante el plugin emailVerification
-      // El endpoint estándar es /api/auth/verify-email?token=...
-      // Aquí lo llamamos programáticamente si es necesario, o dejamos que el controlador redirija.
-      // Para este slice, usaremos la API interna de Better Auth para validar.
+      
+      
+      
+      
       
       const result = await this.authInstance.api.verifyEmail({
         query: {

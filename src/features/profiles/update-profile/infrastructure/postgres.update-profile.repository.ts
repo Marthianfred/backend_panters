@@ -38,7 +38,7 @@ export class PostgresUpdateProfileRepository implements IUpdateProfileRepository
     }
 
     if (fields.length === 0) {
-      // Nothing to update, return the current profile
+      
       const result = await this.pool.query(
         `SELECT id, user_id AS "userId", full_name AS "fullName", avatar_url AS "avatarUrl", bio 
          FROM antigravity_profiles WHERE user_id = $1 AND is_active = true`,
@@ -47,7 +47,7 @@ export class PostgresUpdateProfileRepository implements IUpdateProfileRepository
       return (result.rows[0] as UpdatedProfileData) || null;
     }
 
-    // Always update the updated_at timestamp
+    
     fields.push(`updated_at = CURRENT_TIMESTAMP`);
 
     values.push(userId);

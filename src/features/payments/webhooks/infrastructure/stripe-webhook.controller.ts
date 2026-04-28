@@ -26,19 +26,19 @@ export class StripeWebhookController {
     }
 
     try {
-      // 1. Validar la firma y construir el evento
-      // El rawBody debe estar habilitado en el main.ts o mediante middleware
+      
+      
       const event = this.stripeService.constructEvent(request.rawBody, signature);
       
       this.logger.log(`Webhook validado correctamente: ${event.type} [${event.id}]`);
 
-      // 2. Ejecutar el caso de uso unificado (Idempotencia + Despacho)
+      
       await this.handleWebhookUseCase.execute(event);
       
       return { received: true, eventId: event.id };
     } catch (err) {
       this.logger.error(`Fallo crítico en el procesamiento del webhook: ${err.message}`);
-      // Respondemos con 400 para que Stripe reintente si es un error de firma o validación
+      
       throw new BadRequestException(`Webhook Error: ${err.message}`);
     }
   }

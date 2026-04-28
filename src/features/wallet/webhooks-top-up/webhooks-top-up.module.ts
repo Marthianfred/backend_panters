@@ -31,6 +31,6 @@ import {
       useClass: BinanceSignatureValidator,
     },
   ],
-  exports: [StripeWebhookHandler], // Exportado para el dispatcher unificado
+  exports: [StripeWebhookHandler], 
 })
 export class WebhooksTopUpModule {}

@@ -24,7 +24,7 @@ export class StripeWebhookHandler {
     payload: any,
     signature: string,
   ): Promise<WebhookResponse> {
-    // Si la firma es 'VALIDATED_BY_DISPATCHER', saltamos la validación local
+    
     if (signature !== 'VALIDATED_BY_DISPATCHER') {
       const isValid = this.signatureValidator.validateSignature(payload, signature);
       if (!isValid) {
@@ -32,12 +32,12 @@ export class StripeWebhookHandler {
       }
     }
 
-    // Si el payload es un Buffer (viniendo de req.rawBody), lo parseamos
+    
     const data: StripeWebhookPayload = Buffer.isBuffer(payload) 
       ? JSON.parse(payload.toString('utf-8')) 
       : (typeof payload === 'string' ? JSON.parse(payload) : payload);
 
-    // Lógica de negocio: Recarga de Wallet
+    
     if (
       data.type === 'checkout.session.completed' &&
       data.data.object.status === 'complete'

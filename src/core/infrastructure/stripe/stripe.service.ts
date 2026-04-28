@@ -14,9 +14,7 @@ export class StripeService {
     });
   }
 
-  /**
-   * Construye un evento de Stripe validando la firma del webhook.
-   */
+  
   constructEvent(payload: Buffer, signature: string): Stripe.Event {
     const webhookSecret = this.configService.getOrThrow<string>('STRIPE_WEBHOOK_SECRET');
     try {
@@ -27,16 +25,12 @@ export class StripeService {
     }
   }
 
-  /**
-   * Obtiene una sesión de checkout por su ID.
-   */
+  
   async getCheckoutSession(sessionId: string): Promise<Stripe.Checkout.Session> {
     return this.stripe.checkout.sessions.retrieve(sessionId);
   }
 
-  /**
-   * Crea una sesión de Checkout para una suscripción.
-   */
+  
   async createCheckoutSession(params: {
     customerId?: string;
     customerEmail?: string;
@@ -67,9 +61,7 @@ export class StripeService {
     });
   }
 
-  /**
-   * Busca o crea un cliente en Stripe por su email.
-   */
+  
   async getOrCreateCustomer(email: string, name?: string): Promise<string> {
     const customers = await this.stripe.customers.list({
       email: email,
@@ -88,9 +80,7 @@ export class StripeService {
     return customer.id;
   }
 
-  /**
-   * Crea una sesión de Checkout para recarga de Wallet (Panter Coins).
-   */
+  
   async createWalletTopUpSession(params: {
     userId: string;
     coinsAmount: number;

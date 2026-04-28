@@ -25,26 +25,26 @@ export class SendGiftHandler {
   ) {}
 
   public async execute(request: SendGiftRequest): Promise<SendGiftResponse> {
-    // 1. Obtener definición del regalo
+    
     const gift = await this.repository.getGiftById(request.giftId);
     if (!gift) {
       throw new GiftNotFoundError(request.giftId);
     }
 
-    // 2. Validar que el usuario remitente existe
+    
     const userExists = await this.repository.userExists(request.userId);
     if (!userExists) {
       throw new UserNotFoundError(request.userId);
     }
 
-    // 3. Validar que el creador destinatario existe
+    
     const creatorExists = await this.repository.userExists(request.creatorId);
     if (!creatorExists) {
       throw new CreatorNotFoundError(request.creatorId);
     }
 
-    // 4. Procesar transacción atómica en DB (PostgreSQL)
-    // Este método maneja el split 70/30 y la deducción de saldo
+    
+    
     const result = await this.repository.processGiftTransaction(
       request.userId,
       request.creatorId,
@@ -52,23 +52,23 @@ export class SendGiftHandler {
     );
 
     if (!result) {
-      // Si falla sin error lanzado, asumimos saldo insuficiente o error de concurrencia
+      
       throw new InsufficientBalanceError(request.userId);
     }
 
     try {
-      // 3. Notificar en tiempo real vía WebSockets (LiveChatGateway)
-      // Obtenemos el nombre del usuario (en una implementación real vendría del Auth o Request)
-      // Simulamos 'Usuario' por ahora para la demo
+      
+      
+      
       this.liveChatGateway.broadcastGift(
         request.creatorId,
-        'Usuario', // Esto se podría expandir obteniendo el perfil del usuario
+        'Usuario', 
         gift.name,
         gift.iconUrl,
         gift.id
       );
       
-      // 4. Emitir evento a Kinesis Data Streams
+      
       await this.kinesisService.publish(
         'GIFT_SENT',
         {
@@ -79,7 +79,7 @@ export class SendGiftHandler {
           giftName: gift.name,
           amount: gift.priceCoins,
         },
-        request.creatorId, // PartitionKey: Agrupamos por creador para procesamiento ordenado
+        request.creatorId, 
       );
 
       return {
@@ -87,8 +87,8 @@ export class SendGiftHandler {
         remainingBalance: result.remainingBalance,
       };
     } catch (error) {
-       // La transacción ya ocurrió en DB, el fallo del socket no debe revertirla, 
-       // pero la reportamos.
+       
+       
        console.error('Error al emitir evento de regalo vía Socket:', error);
        return {
          transactionId: result.transactionId,

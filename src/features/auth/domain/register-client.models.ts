@@ -1,8 +1,6 @@
 import { IsEmail, IsInt, IsNotEmpty, IsString, Min, MinLength } from 'class-validator';
 
-/**
- * DTO para la solicitud de registro del cliente.
- */
+
 export class RegisterClientRequest {
   @IsEmail()
   @IsNotEmpty()
@@ -35,9 +33,7 @@ export class RegisterClientRequest {
   age!: number;
 }
 
-/**
- * DTO para la respuesta del registro.
- */
+
 export class RegisterClientResponse {
   success!: boolean;
   message!: string;
@@ -48,9 +44,7 @@ export class RegisterClientResponse {
   };
 }
 
-/**
- * DTO para la verificación del correo electrónico.
- */
+
 export class VerifyEmailRequest {
   @IsString()
   @IsNotEmpty()

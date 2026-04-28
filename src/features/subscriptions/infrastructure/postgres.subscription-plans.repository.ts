@@ -78,8 +78,8 @@ export class PostgresSubscriptionPlansRepository implements ISubscriptionPlansRe
   }
 
   async delete(id: string): Promise<void> {
-    // Como Tech Lead, prefiero desactivar el plan en lugar de borrarlo físicamente
-    // para mantener integridad referencial histórica en las suscripciones anteriores.
+    
+    
     const query = 'UPDATE public.subscription_plans SET is_active = false, updated_at = NOW() WHERE id = $1;';
     await this.pool.query(query, [id]);
   }

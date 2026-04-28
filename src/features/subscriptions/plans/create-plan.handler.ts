@@ -11,7 +11,7 @@ export class CreatePlanHandler {
   ) {}
 
   async execute(dto: CreatePlanDto): Promise<SubscriptionPlanDto> {
-    // Aquí se podrían agregar validaciones de negocio adicionales si es necesario
+    
     return await this.repository.create(dto);
   }
 }

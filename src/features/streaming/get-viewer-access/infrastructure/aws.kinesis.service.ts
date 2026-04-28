@@ -142,7 +142,7 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
       'us-east-2',
     );
 
-    // 1. Obtener el endpoint HTTPS para Signaling
+    
     const getEndpointCommand = new GetSignalingChannelEndpointCommand({
       ChannelARN: channelArn,
       SingleMasterChannelEndpointConfiguration: {
@@ -160,7 +160,7 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
       throw new Error('No se pudo obtener el endpoint HTTPS para ICE Servers.');
     }
 
-    // 2. Usar las credenciales maestras del servicio para pedir los ICE Servers
+    
     const signalingClient = new KinesisVideoSignalingClient({
       region,
       endpoint: httpsEndpoint,

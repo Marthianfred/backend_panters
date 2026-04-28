@@ -54,7 +54,7 @@ export class MinioContentStorageService implements IContentStorageService {
 
     const command = new PutObjectCommand(params);
 
-    // Expira en 1 hora (3600 segundos)
+    
     return await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
   }
 
@@ -88,7 +88,7 @@ export class MinioContentStorageService implements IContentStorageService {
     try {
       await this.s3Client.send(command);
     } catch (error) {
-      // Si el archivo no existe en S3, ignoramos el error para permitir que el borrado en BDD continúe
+      
       console.warn(`[StorageService] No se pudo borrar el archivo en S3 (quizás no existe): ${key}`, error.message);
     }
   }
@@ -103,6 +103,6 @@ export class MinioContentStorageService implements IContentStorageService {
     if (mime.includes('video/mp4')) return '.mp4';
     if (mime.includes('video/quicktime')) return '.mov';
     if (mime.includes('video/webm')) return '.webm';
-    return '.mp4'; // Default
+    return '.mp4'; 
   }
 }

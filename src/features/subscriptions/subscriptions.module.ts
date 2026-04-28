@@ -12,24 +12,24 @@ import { DeletePlanHandler } from './plans/delete-plan.handler';
 import { SUBSCRIPTION_PLANS_REPOSITORY } from './interfaces/subscription.plans.repository.interface';
 import { PostgresSubscriptionPlansRepository } from './infrastructure/postgres.subscription-plans.repository';
 
-// Pre-registration Slice
+
 import { PreRegistrationController } from './pre-registration/infrastructure/pre-registration.controller';
 import { PreRegistrationUseCase } from './pre-registration/application/pre-registration.use-case';
 import { USER_SUBSCRIPTIONS_REPOSITORY } from './interfaces/user.subscriptions.repository.interface';
 import { PostgresUserSubscriptionsRepository } from './infrastructure/postgres.user-subscriptions.repository';
 
-// Webhooks
+
 import { HandleStripeWebhookUseCase } from './webhooks/stripe/application/handle-stripe-webhook.use-case';
 
-// Checkout Slice
+
 import { CheckoutController } from './checkout/infrastructure/checkout.controller';
 import { CreateCheckoutSessionUseCase } from './checkout/application/create-checkout-session.use-case';
 
-// Get Status Slice
+
 import { GetSubscriptionStatusController } from './get-status/infrastructure/get-subscription-status.controller';
 import { GetSubscriptionStatusUseCase } from './get-status/application/get-subscription-status.use-case';
 
-// Guards
+
 import { SubscriptionGuard } from './guards/subscription.guard';
 
 @Module({
@@ -63,7 +63,7 @@ import { SubscriptionGuard } from './guards/subscription.guard';
   exports: [
     SUBSCRIPTION_PLANS_REPOSITORY, 
     USER_SUBSCRIPTIONS_REPOSITORY,
-    HandleStripeWebhookUseCase, // Exportado para ser usado por el dispatcher unificado
+    HandleStripeWebhookUseCase, 
     CreateCheckoutSessionUseCase
   ],
 })

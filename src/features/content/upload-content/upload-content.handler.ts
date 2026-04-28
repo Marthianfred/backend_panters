@@ -30,7 +30,7 @@ export class UploadContentHandler {
       throw new InvalidPriceError();
     }
 
-    // Resolvemos el UUID del perfil a partir del ID de Better Auth
+    
     const profile = await this.profileRepository.getProfileByUserId(request.creatorId);
     if (!profile) {
       throw new Error('No se encontró un perfil asociado para esta creadora (Panter).');
@@ -55,12 +55,12 @@ export class UploadContentHandler {
         'thumbnails'
       );
       
-      // Ajuste para el storage service: si el storage service usa el contentId directo en la ruta:
-      // Debemos asegurarnos que getPresignedUploadUrl sepa construir la ruta correcta.
-      // Por ahora, asumiremos que el storage service construye la ruta básica.
+      
+      
+      
     }
 
-    // Guardamos metadata en BDD usando el ID de Better Auth (requerido por FK en tabla user)
+    
     await this.contentRepository.saveContent({
       id: contentId,
       creatorId: request.creatorId,
@@ -74,7 +74,7 @@ export class UploadContentHandler {
       createdAt: new Date(),
     });
 
-    // Subcarpetas por usuario usando el ID de Better Auth
+    
     const presignedUploadUrl = await this.storageService.getPresignedUploadUrl(
       request.creatorId,
       contentId,

@@ -25,10 +25,10 @@ export class GetBalanceHandler {
       throw new WalletNotFoundError(request.userId);
     }
 
-    // Adaptación DTO
+    
     return {
       balance: walletData.panterCoinBalance,
-      currency: 'PTC', // Panter Coin Iso Code
+      currency: 'PTC', 
       lastUpdated: walletData.lastUpdated,
     };
   }

@@ -7,12 +7,12 @@ export class SendGiftController {
   constructor(private readonly handler: SendGiftHandler) {}
 
   @Post('send')
-  // En una implementación real usaríamos un guardia de Auth para obtener el userId
+  
   public async sendGift(
     @Body() body: { creatorId: string; giftId: string; userId: string },
   ): Promise<SendGiftResponse> {
     const request: SendGiftRequest = {
-      userId: body.userId, // El userId vendría del token en producción
+      userId: body.userId, 
       creatorId: body.creatorId,
       giftId: body.giftId,
     };

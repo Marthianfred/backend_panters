@@ -25,7 +25,7 @@ export class StripeWebhookController {
     }
 
     try {
-      // Usamos el rawBody que ya viene configurado en main.ts
+      
       const event = this.stripeService.constructEvent(request.rawBody, signature);
 
       

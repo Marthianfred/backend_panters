@@ -34,7 +34,7 @@ export class PostgresP2PTransactionService implements IP2PTransactionService {
     try {
       await client.query('BEGIN');
 
-      // 0. Verificar si ya fue comprado
+      
       const existingPurchase = await client.query<IdRow>(
         'SELECT id FROM content_purchases WHERE user_id = $1 AND content_item_id = $2',
         [subscriberId, contentId],
@@ -44,7 +44,7 @@ export class PostgresP2PTransactionService implements IP2PTransactionService {
         throw new Error('El contenido ya fue adquirido previamente.');
       }
 
-      // 1. Obtener billetera del suscriptor
+      
       const subscriberWalletRes = await client.query<WalletRow>(
         'SELECT id, panter_coin_balance FROM antigravity_wallets WHERE user_id = $1 FOR UPDATE',
         [subscriberId],
@@ -61,13 +61,13 @@ export class PostgresP2PTransactionService implements IP2PTransactionService {
         throw new Error('Saldo insuficiente.');
       }
 
-      // 2. Descontar del suscriptor
+      
       await client.query(
         'UPDATE antigravity_wallets SET panter_coin_balance = panter_coin_balance - $1, updated_at = NOW() WHERE id = $2',
         [amountInCoins, subscriberWallet.id],
       );
 
-      // 3. Registrar transacción de débito
+      
       const txRef = `PURCHASE-${Date.now()}-${subscriberId.slice(0, 4)}`;
       const txResult = await client.query<IdRow>(
         'INSERT INTO wallet_transactions (wallet_id, type, amount, description, reference_id) VALUES ($1, $2, $3, $4, $5) RETURNING id',
@@ -81,7 +81,7 @@ export class PostgresP2PTransactionService implements IP2PTransactionService {
       );
       const transactionId = txResult.rows[0].id;
 
-      // 4. Repartición 70/30 para la creadora
+      
       const creatorAmount = amountInCoins * 0.7;
       const platformCommission = amountInCoins * 0.3;
 
@@ -96,7 +96,7 @@ export class PostgresP2PTransactionService implements IP2PTransactionService {
         [creatorId, amountInCoins, platformCommission, creatorAmount],
       );
 
-      // 5. Registrar la compra de contenido
+      
       await client.query(
         'INSERT INTO content_purchases (user_id, content_item_id, price_paid, transaction_id) VALUES ($1, $2, $3, $4)',
         [subscriberId, contentId, amountInCoins, transactionId],

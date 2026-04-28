@@ -42,7 +42,7 @@ export class PostgresSendGiftRepository implements ISendGiftRepository {
     try {
       await client.query('BEGIN');
 
-      // 1. Verificar y Bloquear Wallet del Usuario (Deducción)
+      
       const walletQuery = `
         UPDATE antigravity_wallets
         SET panter_coin_balance = panter_coin_balance - $1,
@@ -60,7 +60,7 @@ export class PostgresSendGiftRepository implements ISendGiftRepository {
       const walletId = walletRes.rows[0].wallet_id;
       const remainingBalance = parseFloat(walletRes.rows[0].panter_coin_balance);
 
-      // 2. Reparto de Ganancias (Split 70/30)
+      
       const netAmount = gift.priceCoins * 0.70;
       const platformCommission = gift.priceCoins * 0.30;
 
@@ -75,7 +75,7 @@ export class PostgresSendGiftRepository implements ISendGiftRepository {
       `;
       await client.query(creatorWalletQuery, [creatorId, netAmount, platformCommission]);
 
-      // 3. Registrar en Gift Transactions primero para obtener el Id único del envío
+      
       const giftTransQuery = `
         INSERT INTO gift_transactions (user_id, creator_id, gift_id, coins_spent, created_at)
         VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
@@ -84,7 +84,7 @@ export class PostgresSendGiftRepository implements ISendGiftRepository {
       const giftTransRes = await client.query(giftTransQuery, [userId, creatorId, gift.id, gift.priceCoins]);
       const giftTransId = giftTransRes.rows[0].id;
 
-      // 4. Registrar Transacción en Wallet (Historial Usuario) usando el Id del regalo como referencia
+      
       const transQuery = `
         INSERT INTO wallet_transactions (wallet_id, type, amount, description, reference_id, created_at)
         VALUES ($1, 'debit', $2, $3, $4, CURRENT_TIMESTAMP)
@@ -94,7 +94,7 @@ export class PostgresSendGiftRepository implements ISendGiftRepository {
         walletId, 
         gift.priceCoins, 
         `Envío de regalo: ${gift.name}`, 
-        giftTransId // Ahora referenciamos la transacción específica, no solo el tipo de regalo
+        giftTransId 
       ]);
 
       await client.query('COMMIT');

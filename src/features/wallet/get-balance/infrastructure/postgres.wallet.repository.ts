@@ -40,7 +40,7 @@ export class PostgresWalletRepository implements IWalletRepository {
 
     const row = result.rows[0];
 
-    // Retornamos el balance forzando el mapeo desde numerics de PostgreSQL si es necesario
+    
     return {
       userId: row.userId,
       panterCoinBalance: parseFloat(row.panterCoinBalance),

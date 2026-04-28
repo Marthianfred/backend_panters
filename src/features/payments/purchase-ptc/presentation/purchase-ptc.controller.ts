@@ -9,18 +9,13 @@ export class PurchasePtcController {
 
   constructor(private readonly purchasePtcService: PurchasePtcService) {}
 
-  /**
-   * Endpoint para listar los paquetes de PTC disponibles configurados en la base de datos.
-   */
+  
   @Get('packages')
   async getPackages() {
     return await this.purchasePtcService.getAvailablePackages();
   }
 
-  /**
-   * Endpoint para iniciar el proceso de compra de PTC.
-   * Retorna la URL de Stripe Checkout para que el cliente complete el pago.
-   */
+  
   @Post('session')
   @UseGuards(AuthGuard)
   async createPurchaseSession(

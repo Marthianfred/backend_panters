@@ -33,7 +33,7 @@ export class AwsKinesisWallReactionPublisher implements IPostReactionEventPublis
 
   async publish(event: PostReactionEvent): Promise<void> {
     const payload = JSON.stringify({
-      eventType: 'WALL_POST_REACTION_ADDED', // Etiqueta clara para evitar confusión con streaming
+      eventType: 'WALL_POST_REACTION_ADDED', 
       data: event,
       meta: {
         vsa_path: 'panters/post-reactions',
@@ -45,12 +45,12 @@ export class AwsKinesisWallReactionPublisher implements IPostReactionEventPublis
       const command = new PutRecordCommand({
         StreamName: this.streamName,
         Data: Buffer.from(payload),
-        PartitionKey: event.creatorId, // Agrupamos por creadora para facilidad de agregación de rating
+        PartitionKey: event.creatorId, 
       });
 
       await this.kinesisClient.send(command);
     } catch (error) {
-      // Como Tech Lead, preferimos registrar el evento fallido pero no bloquear el registro en DB.
+      
       console.error('[Kinesis/Wall] Fallo la publicación de pantera:', error.message);
     }
   }

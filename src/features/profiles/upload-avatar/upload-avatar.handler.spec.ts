@@ -60,7 +60,7 @@ describe('UploadAvatarHandler', () => {
 
       expect(mockStorageService.uploadAvatar).toHaveBeenCalledWith(
         mockRequest.userId,
-        // The original name 'image.png' is split and replaced with .webp inside the handler
+        
         'image.webp', 
         'image/webp',
         mockWebpBuffer,

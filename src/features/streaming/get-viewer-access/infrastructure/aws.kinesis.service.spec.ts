@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { AwsKinesisVideoService } from './aws.kinesis.service';
 import { KinesisVideoClient } from '@aws-sdk/client-kinesis-video';
 
-// Mock de AWS SDK
+
 jest.mock('@aws-sdk/client-kinesis-video');
 
 describe('AwsKinesisVideoService', () => {

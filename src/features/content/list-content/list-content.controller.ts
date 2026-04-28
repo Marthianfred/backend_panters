@@ -31,7 +31,7 @@ export class ListContentController {
     @Query('limit') limit: number,
   ): Promise<void> {
     try {
-      // Obtener rol del usuario autenticado
+      
       const userRole = req.user?.role || Role.SUBSCRIBER;
 
       const response = await this.handler.execute({

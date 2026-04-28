@@ -38,7 +38,7 @@ describe('ReactToPostHandler', () => {
 
     repository.postExists.mockResolvedValue(true);
     repository.getPostOwnerId.mockResolvedValue(creatorId);
-    repository.upsertReaction.mockResolvedValue(99); // 99 panteras previas + 1
+    repository.upsertReaction.mockResolvedValue(99); 
 
     const result = await handler.execute(userId, dto);
 

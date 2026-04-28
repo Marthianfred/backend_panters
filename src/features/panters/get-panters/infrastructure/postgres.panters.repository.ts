@@ -17,12 +17,12 @@ export class PostgresPantersRepository implements IPantersRepository {
   }
 
   public async getAllPanters(): Promise<PanterData[]> {
-    // Left join with 'user' table if we needed role specific filtering,
-    // but assuming everyone in antigravity_profiles with is_active = true
-    // and maybe a specific role in 'user' table. Let's join with 'user'
-    // to filter only those who are 'model' or 'panter'.
-    // If there is no specific 'model' role, we just return all profiles.
-    // The requirement says: "mostrar todas las chicas panters"
+    
+    
+    
+    
+    
+    
     const query = `
       SELECT 
         p.id as "id",

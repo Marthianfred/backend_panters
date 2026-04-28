@@ -15,22 +15,22 @@ export class RolesGuard implements CanActivate {
     ]);
 
     if (!requiredRoles || requiredRoles.length === 0) {
-      return true; // Si no hay decorador, el endpoint es público o gestionado por AuthGuard
+      return true; 
     }
 
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const user = request.user; // Cargado previamente por AuthGuard
+    const user = request.user; 
 
     if (!user) {
-      return false; // Sin sesión (el AuthGuard ya debería haber fallado antes si se aplica)
+      return false; 
     }
 
-    // Nota: El rol en BetterAuth se guarda típicamente en el objeto del usuario
+    
     const userRole = (user.role as Role) || Role.SUBSCRIBER;
 
     console.log(`[RolesGuard] Debug: userRole=${userRole}, requiredRoles=${requiredRoles}`);
 
-    // Permitir acceso total a administradores (Master Access)
+    
     if (userRole === Role.ADMIN) {
       console.log('[RolesGuard] Access granted to ADMIN');
       return true;
