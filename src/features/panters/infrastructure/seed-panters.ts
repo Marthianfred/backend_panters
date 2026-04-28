@@ -22,7 +22,6 @@ async function seedPanters() {
     );
 
     try {
-      // Intentar agregar las columnas en caso de que no se haya corrido el init-schema.sql actualizado
       await client.query(`
         ALTER TABLE "antigravity_profiles" ADD COLUMN IF NOT EXISTS is_online BOOLEAN DEFAULT false;
         ALTER TABLE "antigravity_profiles" ADD COLUMN IF NOT EXISTS reviews_count INT DEFAULT 0;
@@ -69,7 +68,6 @@ async function seedPanters() {
           v_email TEXT;
           v_avatar TEXT;
       BEGIN
-          -- Limpiar modelos generadas anteriormente por el Mock de Dicebear para forzar el Update Premium
           DELETE FROM "user" WHERE email LIKE 'model%@panters.com';
           
           FOR i IN 1..10 LOOP
@@ -87,7 +85,6 @@ async function seedPanters() {
                   jsonb_build_object('name', 'Videollamada Privada (30m)', 'type', 'streaming', 'price', floor(random() * 200 + 50))
               );
 
-              -- 1. Insertar Usuario
               INSERT INTO "user" (id, name, email, "emailVerified", image, "createdAt", "updatedAt", role)
               VALUES (
                   v_user_id, 
@@ -100,7 +97,6 @@ async function seedPanters() {
                   'model'
               );
 
-              -- 2. Insertar su Perfil
               INSERT INTO "antigravity_profiles" (user_id, full_name, avatar_url, bio, is_online, reviews_count, is_vip, services)
               VALUES (
                   v_user_id,
@@ -113,19 +109,15 @@ async function seedPanters() {
                   v_services
               );
 
-              -- 3. Crear Wallets
               INSERT INTO "antigravity_wallets" (user_id, panter_coin_balance)
               VALUES (v_user_id, floor(random() * 1000));
 
               INSERT INTO "creator_wallets" (creator_id, total_earned, platform_commission, net_balance)
               VALUES (v_user_id, 0, 0, 0);
               
-              -- 4. Inyectar CONTENIDO PREMIUM REAL (Videos/Photos Posts)
-              -- Cada chica tendrá entre 2 y 4 posts aleatorios
               FOR j IN 1..(floor(random() * 3) + 2) LOOP
                   v_content_id := gen_random_uuid();
                   
-                  -- Simulamos una inserción a content_items
                   INSERT INTO "content_items" (
                       id, creator_id, title, description, type, price_coins, file_url, thumbnail, status
                   ) VALUES (
