@@ -18,6 +18,7 @@ import { UsersManagementModule } from '@/features/users/management/users-managem
 import { PaymentsModule } from '@/features/payments/payments.module';
 
 import { VideoChatModule } from '@/features/video-chat/video-chat.module';
+import { EmailModule } from '@/core/infrastructure/email/email.module';
 
 @Module({
   imports: [
@@ -25,9 +26,10 @@ import { VideoChatModule } from '@/features/video-chat/video-chat.module';
       isGlobal: true,
       envFilePath: '.env',
     }),
+    EmailModule,
     MulterModule.register({
       limits: {
-        fileSize: 10000 * 1024 * 1024, 
+        fileSize: 10000 * 1024 * 1024,
       },
     }),
     DatabaseModule,
@@ -40,7 +42,7 @@ import { VideoChatModule } from '@/features/video-chat/video-chat.module';
     LiveChatModule,
     EarningsModule,
     SubscriptionsModule,
-    PaymentsModule, 
+    PaymentsModule,
     KinesisDataModule,
     CreatorsModule,
     UsersManagementModule,

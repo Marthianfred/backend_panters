@@ -5,10 +5,11 @@ import { Pool } from 'pg';
 import { ConfigService } from '@nestjs/config';
 
 import { BETTER_AUTH_TOKEN } from './auth.constants';
+import { EMAIL_SERVICE_TOKEN, EmailService } from '@/core/domain/services/email-service.interface';
 
 export const BetterAuthProvider: Provider = {
   provide: BETTER_AUTH_TOKEN,
-  useFactory: (configService: ConfigService) => {
+  useFactory: (configService: ConfigService, emailService: EmailService) => {
     const databaseUrl = configService.getOrThrow<string>('DATABASE_URL');
     const baseUrl = configService.getOrThrow<string>('BASE_URL');
     const secret = configService.getOrThrow<string>('BETTER_AUTH_SECRET');
@@ -52,6 +53,22 @@ export const BetterAuthProvider: Provider = {
       },
       emailAndPassword: {
         enabled: true,
+        async sendResetPassword({ user, url }) {
+          await emailService.send({
+            to: user.email,
+            subject: 'Recuperación de contraseña - Panters',
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: auto;">
+                <h1 style="color: #333;">Recuperación de contraseña</h1>
+                <p>Hola ${user.name},</p>
+                <p>Has solicitado restablecer tu contraseña. Haz clic en el siguiente enlace para continuar:</p>
+                <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">Restablecer contraseña</a>
+                <p style="margin-top: 20px; font-size: 0.9em; color: #666;">Si no solicitaste esto, puedes ignorar este correo tranquilamente.</p>
+                <p style="font-size: 0.8em; color: #999;">Este enlace expirará en 1 hora.</p>
+              </div>
+            `,
+          });
+        },
       },
       plugins: [
         username(),
@@ -62,9 +79,19 @@ export const BetterAuthProvider: Provider = {
       ],
       emailVerification: {
         async sendVerificationEmail({ user, url }) {
-          
-          console.log(`[EMAIL VERIFICATION] Para: ${user.email}`);
-          console.log(`[EMAIL VERIFICATION] URL: ${url}`);
+          await emailService.send({
+            to: user.email,
+            subject: 'Verifica tu cuenta - Panters',
+            html: `
+              <div style="font-family: sans-serif; max-width: 600px; margin: auto;">
+                <h1 style="color: #333;">Bienvenido a Panters</h1>
+                <p>Hola ${user.name},</p>
+                <p>Gracias por registrarte. Por favor, verifica tu cuenta haciendo clic en el siguiente enlace:</p>
+                <a href="${url}" style="display: inline-block; padding: 12px 24px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">Verificar cuenta</a>
+                <p style="margin-top: 20px; font-size: 0.9em; color: #666;">Si no creaste una cuenta, puedes ignorar este correo.</p>
+              </div>
+            `,
+          });
         },
         sendOnSignUp: true,
       },
@@ -103,5 +130,5 @@ export const BetterAuthProvider: Provider = {
       trustedOrigins: ['http://*', 'https://*', '*'],
     });
   },
-  inject: [ConfigService],
+  inject: [ConfigService, EMAIL_SERVICE_TOKEN],
 };
