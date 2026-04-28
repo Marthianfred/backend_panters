@@ -28,6 +28,9 @@ RUN pnpm install --prod --frozen-lockfile --ignore-scripts --shamefully-hoist
 
 COPY --from=builder /app/dist ./dist
 
+COPY start.sh ./
+RUN chmod +x start.sh
+
 EXPOSE 3001
 
-CMD ["node", "dist/main.js"]
+CMD ["./start.sh"]
