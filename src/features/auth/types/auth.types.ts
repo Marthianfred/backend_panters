@@ -26,8 +26,8 @@ export interface Session {
 }
 
 export interface AuthenticatedRequest extends Request {
-  user: AuthenticatedUser;
-  session: Session;
+  user: AuthenticatedUser | null;
+  session: Session | null;
 }
 
 export interface BetterAuthInstance {

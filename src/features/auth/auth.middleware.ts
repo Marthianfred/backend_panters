@@ -20,28 +20,20 @@ export class AuthMiddleware implements NestMiddleware {
     next: NextFunction,
   ): Promise<void> {
     try {
-      
       const instance = this.authInstance;
       const sessionResponse = await instance.api.getSession({
         headers: fromNodeHeaders(req.headers),
       });
 
       if (sessionResponse && sessionResponse.user) {
-        
         req.user = sessionResponse.user;
         req.session = sessionResponse.session;
       } else {
-        
-        
         req.user = null;
-        
         req.session = null;
       }
     } catch {
-      
-      
       req.user = null;
-      
       req.session = null;
     }
 
