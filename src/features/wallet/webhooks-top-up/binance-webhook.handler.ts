@@ -19,7 +19,7 @@ export class BinanceWebhookHandler {
   ) {}
 
   public async execute(
-    payload: any,
+    payload: Buffer | string | Record<string, any>,
     signature: string,
   ): Promise<WebhookResponse> {
     const isValid = this.signatureValidator.validateSignature(
@@ -31,11 +31,18 @@ export class BinanceWebhookHandler {
       throw new InvalidSignatureError();
     }
 
-    const data: BinanceWebhookPayload = Buffer.isBuffer(payload) 
-      ? JSON.parse(payload.toString('utf-8')) 
-      : (typeof payload === 'string' ? JSON.parse(payload) : payload);
+    let data: BinanceWebhookPayload;
+    try {
+      data = Buffer.isBuffer(payload)
+        ? (JSON.parse(payload.toString('utf-8')) as BinanceWebhookPayload)
+        : (typeof payload === 'string'
+            ? (JSON.parse(payload) as BinanceWebhookPayload)
+            : (payload as BinanceWebhookPayload));
+    } catch (e) {
+      throw new Error('Invalid JSON payload');
+    }
 
-    if (data.bizStatus === 'PAY_SUCCESS') {
+    if (data.bizStatus === 'PAY_SUCCESS' && data.metadata) {
       const userId = data.metadata.userId;
       const amount = parseInt(data.metadata.coinsAmount, 10);
       const transactionId = data.bizId;

@@ -21,8 +21,7 @@ async function bootstrap() {
     ],
   });
 
-  // Global Middleware for Cross-Origin Resource Policy (CORP) to avoid image blocking
-  app.use((_req: Request, res: Response, next: any) => {
+  app.use((_req: Request, res: Response, next: () => void) => {
     res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
     next();
   });
@@ -55,6 +54,6 @@ async function bootstrap() {
   );
 }
 
-bootstrap().catch((error) => {
+bootstrap().catch((error: unknown) => {
   console.error('[Panters] Failed to start application', error);
 });

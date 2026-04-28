@@ -26,16 +26,12 @@ export class WebhooksTopUpController {
     private readonly binanceHandler: BinanceWebhookHandler,
   ) {}
 
-  /**
-   * @deprecated Usar api/v1/payments/webhooks/stripe (Dispatcher Unificado)
-   */
   @Post('stripe')
   @HttpCode(HttpStatus.OK)
-  public async handleStripe(
-    @Req() req: RequestWithRawBody,
-    @Headers('stripe-signature') signature: string,
+  public handleStripe(
+    @Req() _req: RequestWithRawBody,
+    @Headers('stripe-signature') _signature: string,
   ): Promise<WebhookResponse> {
-    // Redirigir o lanzar error para forzar migración a dispatcher unificado
     throw new HttpException(
       'Este endpoint está deprecado. Use el dispatcher unificado en api/v1/payments/webhooks/stripe',
       HttpStatus.GONE,
@@ -49,13 +45,14 @@ export class WebhooksTopUpController {
     @Headers('binancepay-signature') signature: string,
   ): Promise<WebhookResponse> {
     try {
-      return await this.binanceHandler.execute(req.rawBody || req.body, signature || '');
-    } catch (error) {
+      return await this.binanceHandler.execute(req.rawBody || (req.body as Buffer), signature || '');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       if (error instanceof InvalidSignatureError) {
-        throw new HttpException(error.message, HttpStatus.UNAUTHORIZED);
+        throw new HttpException(errorMessage, HttpStatus.UNAUTHORIZED);
       }
       throw new HttpException(
-        `Error procesando webhook de Binance: ${error.message}`,
+        `Error procesando webhook de Binance: ${errorMessage}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
