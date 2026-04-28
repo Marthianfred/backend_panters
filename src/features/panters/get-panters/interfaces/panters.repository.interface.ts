@@ -12,7 +12,8 @@ export interface PanterData {
   isOnline: boolean;
   reviewsCount: number;
   isVip: boolean;
-  services: PanterServiceItem[] | null;
+  services: PanterServiceItem[] | string;
+  rating?: number;
 }
 
 export const PANTERS_REPOSITORY = 'PANTERS_REPOSITORY';

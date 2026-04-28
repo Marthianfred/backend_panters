@@ -45,6 +45,7 @@ export class GetPantersHandler {
         reviewsCount: Number(panter.reviewsCount) || 0,
         isVip: Boolean(panter.isVip),
         services: parsedServices,
+        rating: Number(panter.rating) || 0,
       };
     });
 
@@ -63,6 +64,7 @@ export class GetPantersHandler {
       reviewsCount: Number(panter.reviewsCount) || 0,
       isVip: Boolean(panter.isVip),
       services: [], 
+      rating: Number(panter.rating) || 0,
     }));
 
     return { panters };

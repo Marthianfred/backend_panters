@@ -12,6 +12,7 @@ export interface PanterSummary {
   reviewsCount: number;
   isVip: boolean;
   services: PanterServiceItem[];
+  rating: number;
 }
 
 export interface GetPantersResponse {

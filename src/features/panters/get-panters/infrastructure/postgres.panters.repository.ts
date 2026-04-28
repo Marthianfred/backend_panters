@@ -32,10 +32,17 @@ export class PostgresPantersRepository implements IPantersRepository {
         p.is_online AS "isOnline",
         p.reviews_count AS "reviewsCount",
         p.is_vip AS "isVip",
-        p.services AS "services"
+        p.services AS "services",
+        COALESCE(reaction_counts.cnt, 0)::FLOAT as "rating"
       FROM antigravity_profiles p
       INNER JOIN "user" u ON p.user_id = u.id
       INNER JOIN roles r ON r.id = u."roleId"
+      LEFT JOIN (
+        SELECT ci.creator_id, COUNT(pr.id) as cnt
+        FROM content_items ci
+        JOIN post_reactions pr ON pr.post_id = ci.id
+        GROUP BY ci.creator_id
+      ) reaction_counts ON reaction_counts.creator_id = u.id
       WHERE p.is_active = true AND r.name = 'model';
     `;
 
@@ -53,10 +60,17 @@ export class PostgresPantersRepository implements IPantersRepository {
         p.is_online AS "isOnline",
         p.reviews_count AS "reviewsCount",
         p.is_vip AS "isVip",
-        p.services AS "services"
+        p.services AS "services",
+        COALESCE(reaction_counts.cnt, 0)::FLOAT as "rating"
       FROM antigravity_profiles p
       INNER JOIN "user" u ON p.user_id = u.id
       INNER JOIN roles r ON r.id = u."roleId"
+      LEFT JOIN (
+        SELECT ci.creator_id, COUNT(pr.id) as cnt
+        FROM content_items ci
+        JOIN post_reactions pr ON pr.post_id = ci.id
+        GROUP BY ci.creator_id
+      ) reaction_counts ON reaction_counts.creator_id = u.id
       WHERE p.is_active = true AND r.name = 'model'
       ORDER BY p.is_vip DESC, p.reviews_count DESC
       LIMIT $1;
