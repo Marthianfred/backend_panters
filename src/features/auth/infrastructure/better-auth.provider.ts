@@ -31,7 +31,6 @@ export const BetterAuthProvider: Provider = {
       database: pool,
       hooks: {
         after: createAuthMiddleware(async (ctx) => {
-          // Si es el login por email, adjuntamos la suscripción a la respuesta
           if (ctx.path === '/sign-in/email' && ctx.method === 'POST') {
             const returned = ctx.context.returned;
             const user = ctx.context.newSession?.user || (returned as any)?.user;
@@ -61,7 +60,6 @@ export const BetterAuthProvider: Provider = {
                   subscription = { status: 'none', isExpired: false };
                 }
 
-                // Fusionamos la respuesta original con la suscripción
                 return ctx.json({
                   ...(typeof returned === 'object' ? returned : {}),
                   subscription

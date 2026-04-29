@@ -28,7 +28,7 @@ export class RenewSubscriptionUseCase {
 
   async execute(dto: RenewSubscriptionDto): Promise<RenewSessionResponse> {
     const subscriptions = await this.userSubscriptionsRepository.findByUserId(dto.userId);
-    const subscription = subscriptions[0]; // La más reciente por el ORDER BY en el repo
+    const subscription = subscriptions[0];
 
     if (!subscription) {
       throw new NotFoundException('No se encontró una suscripción previa para renovar.');

@@ -11,7 +11,6 @@ export class CheckExpiredSubscriptionsTask {
     private readonly userSubscriptionsRepository: userSubscriptionsRepositoryInterface.IUserSubscriptionsRepository,
   ) {}
 
-  // Se ejecuta cada hora para asegurar una limpieza constante
   @Cron(CronExpression.EVERY_HOUR)
   async handleCron() {
     this.logger.log('Iniciando tarea automática de verificación de suscripciones expiradas...');

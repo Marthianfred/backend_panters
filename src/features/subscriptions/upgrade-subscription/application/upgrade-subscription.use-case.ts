@@ -19,13 +19,11 @@ export class UpgradeSubscriptionUseCase {
   ) {}
 
   async execute(userId: string, dto: UpgradeSubscriptionDto): Promise<UpgradeSessionResponse> {
-    // 1. Obtener suscripción activa
     const subscription = await this.userSubscriptionsRepository.findActiveByUserId(userId);
     if (!subscription) {
       throw new NotFoundException('No tienes una suscripción activa para realizar un upgrade.');
     }
 
-    // 2. Obtener plan actual y plan objetivo
     const currentPlan = await this.plansRepository.findById(subscription.planId);
     if (!currentPlan) {
       throw new NotFoundException('Plan actual no encontrado.');
@@ -36,7 +34,6 @@ export class UpgradeSubscriptionUseCase {
       throw new NotFoundException('El plan objetivo no existe o no está activo.');
     }
 
-    // 3. Validar que sea un upgrade (precio mayor)
     const currentPrice = Number(currentPlan.priceUsd);
     const targetPrice = Number(targetPlan.priceUsd);
 
@@ -48,7 +45,6 @@ export class UpgradeSubscriptionUseCase {
       throw new BadRequestException('El plan objetivo no tiene una pasarela de pago configurada.');
     }
 
-    // 4. Preparar sesión de Stripe
     const user = await this.usersRepository.getUserDetails(userId);
     if (!user) {
       throw new NotFoundException('Usuario no encontrado.');

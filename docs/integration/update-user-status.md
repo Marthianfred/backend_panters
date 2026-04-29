@@ -41,7 +41,7 @@ const toggleUserStatus = async (userId, newStatus, token) => {
     }
 
     const data = await response.json();
-    return data; // { success: true, isActive: boolean }
+    return data;
   } catch (error) {
     console.error('Error en toggleUserStatus:', error);
     throw error;

@@ -90,8 +90,6 @@ export class HandleStripeWebhookUseCase {
     }
 
     const now = new Date();
-    // Si la suscripción aún no ha expirado, extendemos desde la fecha de expiración actual.
-    // Si ya expiró, extendemos desde "ahora".
     const currentEndsAt = subscription.endsAt ? new Date(subscription.endsAt) : now;
     const baseDate = currentEndsAt > now ? currentEndsAt : now;
     

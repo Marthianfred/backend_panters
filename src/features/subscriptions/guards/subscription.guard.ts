@@ -24,9 +24,6 @@ export class SubscriptionGuard implements CanActivate {
       throw new UnauthorizedException('Se requiere autenticación para acceder a este recurso.');
     }
 
-    
-    // Solo los usuarios con rol 'subscriber' están sujetos a la restricción de suscripción activa.
-    // Otros roles (admin, model) tienen acceso permitido.
     if (request.user.role !== 'subscriber') {
       return true;
     }
