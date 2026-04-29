@@ -29,7 +29,7 @@ import { Query } from '@nestjs/common';
 
 @Controller('api/v1/management')
 @UseGuards(AuthGuard, RolesGuard)
-@Roles('admin', 'moderator')
+@Roles('admin')
 export class UsersManagementController {
   constructor(
     private readonly createUserHandler: AdminCreateUserHandler,

@@ -2,7 +2,6 @@ import { IsEmail, IsString, IsEnum, MinLength } from 'class-validator';
 
 export enum UserRoleFlag {
   ADMIN = 'admin',
-  MODERATOR = 'moderator',
   MODEL = 'model',
   CREATOR = 'creator',
   SUBSCRIBER = 'subscriber',

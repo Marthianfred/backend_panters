@@ -20,9 +20,13 @@ import { PaymentsModule } from '@/features/payments/payments.module';
 import { VideoChatModule } from '@/features/video-chat/video-chat.module';
 import { EmailModule } from '@/core/infrastructure/email/email.module';
 
+import { ScheduleModule } from '@nestjs/schedule';
+
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
+
       isGlobal: true,
       envFilePath: '.env',
     }),

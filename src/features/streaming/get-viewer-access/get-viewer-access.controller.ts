@@ -11,11 +11,13 @@ import type { Response } from 'express';
 import { GetViewerAccessHandler } from './get-viewer-access.handler';
 import { StreamNotFoundError } from './get-viewer-access.models';
 import { AuthGuard } from '../../auth/guards/auth.guard';
+import { SubscriptionGuard } from '../../subscriptions/guards/subscription.guard';
 import type { AuthenticatedRequest } from '../../auth/types/auth.types';
 
 @Controller('api/v1/streams')
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, SubscriptionGuard)
 export class GetViewerAccessController {
+
   constructor(private readonly handler: GetViewerAccessHandler) {}
 
   @Get(':streamId/access')

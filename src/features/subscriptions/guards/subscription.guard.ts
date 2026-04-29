@@ -25,9 +25,12 @@ export class SubscriptionGuard implements CanActivate {
     }
 
     
-    if (request.user.role === 'admin') {
+    // Solo los usuarios con rol 'subscriber' están sujetos a la restricción de suscripción activa.
+    // Otros roles (admin, model) tienen acceso permitido.
+    if (request.user.role !== 'subscriber') {
       return true;
     }
+
 
     
     const activeSubscription = await this.userSubscriptionsRepository.findActiveByUserId(request.user.id);

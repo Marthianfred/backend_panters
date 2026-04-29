@@ -2,7 +2,7 @@ import { Module, Global, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { AuthController } from './api/auth.controller';
 import { AuthService } from './application/auth.service';
 import { RegisterClientService } from './application/register-client.service';
-import { BetterAuthProvider } from './infrastructure/better-auth.provider';
+import { BetterAuthProvider, AuthPoolProvider } from './infrastructure/better-auth.provider';
 import { AuthGuard } from './guards/auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { AuthSeedingService } from './infrastructure/auth-seeding.service';
@@ -16,8 +16,10 @@ import { DatabaseModule } from '@/core/database/database.module';
   providers: [
     AuthService,
     RegisterClientService,
+    AuthPoolProvider,
     BetterAuthProvider,
     AuthGuard,
+
     RolesGuard,
     AuthSeedingService,
     AuthMiddleware,

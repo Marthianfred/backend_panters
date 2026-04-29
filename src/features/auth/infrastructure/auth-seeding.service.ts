@@ -20,7 +20,7 @@ export class AuthSeedingService implements OnModuleInit {
     await this.schemaService.ensureInitialized();
 
     this.logger.log(
-      'Iniciando seeding de usuarios por roles (Admin, Moderator, Model, Subscriber)...',
+      'Iniciando seeding de usuarios por roles (Admin, Model, Subscriber)...',
     );
 
     await this.seedUser(
@@ -29,13 +29,6 @@ export class AuthSeedingService implements OnModuleInit {
       'Panters Admin',
       'c901e6a7-f58c-493e-b567-5d554a32ac46',
       'admin'
-    );
-    await this.seedUser(
-      'moderator@panters.com',
-      'moderatorPassword123',
-      'Panters Moderador',
-      'e3519c28-98e9-4467-bd77-083da23d249f',
-      'moderator'
     );
     await this.seedUser(
       'model@panters.com',

@@ -40,8 +40,10 @@ import { GetActiveStreamsHandler } from './get-active-streams/get-active-streams
 import { StopStreamController } from './stop-stream/stop-stream.controller';
 import { StopStreamHandler } from './stop-stream/stop-stream.handler';
 
+import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
+
 @Module({
-  imports: [LiveChatModule],
+  imports: [LiveChatModule, SubscriptionsModule],
   controllers: [
     GetViewerAccessController,
     SendGiftController,

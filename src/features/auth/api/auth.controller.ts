@@ -21,6 +21,9 @@ export class AuthController {
     };
   }
 
+
+
+
   @All('*path')
   async handleAuth(@Req() req: AuthenticatedRequest, @Res() res: Response) {
     return this.authService.handleAuthRequest(req, res);

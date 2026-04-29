@@ -1,5 +1,6 @@
 import { Provider } from '@nestjs/common';
 import { betterAuth } from 'better-auth';
+import { createAuthMiddleware } from 'better-auth/api';
 import { username, captcha } from 'better-auth/plugins';
 import { Pool } from 'pg';
 import { ConfigService } from '@nestjs/config';
@@ -7,21 +8,75 @@ import { ConfigService } from '@nestjs/config';
 import { BETTER_AUTH_TOKEN } from './auth.constants';
 import { EMAIL_SERVICE_TOKEN, EmailService } from '@/core/domain/services/email-service.interface';
 
+export const AUTH_POOL_TOKEN = 'AUTH_POOL_TOKEN';
+
+export const AuthPoolProvider: Provider = {
+  provide: AUTH_POOL_TOKEN,
+  useFactory: (configService: ConfigService) => {
+    return new Pool({
+      connectionString: configService.getOrThrow<string>('DATABASE_URL'),
+    });
+  },
+  inject: [ConfigService],
+};
+
 export const BetterAuthProvider: Provider = {
   provide: BETTER_AUTH_TOKEN,
-  useFactory: (configService: ConfigService, emailService: EmailService) => {
-    const databaseUrl = configService.getOrThrow<string>('DATABASE_URL');
+  useFactory: (configService: ConfigService, emailService: EmailService, pool: Pool) => {
     const baseUrl = configService.getOrThrow<string>('BASE_URL');
     const secret = configService.getOrThrow<string>('BETTER_AUTH_SECRET');
     const turnstileSecretKey = configService.getOrThrow<string>('TURNSTILE_SECRET_KEY');
 
-    const pool = new Pool({
-      connectionString: databaseUrl,
-    });
-
     return betterAuth({
       database: pool,
+      hooks: {
+        after: createAuthMiddleware(async (ctx) => {
+          // Si es el login por email, adjuntamos la suscripción a la respuesta
+          if (ctx.path === '/sign-in/email' && ctx.method === 'POST') {
+            const returned = ctx.context.returned;
+            const user = ctx.context.newSession?.user || (returned as any)?.user;
+
+            if (user && user.role === 'subscriber') {
+              try {
+                const query = `
+                  SELECT status, ends_at as "endsAt"
+                  FROM user_subscriptions
+                  WHERE user_id = $1
+                  ORDER BY created_at DESC
+                  LIMIT 1;
+                `;
+                const result = await pool.query(query, [user.id]);
+                const sub = result.rows[0];
+                
+                let subscription: any = null;
+                if (sub) {
+                  const now = new Date();
+                  const isExpired = sub.status === 'expired' || (sub.endsAt && new Date(sub.endsAt) < now);
+                  subscription = {
+                    status: isExpired ? 'expired' : sub.status,
+                    expiresAt: sub.endsAt,
+                    isExpired
+                  };
+                } else {
+                  subscription = { status: 'none', isExpired: false };
+                }
+
+                // Fusionamos la respuesta original con la suscripción
+                return ctx.json({
+                  ...(typeof returned === 'object' ? returned : {}),
+                  subscription
+                });
+              } catch (error) {
+                console.error('Error fetching subscription in login hook:', error);
+              }
+            }
+          }
+
+        }),
+      },
       user: {
+
+
         additionalFields: {
           roleId: {
             type: 'string', 
@@ -71,12 +126,13 @@ export const BetterAuthProvider: Provider = {
         },
       },
       plugins: [
-        username(),
+        username() as any,
         captcha({
           provider: 'cloudflare-turnstile',
           secretKey: turnstileSecretKey,
-        }),
+        }) as any,
       ],
+
       emailVerification: {
         async sendVerificationEmail({ user, url }) {
           await emailService.send({
@@ -130,5 +186,6 @@ export const BetterAuthProvider: Provider = {
       trustedOrigins: ['http://*', 'https://*', '*'],
     });
   },
-  inject: [ConfigService, EMAIL_SERVICE_TOKEN],
+  inject: [ConfigService, EMAIL_SERVICE_TOKEN, AUTH_POOL_TOKEN],
 };
+

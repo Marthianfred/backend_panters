@@ -4,12 +4,15 @@ import { toNodeHandler } from 'better-auth/node';
 import { BETTER_AUTH_TOKEN } from '../infrastructure/auth.constants';
 import type { BetterAuthInstance } from '../types/auth.types';
 
+
 @Injectable()
 export class AuthService {
   constructor(
     @Inject(BETTER_AUTH_TOKEN)
     private readonly authInstance: BetterAuthInstance,
   ) {}
+
+
 
   public get instance(): BetterAuthInstance {
     return this.authInstance;

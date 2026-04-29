@@ -1,6 +1,7 @@
 import { Injectable, Inject, Logger, BadRequestException } from '@nestjs/common';
 import Stripe from 'stripe';
 import * as userSubscriptionsInterface from '@/features/subscriptions/interfaces/user.subscriptions.repository.interface';
+import * as subscriptionPlansInterface from '@/features/subscriptions/interfaces/subscription.plans.repository.interface';
 
 @Injectable()
 export class HandleStripeWebhookUseCase {
@@ -9,6 +10,8 @@ export class HandleStripeWebhookUseCase {
   constructor(
     @Inject(userSubscriptionsInterface.USER_SUBSCRIPTIONS_REPOSITORY)
     private readonly userSubscriptionsRepository: userSubscriptionsInterface.IUserSubscriptionsRepository,
+    @Inject(subscriptionPlansInterface.SUBSCRIPTION_PLANS_REPOSITORY)
+    private readonly plansRepository: subscriptionPlansInterface.ISubscriptionPlansRepository,
   ) {}
 
   async execute(event: Stripe.Event): Promise<void> {
@@ -32,10 +35,10 @@ export class HandleStripeWebhookUseCase {
     }
   }
 
-  
   private async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session): Promise<void> {
     const metadata = session.metadata;
     const subscriptionId = metadata?.subscriptionId;
+    const action = metadata?.action;
     
     if (!subscriptionId) {
       this.logger.error('Sesión de Checkout sin metadata de subscriptionId');
@@ -44,7 +47,19 @@ export class HandleStripeWebhookUseCase {
 
     const externalId = session.subscription as string;
 
+    if (action === 'renew') {
+      await this.processRenewal(subscriptionId);
+      return;
+    }
+
+    if (action === 'upgrade') {
+      const targetPlanId = metadata?.targetPlanId;
+      await this.processUpgrade(subscriptionId, targetPlanId);
+      return;
+    }
+
     this.logger.log(`Pago inicial confirmado para suscripción: ${subscriptionId}. Activando...`);
+
 
     try {
       await this.userSubscriptionsRepository.updateStatus(
@@ -59,7 +74,75 @@ export class HandleStripeWebhookUseCase {
     }
   }
 
-  
+  private async processRenewal(subscriptionId: string): Promise<void> {
+    this.logger.log(`Procesando renovación manual para suscripción: ${subscriptionId}`);
+
+    const subscription = await this.userSubscriptionsRepository.findById(subscriptionId);
+    if (!subscription) {
+      this.logger.error(`Suscripción ${subscriptionId} no encontrada para renovación.`);
+      return;
+    }
+
+    const plan = await this.plansRepository.findById(subscription.planId);
+    if (!plan) {
+      this.logger.error(`Plan ${subscription.planId} no encontrado para la suscripción ${subscriptionId}.`);
+      return;
+    }
+
+    const now = new Date();
+    // Si la suscripción aún no ha expirado, extendemos desde la fecha de expiración actual.
+    // Si ya expiró, extendemos desde "ahora".
+    const currentEndsAt = subscription.endsAt ? new Date(subscription.endsAt) : now;
+    const baseDate = currentEndsAt > now ? currentEndsAt : now;
+    
+    const newEndsAt = new Date(baseDate.getTime() + plan.durationDays * 24 * 60 * 60 * 1000);
+    const newStartsAt = subscription.startsAt || now;
+
+    try {
+      await this.userSubscriptionsRepository.updatePeriod(
+        subscriptionId,
+        newStartsAt,
+        newEndsAt
+      );
+      this.logger.log(`Suscripción ${subscriptionId} renovada exitosamente hasta ${newEndsAt.toISOString()}`);
+    } catch (error) {
+      this.logger.error(`Error al actualizar el periodo de renovación para ${subscriptionId}: ${error.message}`);
+      throw new BadRequestException('Error al procesar la renovación en la base de datos.');
+    }
+  }
+
+  private async processUpgrade(subscriptionId: string, targetPlanId: string): Promise<void> {
+    this.logger.log(`Procesando upgrade para suscripción: ${subscriptionId} al plan: ${targetPlanId}`);
+
+    if (!targetPlanId) {
+      this.logger.error(`Upgrade fallido: targetPlanId no proporcionado para ${subscriptionId}`);
+      return;
+    }
+
+    const plan = await this.plansRepository.findById(targetPlanId);
+    if (!plan) {
+      this.logger.error(`Plan objetivo ${targetPlanId} no encontrado.`);
+      return;
+    }
+
+    const now = new Date();
+    const newEndsAt = new Date(now.getTime() + plan.durationDays * 24 * 60 * 60 * 1000);
+
+    try {
+      await this.userSubscriptionsRepository.changePlan(
+        subscriptionId,
+        targetPlanId,
+        now,
+        newEndsAt
+      );
+      this.logger.log(`Suscripción ${subscriptionId} mejorada con éxito al plan ${plan.name} hasta ${newEndsAt.toISOString()}`);
+    } catch (error) {
+      this.logger.error(`Error al procesar el upgrade para ${subscriptionId}: ${error.message}`);
+      throw new BadRequestException('Error al actualizar el plan en la base de datos.');
+    }
+  }
+
+
   private async handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
     const externalSubscriptionId = (invoice as any).subscription as string;
     
@@ -68,7 +151,6 @@ export class HandleStripeWebhookUseCase {
       return;
     }
 
-    
     const subscription = await this.userSubscriptionsRepository.findByExternalId(externalSubscriptionId);
     
     if (!subscription) {
@@ -76,8 +158,6 @@ export class HandleStripeWebhookUseCase {
       return;
     }
 
-    
-    
     const periodStart = new Date(invoice.period_start * 1000);
     const periodEnd = new Date(invoice.period_end * 1000);
 
@@ -96,7 +176,6 @@ export class HandleStripeWebhookUseCase {
     }
   }
 
-  
   private async handleSubscriptionDeleted(stripeSubscription: Stripe.Subscription): Promise<void> {
     const externalId = stripeSubscription.id;
     
@@ -110,10 +189,11 @@ export class HandleStripeWebhookUseCase {
     this.logger.log(`Cancelando suscripción local ${subscription.id} debido a evento externo.`);
 
     try {
-      await this.userSubscriptionsRepository.updateStatus(subscription.id, 'canceled');
+      await this.userSubscriptionsRepository.updateStatus(subscription.id, 'cancelled');
       this.logger.log(`Suscripción ${subscription.id} marcada como cancelada.`);
     } catch (error) {
       this.logger.error(`Error cancelando suscripción ${subscription.id}: ${error.message}`);
     }
   }
 }
+

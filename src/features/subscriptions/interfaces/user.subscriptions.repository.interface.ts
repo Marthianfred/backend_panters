@@ -10,4 +10,10 @@ export interface IUserSubscriptionsRepository {
   findById(id: string): Promise<UserSubscriptionDto | null>;
   findByExternalId(externalId: string): Promise<UserSubscriptionDto | null>;
   updatePeriod(id: string, startsAt: Date, endsAt: Date): Promise<UserSubscriptionDto>;
+  findActiveWithPlanByUserId(userId: string): Promise<any | null>;
+  changePlan(id: string, planId: string, startsAt: Date, endsAt: Date): Promise<UserSubscriptionDto>;
+  markExpiredSubscriptions(now: Date): Promise<number>;
 }
+
+
+

@@ -18,7 +18,6 @@ CREATE TABLE IF NOT EXISTS "roles" (
 -- Roles Iniciales
 INSERT INTO "roles" (id, name, description) VALUES 
 ('c901e6a7-f58c-493e-b567-5d554a32ac46', 'admin', 'Administrador con acceso total al sistema'),
-('e3519c28-98e9-4467-bd77-083da23d249f', 'moderator', 'Moderador de contenido y usuarios'),
 ('f88b9012-bd7c-47ea-a2a9-c70a84d2f831', 'model', 'Usuario con capacidades de creación de contenido premium'),
 ('d80b1a31-4521-4ec0-9329-30d4d1adc025', 'subscriber', 'Usuario consumidor de contenido')
 ON CONFLICT (id) DO NOTHING;
@@ -31,7 +30,13 @@ CREATE TABLE IF NOT EXISTS "user" (
     image TEXT,
     "createdAt" TIMESTAMP NOT NULL,
     "updatedAt" TIMESTAMP NOT NULL,
+    username TEXT,
+    "birthDate" TEXT,
+    gender TEXT,
+    age INTEGER,
+    "displayUsername" TEXT,
     "roleId" UUID NOT NULL REFERENCES "roles"(id) DEFAULT 'd80b1a31-4521-4ec0-9329-30d4d1adc025',
+    role TEXT,
     is_active BOOLEAN DEFAULT true,
     must_change_password BOOLEAN DEFAULT false
 );
@@ -208,7 +213,111 @@ CREATE TABLE IF NOT EXISTS "video_call_sessions" (
 
 -- Índices de optimización
 CREATE INDEX IF NOT EXISTS idx_wallet_transactions_wallet_id ON wallet_transactions (wallet_id);
-
 CREATE INDEX IF NOT EXISTS idx_content_items_creator_status ON content_items (creator_id, status);
-
 CREATE INDEX IF NOT EXISTS idx_video_calls_users ON video_call_sessions (creator_id, user_id);
+
+-- ===========================================================================
+-- 6. SUBSCRIPTIONS (Planes y Suscripciones)
+-- ===========================================================================
+CREATE TABLE IF NOT EXISTS "subscription_plans" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR NOT NULL,
+    description TEXT,
+    price_usd NUMERIC NOT NULL,
+    duration_days INTEGER NOT NULL,
+    benefits JSONB DEFAULT '[]'::jsonb,
+    stripe_price_id VARCHAR,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS "user_subscriptions" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    plan_id UUID NOT NULL REFERENCES "subscription_plans"(id) ON DELETE CASCADE,
+    status VARCHAR NOT NULL DEFAULT 'pending',
+    payment_gateway VARCHAR,
+    external_subscription_id VARCHAR,
+    cancel_at_period_end BOOLEAN DEFAULT false,
+    starts_at TIMESTAMP WITH TIME ZONE,
+    ends_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- ===========================================================================
+-- 7. PTC PACKAGES (Panter Coins)
+-- ===========================================================================
+CREATE TABLE IF NOT EXISTS "ptc_packages" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR NOT NULL,
+    ptc_amount INTEGER NOT NULL,
+    stripe_price_id VARCHAR NOT NULL,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
+
+-- ===========================================================================
+-- 8. CONTENT EXTRA (Reacciones, Ratings y Multimedia)
+-- ===========================================================================
+CREATE TABLE IF NOT EXISTS "home_loop_videos" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    key TEXT NOT NULL,
+    url TEXT NOT NULL,
+    original_name TEXT NOT NULL,
+    mime_type TEXT NOT NULL DEFAULT 'video/webm',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "post_reactions" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    post_id UUID NOT NULL, -- Se asocia a posts en Kinesis o DB externa
+    created_at TIMESTAMP DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS "panter_ratings" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    creator_id UUID NOT NULL,
+    subscriber_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    rating INTEGER NOT NULL,
+    comment TEXT,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
+
+-- ===========================================================================
+-- 9. GIFTS (Regalos Virtuales)
+-- ===========================================================================
+CREATE TABLE IF NOT EXISTS "virtual_gifts" (
+    gift_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    price_coins NUMERIC NOT NULL,
+    icon TEXT NOT NULL,
+    animation TEXT,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS "gift_transactions" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    creator_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    gift_id UUID REFERENCES virtual_gifts(gift_id) ON DELETE SET NULL,
+    coins_spent NUMERIC NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ===========================================================================
+-- 10. STRIPE TRACKING (Eventos Procesados)
+-- ===========================================================================
+CREATE TABLE IF NOT EXISTS "stripe_processed_events" (
+    id VARCHAR PRIMARY KEY,
+    type VARCHAR NOT NULL,
+    status VARCHAR NOT NULL,
+    metadata JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

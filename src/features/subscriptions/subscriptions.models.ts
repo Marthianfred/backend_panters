@@ -19,6 +19,9 @@ export class UserSubscriptionDto {
   @ApiProperty({ example: 'sub_12345', required: false })
   externalSubscriptionId?: string;
 
+  @ApiProperty({ example: false })
+  cancelAtPeriodEnd: boolean;
+
   @ApiProperty({ required: false })
   startsAt?: Date;
 
@@ -38,6 +41,8 @@ export class CreateUserSubscriptionDto {
   status?: string;
   paymentGateway?: string;
   externalSubscriptionId?: string;
+  cancelAtPeriodEnd?: boolean;
   startsAt?: Date;
   endsAt?: Date;
 }
+

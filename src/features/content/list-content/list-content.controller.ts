@@ -14,14 +14,16 @@ import { Roles } from '../../../core/auth/decorators/roles.decorator';
 import { Role } from '../../../core/auth/roles.enum';
 import { RolesGuard } from '../../../core/auth/guards/roles.guard';
 import { AuthGuard } from '../../../features/auth/guards/auth.guard';
+import { SubscriptionGuard } from '../../../features/subscriptions/guards/subscription.guard';
 
 @Controller('api/v1/content')
-@UseGuards(AuthGuard, RolesGuard)
+@UseGuards(AuthGuard, RolesGuard, SubscriptionGuard)
 export class ListContentController {
+
   constructor(private readonly handler: ListContentHandler) {}
 
   @Get('list')
-  @Roles(Role.SUBSCRIBER, Role.PANTER, Role.MODEL, Role.MODERATOR, Role.ADMIN)
+  @Roles(Role.SUBSCRIBER, Role.PANTER, Role.MODEL, Role.ADMIN)
   public async listContents(
     @Req() req: AuthenticatedRequest,
     @Res() res: Response,

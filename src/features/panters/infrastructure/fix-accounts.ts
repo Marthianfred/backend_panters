@@ -13,7 +13,7 @@ async function fixAccounts() {
   const client = new Client({ connectionString: databaseUrl });
   try {
     await client.connect();
-    console.log('Verificando cuentas Admin, Moderador y Cliente...');
+    console.log('Verificando cuentas Admin y Cliente...');
 
     const updates = [
       {
@@ -21,12 +21,6 @@ async function fixAccounts() {
         name: 'Administrador Master',
         image:
           'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400',
-      },
-      {
-        email: 'moderator@panters.com',
-        name: 'Moderador Panters',
-        image:
-          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=400',
       },
       {
         email: 'client@panters.com',

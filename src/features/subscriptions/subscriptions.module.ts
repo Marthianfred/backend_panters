@@ -26,11 +26,25 @@ import { CheckoutController } from './checkout/infrastructure/checkout.controlle
 import { CreateCheckoutSessionUseCase } from './checkout/application/create-checkout-session.use-case';
 
 
+import { RenewSubscriptionController } from './renew/infrastructure/renew-subscription.controller';
+import { RenewSubscriptionUseCase } from './renew/application/renew-subscription.use-case';
+
+
+import { UpgradeSubscriptionController } from './upgrade-subscription/infrastructure/upgrade-subscription.controller';
+import { UpgradeSubscriptionUseCase } from './upgrade-subscription/application/upgrade-subscription.use-case';
+
+
 import { GetSubscriptionStatusController } from './get-status/infrastructure/get-subscription-status.controller';
 import { GetSubscriptionStatusUseCase } from './get-status/application/get-subscription-status.use-case';
 
 
+import { GetMySubscriptionController } from './get-my-subscription/infrastructure/get-my-subscription.controller';
+import { GetMySubscriptionUseCase } from './get-my-subscription/application/get-my-subscription.use-case';
+
+
 import { SubscriptionGuard } from './guards/subscription.guard';
+import { CheckExpiredSubscriptionsTask } from './check-expired/application/check-expired-subscriptions.task';
+
 
 @Module({
   imports: [ConfigModule, DatabaseModule, AuthModule, UsersManagementModule],
@@ -38,6 +52,9 @@ import { SubscriptionGuard } from './guards/subscription.guard';
     PlansController, 
     PreRegistrationController, 
     CheckoutController,
+    RenewSubscriptionController,
+    UpgradeSubscriptionController,
+    GetMySubscriptionController,
     GetSubscriptionStatusController
   ],
   providers: [
@@ -49,8 +66,12 @@ import { SubscriptionGuard } from './guards/subscription.guard';
     PreRegistrationUseCase,
     HandleStripeWebhookUseCase,
     CreateCheckoutSessionUseCase,
+    RenewSubscriptionUseCase,
+    UpgradeSubscriptionUseCase,
+    GetMySubscriptionUseCase,
     GetSubscriptionStatusUseCase,
     SubscriptionGuard,
+    CheckExpiredSubscriptionsTask,
     {
       provide: SUBSCRIPTION_PLANS_REPOSITORY,
       useClass: PostgresSubscriptionPlansRepository,
@@ -64,7 +85,14 @@ import { SubscriptionGuard } from './guards/subscription.guard';
     SUBSCRIPTION_PLANS_REPOSITORY, 
     USER_SUBSCRIPTIONS_REPOSITORY,
     HandleStripeWebhookUseCase, 
-    CreateCheckoutSessionUseCase
+    CreateCheckoutSessionUseCase,
+    RenewSubscriptionUseCase,
+    UpgradeSubscriptionUseCase,
+    GetMySubscriptionUseCase,
+    CheckExpiredSubscriptionsTask
   ],
+
+
 })
 export class SubscriptionsModule {}
+

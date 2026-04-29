@@ -23,8 +23,10 @@ import { GetMediaUrlHandler } from './get-media-url/get-media-url.handler';
 import { ShareContentController } from './share-content/share-content.controller';
 import { GetShareInfoHandler } from './share-content/get-share-info.handler';
 
+import { SubscriptionsModule } from '../subscriptions/subscriptions.module';
+
 @Module({
-  imports: [AuthModule, ProfilesModule],
+  imports: [AuthModule, ProfilesModule, SubscriptionsModule],
   controllers: [
     UploadContentController,
     ListContentController,
