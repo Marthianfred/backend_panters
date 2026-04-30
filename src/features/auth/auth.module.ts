@@ -8,10 +8,11 @@ import { RolesGuard } from './guards/roles.guard';
 import { AuthSeedingService } from './infrastructure/auth-seeding.service';
 import { AuthMiddleware } from './auth.middleware';
 import { DatabaseModule } from '@/core/database/database.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Global()
 @Module({
-  imports: [DatabaseModule],
+  imports: [DatabaseModule, NotificationsModule],
   controllers: [AuthController],
   providers: [
     AuthService,

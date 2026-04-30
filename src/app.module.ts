@@ -16,6 +16,7 @@ import { RequestLoggerMiddleware } from '@/core/infrastructure/logger/request-lo
 import { CreatorsModule } from '@/features/creators/creators.module';
 import { UsersManagementModule } from '@/features/users/management/users-management.module';
 import { PaymentsModule } from '@/features/payments/payments.module';
+import { NotificationsModule } from '@/features/notifications/notifications.module';
 
 import { VideoChatModule } from '@/features/video-chat/video-chat.module';
 import { EmailModule } from '@/core/infrastructure/email/email.module';
@@ -51,6 +52,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     CreatorsModule,
     UsersManagementModule,
     VideoChatModule,
+    NotificationsModule,
   ],
 })
 export class AppModule implements NestModule {

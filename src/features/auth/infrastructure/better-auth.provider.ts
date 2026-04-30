@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { BETTER_AUTH_TOKEN } from './auth.constants';
 import { EMAIL_SERVICE_TOKEN, EmailService } from '@/core/domain/services/email-service.interface';
+import { NotifyUserUseCase } from '../../notifications/application/use-cases/notify-user.use-case';
 
 export const AUTH_POOL_TOKEN = 'AUTH_POOL_TOKEN';
 
@@ -22,7 +23,7 @@ export const AuthPoolProvider: Provider = {
 
 export const BetterAuthProvider: Provider = {
   provide: BETTER_AUTH_TOKEN,
-  useFactory: (configService: ConfigService, emailService: EmailService, pool: Pool) => {
+  useFactory: (configService: ConfigService, emailService: EmailService, notifyUserUseCase: NotifyUserUseCase, pool: Pool) => {
     const baseUrl = configService.getOrThrow<string>('BASE_URL');
     const secret = configService.getOrThrow<string>('BETTER_AUTH_SECRET');
     const turnstileSecretKey = configService.getOrThrow<string>('TURNSTILE_SECRET_KEY');
@@ -146,6 +147,14 @@ export const BetterAuthProvider: Provider = {
               </div>
             `,
           });
+
+          
+          await notifyUserUseCase.execute(user.id, {
+            title: 'Verifica tu cuenta 📧',
+            body: 'Te hemos enviado un correo de verificación. Por favor, revísalo para activar todas las funciones.',
+            icon: '/icons/notification-icon.png',
+            data: { url },
+          }).catch(err => console.error('Error enviando push de verificación:', err));
         },
         sendOnSignUp: true,
       },
@@ -184,6 +193,6 @@ export const BetterAuthProvider: Provider = {
       trustedOrigins: ['http://*', 'https://*', '*'],
     });
   },
-  inject: [ConfigService, EMAIL_SERVICE_TOKEN, AUTH_POOL_TOKEN],
+  inject: [ConfigService, EMAIL_SERVICE_TOKEN, NotifyUserUseCase, AUTH_POOL_TOKEN],
 };
 
