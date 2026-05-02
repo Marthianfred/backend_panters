@@ -19,6 +19,7 @@ import { PaymentsModule } from '@/features/payments/payments.module';
 import { NotificationsModule } from '@/features/notifications/notifications.module';
 import { PtcPackagesManagementModule } from '@/features/admin/ptc-packages/ptc-packages-management.module';
 
+import { SubscriptionPlansManagementModule } from '@/features/admin/subscription-plans/subscription-plans-management.module';
 import { VideoChatModule } from '@/features/video-chat/video-chat.module';
 import { EmailModule } from '@/core/infrastructure/email/email.module';
 
@@ -55,6 +56,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     VideoChatModule,
     NotificationsModule,
     PtcPackagesManagementModule,
+    SubscriptionPlansManagementModule,
   ],
 })
 export class AppModule implements NestModule {
