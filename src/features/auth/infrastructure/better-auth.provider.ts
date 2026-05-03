@@ -8,8 +8,8 @@ import { ConfigService } from '@nestjs/config';
 import { BETTER_AUTH_TOKEN } from './auth.constants';
 import { EMAIL_SERVICE_TOKEN, EmailService } from '@/core/domain/services/email-service.interface';
 import { NotifyUserUseCase } from '../../notifications/application/use-cases/notify-user.use-case';
-
-export const AUTH_POOL_TOKEN = 'AUTH_POOL_TOKEN';
+import { CheckUserActivityUseCase } from '../application/use-cases/check-user-activity.use-case';
+import { AUTH_POOL_TOKEN } from './auth.constants';
 
 export const AuthPoolProvider: Provider = {
   provide: AUTH_POOL_TOKEN,
@@ -23,7 +23,7 @@ export const AuthPoolProvider: Provider = {
 
 export const BetterAuthProvider: Provider = {
   provide: BETTER_AUTH_TOKEN,
-  useFactory: (configService: ConfigService, emailService: EmailService, notifyUserUseCase: NotifyUserUseCase, pool: Pool) => {
+  useFactory: (configService: ConfigService, emailService: EmailService, notifyUserUseCase: NotifyUserUseCase, checkUserActivityUseCase: CheckUserActivityUseCase, pool: Pool) => {
     const baseUrl = configService.getOrThrow<string>('BASE_URL');
     const secret = configService.getOrThrow<string>('BETTER_AUTH_SECRET');
     const turnstileSecretKey = configService.getOrThrow<string>('TURNSTILE_SECRET_KEY');
@@ -36,41 +36,51 @@ export const BetterAuthProvider: Provider = {
             const returned = ctx.context.returned;
             const user = ctx.context.newSession?.user || (returned as any)?.user;
 
-            if (user && user.role === 'subscriber') {
-              try {
-                const query = `
-                  SELECT status, ends_at as "endsAt"
-                  FROM user_subscriptions
-                  WHERE user_id = $1
-                  ORDER BY created_at DESC
-                  LIMIT 1;
-                `;
-                const result = await pool.query(query, [user.id]);
-                const sub = result.rows[0];
-                
-                let subscription: any = null;
-                if (sub) {
-                  const now = new Date();
-                  const isExpired = sub.status === 'expired' || (sub.endsAt && new Date(sub.endsAt) < now);
-                  subscription = {
-                    status: isExpired ? 'expired' : sub.status,
-                    expiresAt: sub.endsAt,
-                    isExpired
-                  };
-                } else {
-                  subscription = { status: 'none', isExpired: false };
-                }
-
-                return ctx.json({
-                  ...(typeof returned === 'object' ? returned : {}),
-                  subscription
+            if (user) {
+              // Verificar si el usuario está activo usando el caso de uso
+              const isActive = await checkUserActivityUseCase.execute(user.id);
+              if (!isActive) {
+                const { APIError } = await import('better-auth/api');
+                throw new APIError('UNAUTHORIZED', {
+                  message: 'Su usuario fue desactivado y debe contactar con el soporte',
                 });
-              } catch (error) {
-                console.error('Error fetching subscription in login hook:', error);
+              }
+
+              if (user.role === 'subscriber') {
+                try {
+                  const query = `
+                    SELECT status, ends_at as "endsAt"
+                    FROM user_subscriptions
+                    WHERE user_id = $1
+                    ORDER BY created_at DESC
+                    LIMIT 1;
+                  `;
+                  const result = await pool.query(query, [user.id]);
+                  const sub = result.rows[0];
+                  
+                  let subscription: any = null;
+                  if (sub) {
+                    const now = new Date();
+                    const isExpired = sub.status === 'expired' || (sub.endsAt && new Date(sub.endsAt) < now);
+                    subscription = {
+                      status: isExpired ? 'expired' : sub.status,
+                      expiresAt: sub.endsAt,
+                      isExpired
+                    };
+                  } else {
+                    subscription = { status: 'none', isExpired: false };
+                  }
+
+                  return ctx.json({
+                    ...(typeof returned === 'object' ? returned : {}),
+                    subscription
+                  });
+                } catch (error) {
+                  console.error('Error fetching subscription in login hook:', error);
+                }
               }
             }
           }
-
         }),
       },
       user: {
@@ -102,6 +112,12 @@ export const BetterAuthProvider: Provider = {
           age: {
             type: 'number',
             required: false,
+          },
+          isActive: {
+            type: 'boolean',
+            required: false,
+            defaultValue: true,
+            fieldName: 'is_active',
           },
         },
       },
@@ -193,6 +209,6 @@ export const BetterAuthProvider: Provider = {
       trustedOrigins: ['http://*', 'https://*', '*'],
     });
   },
-  inject: [ConfigService, EMAIL_SERVICE_TOKEN, NotifyUserUseCase, AUTH_POOL_TOKEN],
+  inject: [ConfigService, EMAIL_SERVICE_TOKEN, NotifyUserUseCase, CheckUserActivityUseCase, AUTH_POOL_TOKEN],
 };
 

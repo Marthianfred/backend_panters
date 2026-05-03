@@ -9,6 +9,7 @@ import { AuthSeedingService } from './infrastructure/auth-seeding.service';
 import { AuthMiddleware } from './auth.middleware';
 import { DatabaseModule } from '@/core/database/database.module';
 import { NotificationsModule } from '../notifications/notifications.module';
+import { CheckUserActivityUseCase } from './application/use-cases/check-user-activity.use-case';
 
 @Global()
 @Module({
@@ -24,6 +25,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
     RolesGuard,
     AuthSeedingService,
     AuthMiddleware,
+    CheckUserActivityUseCase,
   ],
   exports: [AuthService, AuthGuard, RolesGuard, BetterAuthProvider, RegisterClientService],
 })
