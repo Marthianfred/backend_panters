@@ -30,6 +30,10 @@ export class GetPlatformRevenueHandler {
         ptc: metrics.totalCreatorPtc,
         usd: this.convertToUsd(metrics.totalCreatorPtc),
       },
+      subscriptionRevenue: {
+        ptc: metrics.totalSubscriptionUsd * 10, // Inversa de la tasa 0.1 para propósitos de reporte
+        usd: metrics.totalSubscriptionUsd,
+      },
       generatedAt: new Date().toISOString(),
     };
   }

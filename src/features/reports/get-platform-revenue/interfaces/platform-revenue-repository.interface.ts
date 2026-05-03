@@ -6,5 +6,6 @@ export interface IPlatformRevenueRepository {
     totalGrossPtc: number;
     totalPlatformPtc: number;
     totalCreatorPtc: number;
+    totalSubscriptionUsd: number;
   }>;
 }

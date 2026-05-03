@@ -31,6 +31,9 @@ export class PlatformRevenueResponseDto {
   @ApiProperty({ description: 'Ingresos netos de creadoras (70%)' })
   creatorEarnings: RevenueMetrics;
 
+  @ApiProperty({ description: 'Ingresos por suscripciones (100% plataforma)' })
+  subscriptionRevenue: RevenueMetrics;
+
   @ApiProperty({ description: 'Fecha del reporte' })
   generatedAt: string;
 }

@@ -54,7 +54,7 @@ export class PostgresPlatformSummaryRepository implements IPlatformSummaryReposi
       params.push(endDate);
     }
 
-    // Combinamos regalos y ventas de contenido
+    // Combinamos regalos, ventas de contenido y videollamadas
     const query = `
       WITH model_revenue AS (
         -- Regalos
@@ -71,11 +71,19 @@ export class PostgresPlatformSummaryRepository implements IPlatformSummaryReposi
         JOIN content_items ci ON cp.content_item_id = ci.id
         WHERE 1=1 ${dateFilter.replace(/created_at/g, 'cp.created_at')}
         GROUP BY ci.creator_id
+
+        UNION ALL
+
+        -- Videollamadas
+        SELECT creator_id, SUM(price_coins) as amount
+        FROM video_call_sessions
+        WHERE status = 'completed' ${dateFilter}
+        GROUP BY creator_id
       )
       SELECT 
         mr.creator_id as "creatorId",
         COALESCE(p.full_name, p.username, 'Usuario ' || mr.creator_id) as "creatorName",
-        SUM(mr.amount) as "totalEarnedPtc"
+        SUM(mr.amount * 0.70) as "totalEarnedPtc"
       FROM model_revenue mr
       LEFT JOIN antigravity_profiles p ON mr.creator_id = p.user_id
       GROUP BY mr.creator_id, p.full_name, p.username

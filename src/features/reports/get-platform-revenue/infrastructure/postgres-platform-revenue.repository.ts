@@ -14,25 +14,35 @@ export class PostgresPlatformRevenueRepository implements IPlatformRevenueReposi
     totalGrossPtc: number;
     totalPlatformPtc: number;
     totalCreatorPtc: number;
+    totalSubscriptionUsd: number;
   }> {
-    let query = `
-      SELECT 
-        COALESCE(SUM(amount), 0) as total_gross,
-        COALESCE(SUM(amount * 0.30), 0) as platform_fee,
-        COALESCE(SUM(amount * 0.70), 0) as creator_share
-      FROM wallet_transactions
-      WHERE type = 'debit'
-    `;
-
     const params: any[] = [];
+    let dateFilter = '';
+    let subDateFilter = '';
+
     if (startDate) {
-      query += ` AND created_at >= $${params.length + 1}`;
       params.push(startDate);
+      dateFilter += ` AND created_at >= $${params.length}`;
+      subDateFilter += ` AND s.created_at >= $${params.length}`;
     }
     if (endDate) {
-      query += ` AND created_at <= $${params.length + 1}`;
       params.push(endDate);
+      dateFilter += ` AND created_at <= $${params.length}`;
+      subDateFilter += ` AND s.created_at <= $${params.length}`;
     }
+
+    const query = `
+      SELECT 
+        (SELECT COALESCE(SUM(amount), 0) FROM wallet_transactions WHERE type = 'debit' ${dateFilter}) as total_gross,
+        (SELECT COALESCE(SUM(amount * 0.30), 0) FROM wallet_transactions WHERE type = 'debit' ${dateFilter}) as platform_fee,
+        (SELECT COALESCE(SUM(amount * 0.70), 0) FROM wallet_transactions WHERE type = 'debit' ${dateFilter}) as creator_share,
+        (
+          SELECT COALESCE(SUM(p.price_usd), 0) 
+          FROM user_subscriptions s
+          JOIN subscription_plans p ON s.plan_id = p.id
+          WHERE s.status = 'active' ${subDateFilter}
+        ) as total_subscriptions
+    `;
 
     const result = await this.entityManager.query(query, params);
     const row = result[0];
@@ -41,6 +51,7 @@ export class PostgresPlatformRevenueRepository implements IPlatformRevenueReposi
       totalGrossPtc: parseFloat(row.total_gross),
       totalPlatformPtc: parseFloat(row.platform_fee),
       totalCreatorPtc: parseFloat(row.creator_share),
+      totalSubscriptionUsd: parseFloat(row.total_subscriptions),
     };
   }
 }
