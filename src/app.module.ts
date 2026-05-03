@@ -22,6 +22,7 @@ import { PtcPackagesManagementModule } from '@/features/admin/ptc-packages/ptc-p
 import { SubscriptionPlansManagementModule } from '@/features/admin/subscription-plans/subscription-plans-management.module';
 import { VideoChatModule } from '@/features/video-chat/video-chat.module';
 import { EmailModule } from '@/core/infrastructure/email/email.module';
+import { ReportsModule } from '@/features/reports/reports.module';
 
 import { ScheduleModule } from '@nestjs/schedule';
 
@@ -57,6 +58,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     NotificationsModule,
     PtcPackagesManagementModule,
     SubscriptionPlansManagementModule,
+    ReportsModule,
   ],
 })
 export class AppModule implements NestModule {
