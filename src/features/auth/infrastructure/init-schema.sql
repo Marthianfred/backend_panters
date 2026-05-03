@@ -1,5 +1,6 @@
 -- Archivo: src/features/auth/infrastructure/init-schema.sql
 -- Este script inicializa TODAS las tablas necesarias para el ecosistema Panters.
+-- Actualizado según el estado real de la base de datos.
 
 -- Extensiones necesarias
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
@@ -35,10 +36,10 @@ CREATE TABLE IF NOT EXISTS "user" (
     gender TEXT,
     age INTEGER,
     "displayUsername" TEXT,
-    "roleId" UUID NOT NULL REFERENCES "roles"(id) DEFAULT 'd80b1a31-4521-4ec0-9329-30d4d1adc025',
-    role TEXT,
     is_active BOOLEAN DEFAULT true,
-    must_change_password BOOLEAN DEFAULT false
+    must_change_password BOOLEAN DEFAULT false,
+    "roleId" UUID NOT NULL REFERENCES "roles"(id) DEFAULT 'd80b1a31-4521-4ec0-9329-30d4d1adc025',
+    role TEXT
 );
 
 CREATE TABLE IF NOT EXISTS "session" (
@@ -91,6 +92,10 @@ CREATE TABLE IF NOT EXISTS "antigravity_profiles" (
     reviews_count INT DEFAULT 0,
     is_vip BOOLEAN DEFAULT false,
     services JSONB DEFAULT '[]'::jsonb,
+    username TEXT,
+    birth_date DATE,
+    gender TEXT,
+    age INTEGER,
     created_at TIMESTAMP DEFAULT now(),
     updated_at TIMESTAMP DEFAULT now()
 );
@@ -160,6 +165,7 @@ CREATE TABLE IF NOT EXISTS "content_items" (
     file_url TEXT NOT NULL,
     thumbnail TEXT,
     status content_status NOT NULL DEFAULT 'draft',
+    access_type TEXT NOT NULL DEFAULT 'free',
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     CONSTRAINT price_must_be_positive CHECK (price_coins >= 0)
@@ -255,6 +261,7 @@ CREATE TABLE IF NOT EXISTS "ptc_packages" (
     ptc_amount INTEGER NOT NULL,
     stripe_price_id VARCHAR NOT NULL,
     is_active BOOLEAN DEFAULT true,
+    price_usd NUMERIC NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT now(),
     updated_at TIMESTAMP DEFAULT now()
 );
@@ -320,4 +327,27 @@ CREATE TABLE IF NOT EXISTS "stripe_processed_events" (
     metadata JSONB,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
+);
+
+-- ===========================================================================
+-- 11. NOTIFICATIONS & PUSH (Mensajería y Web Push)
+-- ===========================================================================
+CREATE TABLE IF NOT EXISTS "notifications" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id VARCHAR NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    title VARCHAR NOT NULL,
+    body VARCHAR NOT NULL,
+    data JSONB,
+    is_read BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMP DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS "user_push_subscriptions" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id VARCHAR NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    endpoint VARCHAR NOT NULL,
+    p256dh VARCHAR NOT NULL,
+    auth VARCHAR NOT NULL,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
