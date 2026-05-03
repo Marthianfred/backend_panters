@@ -37,7 +37,11 @@ export class PostgresEarningsRepository implements IEarningsRepository {
     };
 
     const salesCountRes = await this.pool.query(
-      'SELECT COUNT(*) as total FROM content_purchases cp JOIN content_items ci ON cp.content_item_id = ci.id WHERE ci.creator_id = $1',
+      `SELECT (
+        (SELECT COUNT(*) FROM content_purchases cp JOIN content_items ci ON cp.content_item_id = ci.id WHERE ci.creator_id = $1) +
+        (SELECT COUNT(*) FROM gift_transactions WHERE creator_id = $1) +
+        (SELECT COUNT(*) FROM video_call_sessions WHERE creator_id = $1 AND status = 'completed')
+      ) as total`,
       [creatorId],
     );
 
@@ -116,6 +120,22 @@ export class PostgresEarningsRepository implements IEarningsRepository {
         JOIN virtual_gifts vg ON gt.gift_id = vg.gift_id
         JOIN "user" u ON gt.user_id = u.id
         WHERE gt.creator_id = $1
+
+        UNION ALL
+
+        -- Videollamadas (Video Calls)
+        SELECT 
+          vcs.id,
+          'VIDEO_CALL'::text as type,
+          'Sesión de videollamada'::text as description,
+          vcs.price_coins as gross_amount,
+          vcs.price_coins * 0.70 as net_amount,
+          vcs.price_coins * 0.30 as platform_fee,
+          vcs.created_at as date,
+          u.name as buyer_name
+        FROM video_call_sessions vcs
+        JOIN "user" u ON vcs.user_id = u.id
+        WHERE vcs.creator_id = $1 AND vcs.status = 'completed'
       )
       SELECT * FROM all_earnings
       WHERE 
@@ -133,6 +153,9 @@ export class PostgresEarningsRepository implements IEarningsRepository {
         UNION ALL
         SELECT gt.id FROM gift_transactions gt 
         WHERE gt.creator_id = $1
+        UNION ALL
+        SELECT vcs.id FROM video_call_sessions vcs
+        WHERE vcs.creator_id = $1 AND vcs.status = 'completed'
       ) as total;
     `;
 
