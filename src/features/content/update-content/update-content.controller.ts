@@ -26,7 +26,7 @@ export class UpdateContentController {
   constructor(private readonly handler: UpdateContentHandler) {}
 
   @Patch(':contentId')
-  @Roles(Role.PANTER, Role.MODEL, Role.ADMIN)
+  @Roles(Role.MODEL, Role.ADMIN)
   public async updateContent(
     @Req() req: AuthenticatedRequest,
     @Param('contentId') contentId: string,

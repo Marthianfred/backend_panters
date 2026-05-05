@@ -55,7 +55,7 @@ describe('RolesGuard', () => {
   });
 
   it('debería denegar el acceso si no hay usuario en el request', () => {
-    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.PANTER]);
+    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue([Role.MODEL]);
 
     const mockContext = {
       getHandler: jest.fn(),

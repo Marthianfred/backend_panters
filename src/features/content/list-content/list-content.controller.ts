@@ -23,7 +23,7 @@ export class ListContentController {
   constructor(private readonly handler: ListContentHandler) {}
 
   @Get('list')
-  @Roles(Role.SUBSCRIBER, Role.PANTER, Role.MODEL, Role.ADMIN)
+  @Roles(Role.SUBSCRIBER, Role.MODEL, Role.ADMIN)
   public async listContents(
     @Req() req: AuthenticatedRequest,
     @Res() res: Response,

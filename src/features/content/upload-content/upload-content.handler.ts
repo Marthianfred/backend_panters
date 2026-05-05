@@ -10,7 +10,7 @@ import type {
   UploadContentRequest,
   UploadContentResponse,
 } from './upload-content.models';
-import { InvalidPriceError } from './upload-content.models';
+import { InvalidPriceError, ProfileNotFoundError } from './upload-content.models';
 
 @Injectable()
 export class UploadContentHandler {
@@ -33,7 +33,7 @@ export class UploadContentHandler {
     
     const profile = await this.profileRepository.getProfileByUserId(request.creatorId);
     if (!profile) {
-      throw new Error('No se encontró un perfil asociado para esta creadora (Panter).');
+      throw new ProfileNotFoundError();
     }
 
     const contentId = crypto.randomUUID();

@@ -1,3 +1,5 @@
+import { BadRequestException } from '@nestjs/common';
+
 export class GiftNotFoundError extends Error {
   constructor(public readonly giftId: string) {
     super(`Regalo no encontrado: ${giftId}`);
@@ -19,10 +21,9 @@ export class UserNotFoundError extends Error {
   }
 }
 
-export class InsufficientBalanceError extends Error {
+export class InsufficientBalanceError extends BadRequestException {
   constructor(public readonly userId: string) {
-    super(`Saldo insuficiente para el usuario: ${userId}`);
-    this.name = 'InsufficientBalanceError';
+    super('No posee PTC suficientes para la compra');
   }
 }
 

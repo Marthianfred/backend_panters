@@ -42,7 +42,7 @@ export class RequestPrivateChatHandler {
     );
 
     if (!paymentResult) {
-      throw new BadRequestException('Saldo insuficiente para iniciar el chat privado.');
+      throw new BadRequestException('No posee PTC suficientes para la compra');
     }
 
     const streamId = randomUUID();

@@ -1,3 +1,5 @@
+import { BadRequestException } from '@nestjs/common';
+
 export interface PurchaseContentRequest {
   subscriberId: string;
   contentId: string;
@@ -16,9 +18,8 @@ export class ContentNotFoundError extends Error {
   }
 }
 
-export class InsufficientCoinsError extends Error {
+export class InsufficientCoinsError extends BadRequestException {
   constructor() {
-    super('No possee suficientes Panter Coins para desbloquear esto.');
-    this.name = 'InsufficientCoinsError';
+    super('No posee PTC suficientes para la compra');
   }
 }

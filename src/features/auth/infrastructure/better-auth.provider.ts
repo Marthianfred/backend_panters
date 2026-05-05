@@ -32,8 +32,35 @@ export const BetterAuthProvider: Provider = {
       database: pool,
       hooks: {
         after: createAuthMiddleware(async (ctx) => {
+          const returned = ctx.context.returned;
+
+          // Si hay un error (identificado por tener un código o ser un error de Better Auth)
+          if (returned && typeof returned === 'object') {
+            const error = returned as any;
+            const errorCode = error.code || (error.body && typeof error.body === 'object' ? error.body.code : null);
+            
+            if (errorCode) {
+              const errorMap: Record<string, string> = {
+                'USER_ALREADY_EXISTS': 'El correo electrónico ya está registrado.',
+                'EMAIL_ALREADY_EXISTS': 'El correo electrónico ya está registrado.',
+                'USERNAME_IS_ALREADY_TAKEN': 'El nombre de usuario ya está en uso. Por favor, elige otro.',
+                'INVALID_EMAIL_OR_PASSWORD': 'Correo electrónico o contraseña incorrectos.',
+                'USER_NOT_FOUND': 'Usuario no encontrado.',
+                'INVALID_PASSWORD': 'Contraseña incorrecta.',
+                'SESSION_EXPIRED': 'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.',
+                'EMAIL_NOT_VERIFIED': 'Debes verificar tu correo electrónico antes de iniciar sesión.',
+              };
+
+              if (errorMap[errorCode]) {
+                return ctx.json({
+                  ...error,
+                  message: errorMap[errorCode],
+                }, { status: 400 });
+              }
+            }
+          }
+
           if (ctx.path === '/sign-in/email' && ctx.method === 'POST') {
-            const returned = ctx.context.returned;
             const user = ctx.context.newSession?.user || (returned as any)?.user;
 
             if (user) {

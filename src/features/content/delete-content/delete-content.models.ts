@@ -1,3 +1,5 @@
+import { NotFoundException, ForbiddenException } from '@nestjs/common';
+
 export class DeleteContentRequest {
   constructor(
     public readonly contentId: string,
@@ -12,13 +14,13 @@ export class DeleteContentResponse {
   ) {}
 }
 
-export class ContentNotFoundError extends Error {
+export class ContentNotFoundError extends NotFoundException {
   constructor() {
     super('Contenido no encontrado.');
   }
 }
 
-export class UnauthorizedDeleteError extends Error {
+export class UnauthorizedDeleteError extends ForbiddenException {
   constructor() {
     super('No tiene permisos para eliminar este contenido.');
   }

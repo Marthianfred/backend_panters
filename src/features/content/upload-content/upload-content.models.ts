@@ -1,3 +1,5 @@
+import { BadRequestException, NotFoundException } from '@nestjs/common';
+
 export interface UploadContentRequest {
   creatorId: string;
   title: string;
@@ -17,9 +19,14 @@ export interface UploadContentResponse {
   presignedThumbnailUploadUrl?: string; 
 }
 
-export class InvalidPriceError extends Error {
+export class InvalidPriceError extends BadRequestException {
   constructor() {
-    super('El precio en Panter Coins debe ser mayor o igual a cero.');
-    this.name = 'InvalidPriceError';
+    super('El precio debe ser mayor o igual a cero.');
+  }
+}
+
+export class ProfileNotFoundError extends NotFoundException {
+  constructor() {
+    super('No se encontró un perfil asociado para esta modelo.');
   }
 }

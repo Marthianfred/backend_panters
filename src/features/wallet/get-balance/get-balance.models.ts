@@ -1,3 +1,5 @@
+import { NotFoundException } from '@nestjs/common';
+
 export interface GetBalanceRequest {
   userId: string;
 }
@@ -8,9 +10,8 @@ export interface GetBalanceResponse {
   lastUpdated: Date;
 }
 
-export class WalletNotFoundError extends Error {
+export class WalletNotFoundError extends NotFoundException {
   constructor(userId: string) {
-    super(`No se encontró una wallet de Panter Coin para el usuario ${userId}`);
-    this.name = 'WalletNotFoundError';
+    super(`No se encontró una billetera de Panter Coin para el usuario ${userId}`);
   }
 }

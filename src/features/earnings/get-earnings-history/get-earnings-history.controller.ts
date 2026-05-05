@@ -13,7 +13,7 @@ export class GetEarningsHistoryController {
   constructor(private readonly handler: GetEarningsHistoryHandler) {}
 
   @Get('history')
-  @Roles(Role.PANTER, Role.MODEL)
+  @Roles(Role.MODEL)
   public async getHistory(
     @Req() req: AuthenticatedRequest,
     @Query('page') page?: string,

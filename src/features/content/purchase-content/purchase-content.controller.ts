@@ -25,7 +25,7 @@ export class PurchaseContentController {
   constructor(private readonly handler: PurchaseContentHandler) {}
 
   @Post('purchase')
-  @Roles(Role.SUBSCRIBER)
+  @Roles(Role.SUBSCRIBER, Role.MODEL, Role.ADMIN)
   public async purchase(
     @Req() req: AuthenticatedRequest,
     @Body() body: { contentId: string },
@@ -54,7 +54,7 @@ export class PurchaseContentController {
         return;
       }
       if (error instanceof InsufficientCoinsError) {
-        res.status(HttpStatus.PAYMENT_REQUIRED).json({ error: error.message });
+        res.status(HttpStatus.BAD_REQUEST).json({ error: error.message });
         return;
       }
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({

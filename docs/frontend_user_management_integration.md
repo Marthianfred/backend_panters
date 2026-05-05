@@ -13,9 +13,7 @@ export enum UserRoleFlag {
   ADMIN = 'admin',
   MODERATOR = 'moderator',
   MODEL = 'model',
-  CREATOR = 'creator',
   SUBSCRIBER = 'subscriber',
-  PANTER = 'panter'
 }
 
 export type ModerationAction = 'archived' | 'blocked';

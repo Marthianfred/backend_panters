@@ -14,7 +14,7 @@ import { Role } from '../../../core/auth/roles.enum';
 import { RolesGuard } from '../../../core/auth/guards/roles.guard';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import type { AuthenticatedRequest } from '../../auth/types/auth.types';
-import { InvalidPriceError } from './upload-content.models';
+import { InvalidPriceError, ProfileNotFoundError } from './upload-content.models';
 
 @Controller('api/v1/content')
 @UseGuards(AuthGuard, RolesGuard)
@@ -22,7 +22,7 @@ export class UploadContentController {
   constructor(private readonly handler: UploadContentHandler) {}
 
   @Post('upload')
-  @Roles(Role.PANTER, Role.MODEL, Role.ADMIN)
+  @Roles(Role.MODEL, Role.ADMIN)
   public async upload(
     @Req() req: AuthenticatedRequest,
     @Body() body: { title: string; description: string; price: number, type?: string, mimeType: string, thumbnailMimeType?: string, accessType: string },
@@ -53,6 +53,10 @@ export class UploadContentController {
     } catch (error) {
       if (error instanceof InvalidPriceError) {
         res.status(HttpStatus.BAD_REQUEST).json({ error: error.message });
+        return;
+      }
+      if (error instanceof ProfileNotFoundError) {
+        res.status(HttpStatus.NOT_FOUND).json({ error: error.message });
         return;
       }
       console.error('[UploadContentController] Error:', error);
