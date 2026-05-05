@@ -30,7 +30,6 @@ describe('GetPlatformRevenueHandler', () => {
   });
 
   it('should correctly calculate revenue metrics including conversion to USD', async () => {
-    // Arrange
     const mockMetrics = {
       totalGrossPtc: 1000,
       totalPlatformPtc: 300,
@@ -40,16 +39,14 @@ describe('GetPlatformRevenueHandler', () => {
 
     const query = { startDate: '2024-01-01', endDate: '2024-01-31' };
 
-    // Act
     const result = await handler.execute(query);
 
-    // Assert
     expect(result.grossRevenue.ptc).toBe(1000);
-    expect(result.grossRevenue.usd).toBe(100); // 1000 * 0.1
+    expect(result.grossRevenue.usd).toBe(100);
     expect(result.platformCommission.ptc).toBe(300);
-    expect(result.platformCommission.usd).toBe(30); // 300 * 0.1
+    expect(result.platformCommission.usd).toBe(30);
     expect(result.creatorEarnings.ptc).toBe(700);
-    expect(result.creatorEarnings.usd).toBe(70); // 700 * 0.1
+    expect(result.creatorEarnings.usd).toBe(70);
     expect(repository.getRevenueMetrics).toHaveBeenCalledWith(
       new Date(query.startDate),
       new Date(query.endDate),
@@ -57,7 +54,6 @@ describe('GetPlatformRevenueHandler', () => {
   });
 
   it('should handle zero revenue correctly', async () => {
-    // Arrange
     const mockMetrics = {
       totalGrossPtc: 0,
       totalPlatformPtc: 0,
@@ -65,10 +61,8 @@ describe('GetPlatformRevenueHandler', () => {
     };
     mockRepository.getRevenueMetrics.mockResolvedValue(mockMetrics);
 
-    // Act
     const result = await handler.execute({});
 
-    // Assert
     expect(result.grossRevenue.ptc).toBe(0);
     expect(result.grossRevenue.usd).toBe(0);
   });

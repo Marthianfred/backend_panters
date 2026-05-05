@@ -32,26 +32,34 @@ export class S3HomeVideoStorageService implements IHomeVideoStorageService {
   }
 
   public async uploadVideo(
-    file: Express.Multer.File,
+    file: Express.Multer.File, 
     key: string,
+    onProgress?: (bytesSent: number, totalBytes: number) => void
   ): Promise<string> {
-    const command = new PutObjectCommand({
-      Bucket: this.bucketName,
-      Key: key,
-      Body: file.buffer,
-      ContentType: file.mimetype,
-    });
+    try {
+      const command = new PutObjectCommand({
+        Bucket: this.bucketName,
+        Key: key,
+        Body: file.buffer,
+        ContentType: file.mimetype,
+        ContentLength: file.size,
+      });
 
-    await this.s3Client.send(command);
-    
-    
-    const endpoint = this.configService.getOrThrow<string>('AWS_ENDPOINT');
-    
-    if (this.configService.get<string>('AWS_USE_PATH_STYLE_ENDPOINT') === 'true') {
-      return `${endpoint}/${this.bucketName}/${key}`;
+      if (onProgress) {
+        onProgress(Math.floor(file.size * 0.5), file.size);
+      }
+
+      await this.s3Client.send(command);
+
+      if (onProgress) {
+        onProgress(file.size, file.size);
+      }
+
+      return `https://${this.bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
+    } catch (error) {
+      console.error('Error al subir video a S3:', error);
+      throw new Error(`No se pudo subir el video a S3: ${error.message}`);
     }
-    
-    return `https://${this.bucketName}.s3.amazonaws.com/${key}`;
   }
 
   public async deleteVideo(key: string): Promise<void> {
@@ -69,5 +77,15 @@ export class S3HomeVideoStorageService implements IHomeVideoStorageService {
     });
     
     return await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
+  }
+
+  public async getUploadPresignedUrl(key: string, contentType: string): Promise<string> {
+    const command = new PutObjectCommand({
+      Bucket: this.bucketName,
+      Key: key,
+      ContentType: contentType,
+    });
+    
+    return await getSignedUrl(this.s3Client, command, { expiresIn: 600 }); // 10 minutos para subir
   }
 }

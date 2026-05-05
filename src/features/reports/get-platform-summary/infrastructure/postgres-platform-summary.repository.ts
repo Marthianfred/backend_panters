@@ -54,7 +54,6 @@ export class PostgresPlatformSummaryRepository implements IPlatformSummaryReposi
       params.push(endDate);
     }
 
-    // Combinamos regalos, ventas de contenido y videollamadas
     const query = `
       WITH model_revenue AS (
         -- Regalos

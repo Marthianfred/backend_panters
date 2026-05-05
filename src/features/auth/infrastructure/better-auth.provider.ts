@@ -34,7 +34,6 @@ export const BetterAuthProvider: Provider = {
         after: createAuthMiddleware(async (ctx) => {
           const returned = ctx.context.returned;
 
-          // Si hay un error (identificado por tener un código o ser un error de Better Auth)
           if (returned && typeof returned === 'object') {
             const error = returned as any;
             const errorCode = error.code || (error.body && typeof error.body === 'object' ? error.body.code : null);
@@ -64,7 +63,6 @@ export const BetterAuthProvider: Provider = {
             const user = ctx.context.newSession?.user || (returned as any)?.user;
 
             if (user) {
-              // Verificar si el usuario está activo usando el caso de uso
               const isActive = await checkUserActivityUseCase.execute(user.id);
               if (!isActive) {
                 const { APIError } = await import('better-auth/api');

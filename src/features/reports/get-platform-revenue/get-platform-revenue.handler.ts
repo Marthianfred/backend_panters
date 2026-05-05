@@ -4,7 +4,7 @@ import { PlatformRevenueResponseDto, GetPlatformRevenueQueryDto } from './get-pl
 
 @Injectable()
 export class GetPlatformRevenueHandler {
-  private readonly PTC_TO_USD_RATE = 0.1; // 100 PTC = 10 USD
+  private readonly PTC_TO_USD_RATE = 0.1;
 
   constructor(
     @Inject('IPlatformRevenueRepository')
@@ -31,7 +31,7 @@ export class GetPlatformRevenueHandler {
         usd: this.convertToUsd(metrics.totalCreatorPtc),
       },
       subscriptionRevenue: {
-        ptc: metrics.totalSubscriptionUsd * 10, // Inversa de la tasa 0.1 para propósitos de reporte
+        ptc: metrics.totalSubscriptionUsd * 10,
         usd: metrics.totalSubscriptionUsd,
       },
       generatedAt: new Date().toISOString(),

@@ -41,27 +41,22 @@ export class RegisterClientService {
     } catch (error: any) {
       console.error('[AUTH_REGISTER_ERROR]', error);
 
-      // Si ya es una excepción de NestJS, relanzarla
       if (error instanceof BadRequestException || error instanceof InternalServerErrorException) {
         throw error;
       }
 
-      // Intentar obtener el cuerpo del error (puede venir como string o objeto)
       let errorBody = error.body;
       if (typeof errorBody === 'string') {
         try {
           errorBody = JSON.parse(errorBody);
         } catch (e) {
-          // No es JSON, ignorar
         }
       }
 
-      // Extraer el código de error de varias posibles estructuras
       const errorCode = (errorBody && typeof errorBody === 'object' ? errorBody.code : null) || 
                         error.code || 
                         (typeof error.message === 'string' ? error.message : '');
 
-      // Mapeo de errores de duplicación (Email/Usuario)
       if (errorCode.toString().includes('USER_ALREADY_EXISTS') || 
           errorCode.toString().includes('EMAIL_ALREADY_EXISTS')) {
         throw new BadRequestException('El correo electrónico ya está registrado.');
@@ -71,7 +66,6 @@ export class RegisterClientService {
         throw new BadRequestException('El nombre de usuario ya está en uso. Por favor, elige otro.');
       }
 
-      // Si es un error 400 (Bad Request) de Better Auth, relanzarlo como BadRequestException de NestJS
       if (error.status === 400 || error.statusCode === 400) {
         const message = (errorBody && typeof errorBody === 'object' ? errorBody.message : null) || 
                         error.message || 
@@ -79,7 +73,6 @@ export class RegisterClientService {
         throw new BadRequestException(message);
       }
 
-      // Si no se pudo identificar el error, lanzar 500 con el mensaje original para debugging (temporal)
       throw new InternalServerErrorException(
         `Error interno al procesar el registro. Detalle: ${error.message || 'Error desconocido'}`
       );
