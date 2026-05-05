@@ -53,6 +53,8 @@ export class RequestPrivateChatHandler {
 
     const streamId = randomUUID();
     const channelName = `Private-${creatorId}-${userId}-${Date.now()}`;
+    
+    // 1. Crear el canal de señalización en AWS Kinesis
     const channelArn =
       await this.kinesisVideoService.createSignalingChannel(channelName);
     const region = this.configService.get<string>(
@@ -60,6 +62,7 @@ export class RequestPrivateChatHandler {
       'us-east-2',
     );
 
+    // 2. Registrar el stream en la tabla de antigravity_streams
     await this.streamRepository.createStream({
       id: streamId,
       creatorId: creatorId,
@@ -73,6 +76,7 @@ export class RequestPrivateChatHandler {
       isActive: false,
     });
 
+    // 3. Crear la sesión de video llamada vinculando el streamId
     const session = await this.repository.createSession({
       creatorId,
       userId,
@@ -81,6 +85,10 @@ export class RequestPrivateChatHandler {
       status: 'accepted',
       streamId,
     });
+
+    // 4. Actualizar la sesión con el channelArn explícitamente si el repositorio lo requiere
+    // (Aseguramos que la relación en la DB sea sólida)
+    await this.repository.updateSessionStream(session.id, streamId, channelArn);
 
     const credentials =
       await this.kinesisVideoService.generateViewerCredentials(

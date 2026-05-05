@@ -20,7 +20,7 @@ import { Roles } from '../../core/auth/decorators/roles.decorator';
 import { Role } from '../../core/auth/roles.enum';
 import type { AuthenticatedRequest } from '../auth/types/auth.types';
 
-@Controller('video-chat')
+@Controller('api/v1/video-chat')
 @UseGuards(AuthGuard, RolesGuard)
 export class VideoChatController {
   constructor(
