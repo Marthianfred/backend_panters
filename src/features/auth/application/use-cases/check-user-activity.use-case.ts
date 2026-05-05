@@ -9,11 +9,6 @@ export class CheckUserActivityUseCase {
     private readonly pool: Pool,
   ) {}
 
-  /**
-   * Verifica si un usuario está activo en la base de datos.
-   * @param userId ID del usuario a verificar.
-   * @returns true si está activo, false de lo contrario.
-   */
   async execute(userId: string): Promise<boolean> {
     const query = 'SELECT is_active FROM "user" WHERE id = $1';
     const result = await this.pool.query(query, [userId]);

@@ -47,7 +47,6 @@ export class StartPrivateChatHandler {
       throw new BadRequestException('Esta sesión ya ha finalizado.');
     }
 
-    // Notificar que este usuario se ha unido
     const role = isCreator ? 'MASTER' : 'VIEWER';
     this.liveChatGateway.server
       .to(`live_${session.creatorId}`)
@@ -57,7 +56,6 @@ export class StartPrivateChatHandler {
         role,
       });
 
-    // Lógica de inicio del temporizador si es el primer inicio
     this.manageTimer(session);
 
     return {
@@ -71,11 +69,9 @@ export class StartPrivateChatHandler {
     const timerName = `timer_${session.id}`;
 
     try {
-      // Si ya existe el temporizador, no hacemos nada (ya está corriendo)
       this.schedulerRegistry.getTimeout(timerName);
       return;
     } catch {
-      // Si no existe, lo creamos
       const durationMs = session.durationMinutes * 60 * 1000;
       let remainingSeconds = session.durationMinutes * 60;
 
@@ -83,7 +79,6 @@ export class StartPrivateChatHandler {
         `Iniciando temporizador para sesión ${session.id}: ${session.durationMinutes} min`,
       );
 
-      // Intervalo para enviar actualizaciones de tiempo cada segundo
       const intervalName = `interval_${session.id}`;
       const interval = setInterval(() => {
         remainingSeconds--;
@@ -100,14 +95,12 @@ export class StartPrivateChatHandler {
           try {
             this.schedulerRegistry.deleteInterval(intervalName);
           } catch {
-            // Ignorar
           }
         }
       }, 1000);
 
       this.schedulerRegistry.addInterval(intervalName, interval);
 
-      // Timeout para finalizar la llamada automáticamente
       const timeout = setTimeout(() => {
         this.logger.log(
           `Tiempo agotado para sesión ${session.id}. Finalizando...`,
@@ -127,7 +120,6 @@ export class StartPrivateChatHandler {
             try {
               this.schedulerRegistry.deleteTimeout(timerName);
             } catch {
-              // Ignorar
             }
           });
       }, durationMs);

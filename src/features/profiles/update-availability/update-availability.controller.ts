@@ -26,10 +26,6 @@ export class UpdateAvailabilityDto {
 export class UpdateAvailabilityController {
   constructor(private readonly handler: UpdateAvailabilityHandler) {}
 
-  /**
-   * Obtiene la disponibilidad del usuario actual (para el switch de la Topbar)
-   * Permitimos a todos los roles autenticados acceder para evitar errores 403 en el layout global.
-   */
   @Get('me')
   @Roles(Role.MODEL, Role.SUBSCRIBER, Role.ADMIN)
   async getMyAvailability(
@@ -42,15 +38,10 @@ export class UpdateAvailabilityController {
       res.status(HttpStatus.OK).json({ data: response });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      // Si el usuario no tiene un perfil con disponibilidad (ej. un admin o subscriber nuevo), 
-      // devolvemos un estado por defecto en lugar de un error para no romper el front.
       res.status(HttpStatus.OK).json({ data: { userId: req.user.id, isOnline: false } });
     }
   }
 
-  /**
-   * Obtiene la disponibilidad de cualquier modelo por su userId (para suscriptores en el perfil)
-   */
   @Get(':userId')
   @Roles(Role.MODEL, Role.SUBSCRIBER, Role.ADMIN)
   async getUserAvailability(
@@ -66,9 +57,6 @@ export class UpdateAvailabilityController {
     }
   }
 
-  /**
-   * Actualiza la disponibilidad (solo modelos)
-   */
   @Put()
   @Roles(Role.MODEL, Role.ADMIN)
   async updateAvailability(

@@ -74,7 +74,6 @@ export class UploadHomeVideoHandler {
     try {
       const id = dto.key.split('/').pop().split('.')[0];
 
-      // Obtenemos la URL base configurada en el .env
       const baseUrl =
         process.env.AWS_URL ||
         `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com`;
@@ -120,7 +119,6 @@ export class UploadHomeVideoHandler {
     file: Express.Multer.File,
     clientId?: string,
   ): Promise<HomeVideoUploadResponse> {
-    // Mantener para compatibilidad, pero optimizado
     if (clientId) {
       this.emitStatus(clientId, {
         status: 'starting',

@@ -35,7 +35,6 @@ export class GetProfileController {
 
       const response = await this.handler.execute({ userId });
 
-      // Adjuntar el rol de la sesión al perfil
       const profileWithRole = {
         ...response,
         role: role,

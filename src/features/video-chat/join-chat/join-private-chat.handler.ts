@@ -72,7 +72,6 @@ export class JoinPrivateChatHandler {
         role,
       );
 
-    // IMPORTANTE: Devolvemos el channelArn para que el front no tenga undefined
     return {
       sessionId: session.id,
       role,

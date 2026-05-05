@@ -50,7 +50,6 @@ export class EndPrivateChatHandler {
 
     await this.repository.updateSessionStatus(sessionId, 'completed');
 
-    // Notificar a ambas partes vía WebSocket que la llamada ha finalizado
     this.liveChatGateway.server
       .to(`live_${session.creatorId}`)
       .emit('privateChatEnded', {

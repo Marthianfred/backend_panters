@@ -89,6 +89,6 @@ export class S3HomeVideoStorageService implements IHomeVideoStorageService {
       ContentType: contentType,
     });
 
-    return await getSignedUrl(this.s3Client, command, { expiresIn: 600 }); // 10 minutos para subir
+    return await getSignedUrl(this.s3Client, command, { expiresIn: 600 });
   }
 }
