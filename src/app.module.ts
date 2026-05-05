@@ -30,7 +30,6 @@ import { ScheduleModule } from '@nestjs/schedule';
   imports: [
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
-
       isGlobal: true,
       envFilePath: '.env',
     }),

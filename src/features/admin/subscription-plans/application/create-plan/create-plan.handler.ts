@@ -11,7 +11,9 @@ export class CreatePlanHandler {
     private readonly planRepository: ISubscriptionPlanRepository,
   ) {}
 
-  async handle(dto: CreateSubscriptionPlanDto): Promise<SubscriptionPlanEntity> {
+  async handle(
+    dto: CreateSubscriptionPlanDto,
+  ): Promise<SubscriptionPlanEntity> {
     return await this.planRepository.create({
       name: dto.name,
       description: dto.description || null,

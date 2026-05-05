@@ -2,12 +2,18 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsDateString, IsOptional } from 'class-validator';
 
 export class GetPlatformRevenueQueryDto {
-  @ApiProperty({ required: false, description: 'Fecha de inicio para el reporte (ISO 8601)' })
+  @ApiProperty({
+    required: false,
+    description: 'Fecha de inicio para el reporte (ISO 8601)',
+  })
   @IsOptional()
   @IsDateString()
   startDate?: string;
 
-  @ApiProperty({ required: false, description: 'Fecha de fin para el reporte (ISO 8601)' })
+  @ApiProperty({
+    required: false,
+    description: 'Fecha de fin para el reporte (ISO 8601)',
+  })
   @IsOptional()
   @IsDateString()
   endDate?: string;

@@ -1,9 +1,22 @@
-import { Body, Controller, Post, UseGuards, Request, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import type { AuthenticatedRequest } from '../../auth/types/auth.types';
 import { ReactToPostHandler } from './post-reactions.handler';
 import { ReactToPostDto, PostReactionResponse } from './post-reactions.models';
-import { ApiOperation, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 
 @ApiTags('Panter Wall Interactions')
 @ApiBearerAuth()
@@ -23,7 +36,7 @@ export class PostReactionsController {
   @ApiResponse({ status: 404, description: 'Publicación no encontrada' })
   public async react(
     @Request() req: AuthenticatedRequest,
-    @Body() body: ReactToPostDto
+    @Body() body: ReactToPostDto,
   ): Promise<PostReactionResponse> {
     const userId = req.user.id;
     return await this.handler.execute(userId, body);

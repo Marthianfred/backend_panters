@@ -13,7 +13,7 @@ export class UpdatePlanHandler {
   async execute(id: string, dto: UpdatePlanDto): Promise<SubscriptionPlanDto> {
     const existing = await this.repository.findById(id);
     if (!existing) {
-        throw new NotFoundException(`El plan ${id} no existe.`);
+      throw new NotFoundException(`El plan ${id} no existe.`);
     }
     return await this.repository.update(id, dto);
   }

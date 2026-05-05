@@ -17,7 +17,6 @@ import type { AuthenticatedRequest } from '../../auth/types/auth.types';
 @Controller('api/v1/streams')
 @UseGuards(AuthGuard, SubscriptionGuard)
 export class GetViewerAccessController {
-
   constructor(private readonly handler: GetViewerAccessHandler) {}
 
   @Get(':streamId/access')

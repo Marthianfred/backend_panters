@@ -23,7 +23,6 @@ export class UploadAvatarHandler {
     request: UploadAvatarRequest,
   ): Promise<UploadAvatarResponse> {
     try {
-      
       const webpBuffer = await sharp(request.fileBuffer)
         .webp({ quality: 80 })
         .toBuffer();

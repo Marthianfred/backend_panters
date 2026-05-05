@@ -1,4 +1,12 @@
-import { Controller, Post, Get, Body, UseGuards, Req, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  UseGuards,
+  Req,
+  Logger,
+} from '@nestjs/common';
 import { PurchasePtcService } from '../application/purchase-ptc.service';
 import { CreatePurchaseSessionDto } from '../dto/purchase-ptc.dto';
 import { AuthGuard } from '@/features/auth/guards/auth.guard';
@@ -9,13 +17,11 @@ export class PurchasePtcController {
 
   constructor(private readonly purchasePtcService: PurchasePtcService) {}
 
-  
   @Get('packages')
   async getPackages() {
     return await this.purchasePtcService.getAvailablePackages();
   }
 
-  
   @Post('session')
   @UseGuards(AuthGuard)
   async createPurchaseSession(
@@ -23,9 +29,11 @@ export class PurchasePtcController {
     @Req() req: any,
   ) {
     const userId = req.user.id;
-    
-    this.logger.log(`Solicitud de compra de PTC recibida para el usuario: ${userId}`);
-    
+
+    this.logger.log(
+      `Solicitud de compra de PTC recibida para el usuario: ${userId}`,
+    );
+
     return await this.purchasePtcService.createSession(userId, dto.priceId);
   }
 }

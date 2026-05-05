@@ -15,9 +15,12 @@ import {
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Observable } from 'rxjs';
 import { UploadHomeVideoHandler } from './upload-video.handler';
-import { RegisterUploadDto, UnsupportedMimeTypeError } from './upload-video.models';
-import type { 
-  HomeVideoUploadResponse, 
+import {
+  RegisterUploadDto,
+  UnsupportedMimeTypeError,
+} from './upload-video.models';
+import type {
+  HomeVideoUploadResponse,
   HomeVideoUploadUrlResponse,
 } from './upload-video.models';
 
@@ -26,7 +29,9 @@ export class UploadHomeVideoController {
   constructor(private readonly handler: UploadHomeVideoHandler) {}
 
   @Sse('upload-status/:clientId')
-  public uploadStatus(@Param('clientId') clientId: string): Observable<MessageEvent> {
+  public uploadStatus(
+    @Param('clientId') clientId: string,
+  ): Observable<MessageEvent> {
     return this.handler.getStatusStream(clientId);
   }
 
@@ -36,7 +41,10 @@ export class UploadHomeVideoController {
     @Query('mimeType') mimeType: string,
   ): Promise<HomeVideoUploadUrlResponse> {
     if (!clientId || !mimeType) {
-      throw new HttpException('clientId y mimeType son requeridos.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'clientId y mimeType son requeridos.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
     return await this.handler.generateUploadUrl(clientId, mimeType);
   }
@@ -56,7 +64,7 @@ export class UploadHomeVideoController {
   @UseInterceptors(
     FileInterceptor('video', {
       limits: {
-        fileSize: 100 * 1024 * 1024, 
+        fileSize: 100 * 1024 * 1024,
       },
     }),
   )
@@ -65,13 +73,19 @@ export class UploadHomeVideoController {
     @Query('clientId') clientId?: string,
   ): Promise<HomeVideoUploadResponse> {
     if (!file) {
-      throw new HttpException('No se recibió ningún archivo.', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'No se recibió ningún archivo.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
     try {
       return await this.handler.execute(file, clientId);
     } catch (error) {
       if (error instanceof UnsupportedMimeTypeError) {
-        throw new HttpException(error.message, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+        throw new HttpException(
+          error.message,
+          HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+        );
       }
       throw new HttpException(
         'Falla del servidor al cargar el video.',

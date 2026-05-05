@@ -15,22 +15,22 @@ export class RolesGuard implements CanActivate {
     ]);
 
     if (!requiredRoles || requiredRoles.length === 0) {
-      return true; 
+      return true;
     }
 
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const user = request.user; 
+    const user = request.user;
 
     if (!user) {
-      return false; 
+      return false;
     }
 
-    
     const userRole = (user.role as Role) || Role.SUBSCRIBER;
 
-    console.log(`[RolesGuard] Debug: userRole=${userRole}, requiredRoles=${requiredRoles}`);
+    console.log(
+      `[RolesGuard] Debug: userRole=${userRole}, requiredRoles=${requiredRoles}`,
+    );
 
-    
     if (userRole === Role.ADMIN) {
       console.log('[RolesGuard] Access granted to ADMIN');
       return true;
@@ -38,7 +38,9 @@ export class RolesGuard implements CanActivate {
 
     const hasRole = requiredRoles.includes(userRole);
     if (!hasRole) {
-      console.warn(`[RolesGuard] Access denied for user ${user.id} with role ${userRole}. Required: ${requiredRoles}`);
+      console.warn(
+        `[RolesGuard] Access denied for user ${user.id} with role ${userRole}. Required: ${requiredRoles}`,
+      );
     }
 
     return hasRole;

@@ -12,9 +12,15 @@ import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../auth/decorators/roles.decorator';
 
 import { AdminCreateUserHandler } from './admin-create-user/admin-create-user.handler';
-import { AdminCreateUserRequest, AdminCreateUserResponse } from './admin-create-user/admin-create-user.models';
+import {
+  AdminCreateUserRequest,
+  AdminCreateUserResponse,
+} from './admin-create-user/admin-create-user.models';
 import { ListUsersHandler } from './list-users/list-users.handler';
-import { ListUsersQuery, ListUsersResponse } from './list-users/list-users.models';
+import {
+  ListUsersQuery,
+  ListUsersResponse,
+} from './list-users/list-users.models';
 import { UpdateUserStatusHandler } from './update-user-status/update-user-status.handler';
 import { UpdateUserStatusRequest } from './update-user-status/update-user-status.models';
 import { ChangeRoleHandler } from './change-role/change-role.handler';
@@ -59,12 +65,18 @@ export class UsersManagementController {
   }
 
   @Patch('users/:id/status')
-  async updateUserStatus(@Param('id') id: string, @Body() request: UpdateUserStatusRequest) {
+  async updateUserStatus(
+    @Param('id') id: string,
+    @Body() request: UpdateUserStatusRequest,
+  ) {
     return this.updateUserStatusHandler.handle(id, request);
   }
 
   @Patch('users/:id/role')
-  async changeRole(@Param('id') id: string, @Body() request: ChangeRoleRequest) {
+  async changeRole(
+    @Param('id') id: string,
+    @Body() request: ChangeRoleRequest,
+  ) {
     return this.changeRoleHandler.handle(id, request);
   }
 

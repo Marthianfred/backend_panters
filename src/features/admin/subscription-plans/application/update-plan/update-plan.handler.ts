@@ -11,10 +11,15 @@ export class UpdatePlanHandler {
     private readonly planRepository: ISubscriptionPlanRepository,
   ) {}
 
-  async handle(id: string, dto: UpdateSubscriptionPlanDto): Promise<SubscriptionPlanEntity> {
+  async handle(
+    id: string,
+    dto: UpdateSubscriptionPlanDto,
+  ): Promise<SubscriptionPlanEntity> {
     const existingPlan = await this.planRepository.findById(id);
     if (!existingPlan) {
-      throw new NotFoundException(`Plan de suscripción con ID ${id} no encontrado`);
+      throw new NotFoundException(
+        `Plan de suscripción con ID ${id} no encontrado`,
+      );
     }
 
     return await this.planRepository.update(id, {

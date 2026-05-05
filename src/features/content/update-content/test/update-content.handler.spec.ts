@@ -26,7 +26,16 @@ describe('UpdateContentHandler', () => {
   it('debería actualizar los metadatos exitosamente si es la propietaria', async () => {
     const creatorId = 'c_123';
     const contentId = 'post_1';
-    const mockContent = { id: contentId, creatorId, title: 'Old', description: 'Old', type: 'photo', price: 1, createdAt: new Date(), url: '...' };
+    const mockContent = {
+      id: contentId,
+      creatorId,
+      title: 'Old',
+      description: 'Old',
+      type: 'photo',
+      price: 1,
+      createdAt: new Date(),
+      url: '...',
+    };
 
     mockRepository.getContentById.mockResolvedValue(mockContent);
 
@@ -35,23 +44,43 @@ describe('UpdateContentHandler', () => {
     const response = await handler.execute(request);
 
     expect(response.success).toBe(true);
-    expect(mockRepository.updateContent).toHaveBeenCalledWith(contentId, updates);
+    expect(mockRepository.updateContent).toHaveBeenCalledWith(
+      contentId,
+      updates,
+    );
   });
 
   it('debería lanzar ContentNotFoundError si el post no existe para actualizar', async () => {
     mockRepository.getContentById.mockResolvedValue(null);
 
-    const request = new UpdateContentRequest('invalid', 'any', { title: '...' });
+    const request = new UpdateContentRequest('invalid', 'any', {
+      title: '...',
+    });
 
-    await expect(handler.execute(request)).rejects.toThrow(ContentNotFoundError);
+    await expect(handler.execute(request)).rejects.toThrow(
+      ContentNotFoundError,
+    );
   });
 
   it('debería lanzar UnauthorizedUpdateError si no es la propietaria', async () => {
-    const mockContent = { id: 'p1', creatorId: 'owner', title: 'Old', description: 'Old', type: 'photo', price: 1, createdAt: new Date(), url: '...' };
+    const mockContent = {
+      id: 'p1',
+      creatorId: 'owner',
+      title: 'Old',
+      description: 'Old',
+      type: 'photo',
+      price: 1,
+      createdAt: new Date(),
+      url: '...',
+    };
     mockRepository.getContentById.mockResolvedValue(mockContent);
 
-    const request = new UpdateContentRequest('p1', 'intruder', { title: '...' });
+    const request = new UpdateContentRequest('p1', 'intruder', {
+      title: '...',
+    });
 
-    await expect(handler.execute(request)).rejects.toThrow(UnauthorizedUpdateError);
+    await expect(handler.execute(request)).rejects.toThrow(
+      UnauthorizedUpdateError,
+    );
   });
 });

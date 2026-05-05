@@ -29,8 +29,6 @@ export class TypeOrmPushSubscriptionRepository implements PushSubscriptionReposi
   }
 
   async findByRole(role: string): Promise<PushSubscription[]> {
-    
-    
     const entities = await this.repository
       .createQueryBuilder('sub')
       .innerJoin('user', 'u', 'u.id = sub.user_id')

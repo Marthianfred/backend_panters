@@ -4,7 +4,6 @@ import { Request, Response } from 'express';
 import { BETTER_AUTH_TOKEN } from '../infrastructure/better-auth.provider';
 import { toNodeHandler } from 'better-auth/node';
 
-
 jest.mock('better-auth/node', () => ({
   toNodeHandler: jest
     .fn()
@@ -16,7 +15,7 @@ describe('AuthService', () => {
   let mockAuthInstance: unknown;
 
   beforeEach(async () => {
-    mockAuthInstance = {}; 
+    mockAuthInstance = {};
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -37,7 +36,6 @@ describe('AuthService', () => {
 
   describe('handleAuthRequest', () => {
     it('debe llamar al handler de nodo con la instancia de auth', async () => {
-      
       const mockHandler = (
         toNodeHandler as unknown as jest.Mock<jest.Mock<Promise<boolean>>>
       )();

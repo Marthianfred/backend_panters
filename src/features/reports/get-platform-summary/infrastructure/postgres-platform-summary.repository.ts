@@ -37,14 +37,19 @@ export class PostgresPlatformSummaryRepository implements IPlatformSummaryReposi
     return parseInt(result[0].count);
   }
 
-  async getFinancialStatsPerModel(startDate?: Date, endDate?: Date): Promise<Array<{
-    creatorId: string;
-    creatorName: string;
-    totalEarnedPtc: number;
-  }>> {
+  async getFinancialStatsPerModel(
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<
+    Array<{
+      creatorId: string;
+      creatorName: string;
+      totalEarnedPtc: number;
+    }>
+  > {
     const params: any[] = [];
     let dateFilter = '';
-    
+
     if (startDate) {
       dateFilter += ` AND created_at >= $${params.length + 1}`;
       params.push(startDate);
@@ -91,7 +96,7 @@ export class PostgresPlatformSummaryRepository implements IPlatformSummaryReposi
     `;
 
     const result = await this.entityManager.query(query, params);
-    return result.map(row => ({
+    return result.map((row) => ({
       creatorId: row.creatorId,
       creatorName: row.creatorName,
       totalEarnedPtc: parseFloat(row.totalEarnedPtc),

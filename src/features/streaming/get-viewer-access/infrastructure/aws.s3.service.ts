@@ -39,4 +39,3 @@ export class AwsS3Service implements IS3Service {
     return getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
   }
 }
-

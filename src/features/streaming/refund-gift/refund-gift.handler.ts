@@ -1,7 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import type { 
-  IRefundGiftRepository, 
-} from './interfaces/refund-gift.repository.interface';
+import type { IRefundGiftRepository } from './interfaces/refund-gift.repository.interface';
 import { REFUND_GIFT_REPOSITORY } from './interfaces/refund-gift.repository.interface';
 import {
   RefundGiftRequest,
@@ -17,7 +15,9 @@ export class RefundGiftHandler {
     private readonly repository: IRefundGiftRepository,
   ) {}
 
-  public async execute(request: RefundGiftRequest): Promise<RefundGiftResponse> {
+  public async execute(
+    request: RefundGiftRequest,
+  ): Promise<RefundGiftResponse> {
     const result = await this.repository.processRefundTransaction(
       request.transactionId,
       request.reason,

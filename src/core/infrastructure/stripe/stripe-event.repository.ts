@@ -22,7 +22,6 @@ export class StripeEventRepository {
     });
   }
 
-  
   async findById(id: string): Promise<StripeEventRecord | null> {
     const query = `
       SELECT id, type, status, metadata, created_at as "createdAt", updated_at as "updatedAt"
@@ -33,17 +32,23 @@ export class StripeEventRepository {
     return result.rows[0] || null;
   }
 
-  
-  async recordProcessing(id: string, type: string, metadata?: any): Promise<void> {
+  async recordProcessing(
+    id: string,
+    type: string,
+    metadata?: any,
+  ): Promise<void> {
     const query = `
       INSERT INTO stripe_processed_events (id, type, status, metadata)
       VALUES ($1, $2, 'processing', $3)
       ON CONFLICT (id) DO NOTHING;
     `;
-    await this.pool.query(query, [id, type, metadata ? JSON.stringify(metadata) : null]);
+    await this.pool.query(query, [
+      id,
+      type,
+      metadata ? JSON.stringify(metadata) : null,
+    ]);
   }
 
-  
   async markAsCompleted(id: string): Promise<void> {
     const query = `
       UPDATE stripe_processed_events
@@ -53,7 +58,6 @@ export class StripeEventRepository {
     await this.pool.query(query, [id]);
   }
 
-  
   async markAsFailed(id: string): Promise<void> {
     const query = `
       UPDATE stripe_processed_events

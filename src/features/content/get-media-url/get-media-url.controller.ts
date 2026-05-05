@@ -45,7 +45,7 @@ export class GetMediaUrlController {
         res.status(HttpStatus.FORBIDDEN).json({ error: error.message });
         return;
       }
-      
+
       console.error('[GetMediaUrlController] Error:', error);
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         error: 'Ocurrió un error al intentar obtener el contenido.',

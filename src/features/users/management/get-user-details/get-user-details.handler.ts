@@ -8,7 +8,7 @@ export class GetUserDetailsHandler {
 
   async handle(userId: string): Promise<UserDetailsResponse> {
     const details = await this.repository.getUserDetails(userId);
-    
+
     if (!details) {
       throw new NotFoundException(`Usuario con ID ${userId} no encontrado.`);
     }

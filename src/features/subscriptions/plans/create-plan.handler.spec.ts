@@ -29,7 +29,11 @@ describe('CreatePlanHandler', () => {
       benefits: ['Acceso total'],
     };
 
-    repository.create.mockResolvedValue({ id: 'uuid-1', ...dto, isActive: true });
+    repository.create.mockResolvedValue({
+      id: 'uuid-1',
+      ...dto,
+      isActive: true,
+    });
 
     const result = await handler.execute(dto);
 

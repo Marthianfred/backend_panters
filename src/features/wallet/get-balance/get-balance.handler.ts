@@ -25,10 +25,9 @@ export class GetBalanceHandler {
       throw new WalletNotFoundError(request.userId);
     }
 
-    
     return {
       balance: walletData.panterCoinBalance,
-      currency: 'PTC', 
+      currency: 'PTC',
       lastUpdated: walletData.lastUpdated,
     };
   }

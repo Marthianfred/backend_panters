@@ -1,4 +1,11 @@
-import { Controller, Post, Headers, Req, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Headers,
+  Req,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { StripeService } from '@/core/infrastructure/stripe/stripe.service';
 import { HandleUnifiedStripeWebhookUseCase } from '../application/handle-stripe-webhook.use-case';
@@ -15,7 +22,9 @@ export class StripeWebhookController {
   ) {}
 
   @Post()
-  @ApiOperation({ summary: 'Punto de entrada único para todos los eventos de Stripe' })
+  @ApiOperation({
+    summary: 'Punto de entrada único para todos los eventos de Stripe',
+  })
   async handleWebhook(
     @Headers('stripe-signature') signature: string,
     @Req() request: Request & { rawBody: Buffer },
@@ -26,19 +35,23 @@ export class StripeWebhookController {
     }
 
     try {
-      
-      
-      const event = this.stripeService.constructEvent(request.rawBody, signature);
-      
-      this.logger.log(`Webhook validado correctamente: ${event.type} [${event.id}]`);
+      const event = this.stripeService.constructEvent(
+        request.rawBody,
+        signature,
+      );
 
-      
+      this.logger.log(
+        `Webhook validado correctamente: ${event.type} [${event.id}]`,
+      );
+
       await this.handleWebhookUseCase.execute(event);
-      
+
       return { received: true, eventId: event.id };
     } catch (err) {
-      this.logger.error(`Fallo crítico en el procesamiento del webhook: ${err.message}`);
-      
+      this.logger.error(
+        `Fallo crítico en el procesamiento del webhook: ${err.message}`,
+      );
+
       throw new BadRequestException(`Webhook Error: ${err.message}`);
     }
   }

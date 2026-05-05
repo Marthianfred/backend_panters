@@ -42,20 +42,30 @@ describe('AdminCreateUserHandler', () => {
         name: request.name,
       },
     });
-    expect(mockRepository.updateUserRole).toHaveBeenCalledWith('user-123', 'model');
-    expect(mockRepository.setMustChangePassword).toHaveBeenCalledWith('user-123', true);
+    expect(mockRepository.updateUserRole).toHaveBeenCalledWith(
+      'user-123',
+      'model',
+    );
+    expect(mockRepository.setMustChangePassword).toHaveBeenCalledWith(
+      'user-123',
+      true,
+    );
     expect(result.mustChangePassword).toBe(true);
     expect(result.userId).toBe('user-123');
   });
 
   it('debe lanzar error si falla signUpEmail', async () => {
-    mockAuthInstance.api.signUpEmail.mockRejectedValue(new Error('Auth failed'));
-    
-    await expect(handler.handle({
-      email: 'error@test.com',
-      password: 'password',
-      name: 'Error',
-      role: UserRoleFlag.SUBSCRIBER
-    })).rejects.toThrow('Auth failed');
+    mockAuthInstance.api.signUpEmail.mockRejectedValue(
+      new Error('Auth failed'),
+    );
+
+    await expect(
+      handler.handle({
+        email: 'error@test.com',
+        password: 'password',
+        name: 'Error',
+        role: UserRoleFlag.SUBSCRIBER,
+      }),
+    ).rejects.toThrow('Auth failed');
   });
 });

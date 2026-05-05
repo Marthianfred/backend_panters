@@ -28,42 +28,42 @@ export class AuthSeedingService implements OnModuleInit {
       'adminPassword123',
       'Panters Admin',
       'c901e6a7-f58c-493e-b567-5d554a32ac46',
-      'admin'
+      'admin',
     );
     await this.seedUser(
       'model@panters.com',
       'modelPassword123',
       'Panters Model',
       'f88b9012-bd7c-47ea-a2a9-c70a84d2f831',
-      'model'
+      'model',
     );
     await this.seedUser(
       'model1@panters.com',
       'model1Password123',
       'Panters Model 1',
       'f88b9012-bd7c-47ea-a2a9-c70a84d2f831',
-      'model'
+      'model',
     );
     await this.seedUser(
       'model2@panters.com',
       'model2Password123',
       'Panters Model 2',
       'f88b9012-bd7c-47ea-a2a9-c70a84d2f831',
-      'model'
+      'model',
     );
     await this.seedUser(
       'model3@panters.com',
       'model3Password123',
       'Panters Model 3',
       'f88b9012-bd7c-47ea-a2a9-c70a84d2f831',
-      'model'
+      'model',
     );
     await this.seedUser(
       'client@panters.com',
       'clientPassword123',
       'Panters Cliente',
       'd80b1a31-4521-4ec0-9329-30d4d1adc025',
-      'subscriber'
+      'subscriber',
     );
   }
 

@@ -24,36 +24,44 @@ export class TypeOrmNotificationRepository implements NotificationRepository {
   }
 
   async saveMany(notifications: Notification[]): Promise<void> {
-    const ormEntities = notifications.map(n => this.repository.create({
-      userId: n.userId,
-      title: n.title,
-      body: n.body,
-      data: n.data,
-      isRead: n.isRead,
-    }));
+    const ormEntities = notifications.map((n) =>
+      this.repository.create({
+        userId: n.userId,
+        title: n.title,
+        body: n.body,
+        data: n.data,
+        isRead: n.isRead,
+      }),
+    );
     await this.repository.save(ormEntities);
   }
 
-  async findByUserId(userId: string, onlyUnread: boolean): Promise<Notification[]> {
+  async findByUserId(
+    userId: string,
+    onlyUnread: boolean,
+  ): Promise<Notification[]> {
     const where: any = { userId };
     if (onlyUnread) {
       where.isRead = false;
     }
-    
+
     const entities = await this.repository.find({
       where,
       order: { createdAt: 'DESC' },
     });
 
-    return entities.map(entity => new Notification(
-      entity.id,
-      entity.userId,
-      entity.title,
-      entity.body,
-      entity.data,
-      entity.isRead,
-      entity.createdAt,
-    ));
+    return entities.map(
+      (entity) =>
+        new Notification(
+          entity.id,
+          entity.userId,
+          entity.title,
+          entity.body,
+          entity.data,
+          entity.isRead,
+          entity.createdAt,
+        ),
+    );
   }
 
   async markAsRead(id: string): Promise<void> {

@@ -30,7 +30,13 @@ export class UpdateContentController {
   public async updateContent(
     @Req() req: AuthenticatedRequest,
     @Param('contentId') contentId: string,
-    @Body() body: { title?: string; description?: string; price?: number, accessType?: string },
+    @Body()
+    body: {
+      title?: string;
+      description?: string;
+      price?: number;
+      accessType?: string;
+    },
     @Res() res: Response,
   ): Promise<void> {
     try {

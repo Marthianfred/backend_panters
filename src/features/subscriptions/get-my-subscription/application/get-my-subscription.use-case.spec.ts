@@ -34,7 +34,9 @@ describe('GetMySubscriptionUseCase', () => {
       cancelAtPeriodEnd: false,
     };
 
-    subscriptionsRepository.findActiveWithPlanByUserId.mockResolvedValue(mockResult);
+    subscriptionsRepository.findActiveWithPlanByUserId.mockResolvedValue(
+      mockResult,
+    );
 
     const result = await useCase.execute('user-1');
 
@@ -50,7 +52,6 @@ describe('GetMySubscriptionUseCase', () => {
   it('debería lanzar NotFoundException si no hay suscripción activa', async () => {
     subscriptionsRepository.findActiveWithPlanByUserId.mockResolvedValue(null);
 
-    await expect(useCase.execute('user-1'))
-      .rejects.toThrow(NotFoundException);
+    await expect(useCase.execute('user-1')).rejects.toThrow(NotFoundException);
   });
 });

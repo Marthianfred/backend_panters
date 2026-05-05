@@ -5,7 +5,10 @@ import { HOME_VIDEO_REPOSITORY } from '../interfaces/home-video.repository.inter
 import type { IHomeVideoRepository } from '../interfaces/home-video.repository.interface';
 import { HOME_VIDEO_STORAGE_SERVICE } from '../interfaces/home-video-storage.service.interface';
 import type { IHomeVideoStorageService } from '../interfaces/home-video-storage.service.interface';
-import { UnsupportedMimeTypeError, UploadProgressData } from './upload-video.models';
+import {
+  UnsupportedMimeTypeError,
+  UploadProgressData,
+} from './upload-video.models';
 import type { HomeVideoUploadResponse } from './upload-video.models';
 import type { HomeVideo } from '../home-video.entity';
 
@@ -36,28 +39,47 @@ export class UploadHomeVideoHandler {
     }
   }
 
-  public async generateUploadUrl(clientId: string, mimeType: string): Promise<any> {
+  public async generateUploadUrl(
+    clientId: string,
+    mimeType: string,
+  ): Promise<any> {
     const id = crypto.randomUUID();
     const extension = mimeType === 'video/webm' ? '.webm' : '.mp4';
     const key = `VideosLoopHome/${id}${extension}`;
-    
-    const uploadUrl = await this.storageService.getUploadPresignedUrl(key, mimeType);
-    
-    this.emitStatus(clientId, { status: 'starting', progress: 10, message: 'URL de subida generada' });
-    
+
+    const uploadUrl = await this.storageService.getUploadPresignedUrl(
+      key,
+      mimeType,
+    );
+
+    this.emitStatus(clientId, {
+      status: 'starting',
+      progress: 10,
+      message: 'URL de subida generada',
+    });
+
     return { uploadUrl, key, clientId };
   }
 
-  public async registerUpload(dto: any, clientId: string): Promise<HomeVideoUploadResponse> {
-    this.emitStatus(clientId, { status: 'saving_db', progress: 80, message: 'Registrando en base de datos...' });
-    
+  public async registerUpload(
+    dto: any,
+    clientId: string,
+  ): Promise<HomeVideoUploadResponse> {
+    this.emitStatus(clientId, {
+      status: 'saving_db',
+      progress: 80,
+      message: 'Registrando en base de datos...',
+    });
+
     try {
       const id = dto.key.split('/').pop().split('.')[0];
-      
+
       // Obtenemos la URL base configurada en el .env
-      const baseUrl = process.env.AWS_URL || `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com`;
+      const baseUrl =
+        process.env.AWS_URL ||
+        `https://${process.env.AWS_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com`;
       const url = `${baseUrl}/${dto.key}`;
-      
+
       const video: HomeVideo = {
         id,
         key: dto.key,
@@ -68,25 +90,25 @@ export class UploadHomeVideoHandler {
       };
 
       await this.repository.save(video);
-      
+
       const response = { id, url, key: dto.key };
-      
-      this.emitStatus(clientId, { 
-        status: 'completed', 
-        progress: 100, 
+
+      this.emitStatus(clientId, {
+        status: 'completed',
+        progress: 100,
         message: 'Video registrado con éxito',
-        data: response 
+        data: response,
       });
-      
+
       this.statusStreams.get(clientId)?.complete();
       this.statusStreams.delete(clientId);
-      
+
       return response;
     } catch (error) {
-      this.emitStatus(clientId, { 
-        status: 'error', 
-        progress: 0, 
-        message: `Error al registrar: ${error.message}` 
+      this.emitStatus(clientId, {
+        status: 'error',
+        progress: 0,
+        message: `Error al registrar: ${error.message}`,
       });
       this.statusStreams.get(clientId)?.complete();
       this.statusStreams.delete(clientId);
@@ -94,15 +116,26 @@ export class UploadHomeVideoHandler {
     }
   }
 
-  public async execute(file: Express.Multer.File, clientId?: string): Promise<HomeVideoUploadResponse> {
+  public async execute(
+    file: Express.Multer.File,
+    clientId?: string,
+  ): Promise<HomeVideoUploadResponse> {
     // Mantener para compatibilidad, pero optimizado
     if (clientId) {
-      this.emitStatus(clientId, { status: 'starting', progress: 10, message: 'Validando archivo...' });
+      this.emitStatus(clientId, {
+        status: 'starting',
+        progress: 10,
+        message: 'Validando archivo...',
+      });
     }
 
     if (file.mimetype !== 'video/webm') {
       if (clientId) {
-        this.emitStatus(clientId, { status: 'error', progress: 0, message: 'Formato no soportado' });
+        this.emitStatus(clientId, {
+          status: 'error',
+          progress: 0,
+          message: 'Formato no soportado',
+        });
         this.statusStreams.get(clientId)?.complete();
         this.statusStreams.delete(clientId);
       }
@@ -114,14 +147,22 @@ export class UploadHomeVideoHandler {
     const key = `VideosLoopHome/${id}${extension}`;
 
     if (clientId) {
-      this.emitStatus(clientId, { status: 'uploading_s3', progress: 30, message: 'Subiendo a AWS S3...' });
+      this.emitStatus(clientId, {
+        status: 'uploading_s3',
+        progress: 30,
+        message: 'Subiendo a AWS S3...',
+      });
     }
 
     try {
       const url = await this.storageService.uploadVideo(file, key);
 
       if (clientId) {
-        this.emitStatus(clientId, { status: 'saving_db', progress: 70, message: 'Registrando en base de datos...' });
+        this.emitStatus(clientId, {
+          status: 'saving_db',
+          progress: 70,
+          message: 'Registrando en base de datos...',
+        });
       }
 
       const video: HomeVideo = {
@@ -138,11 +179,11 @@ export class UploadHomeVideoHandler {
       const response = { id, url, key };
 
       if (clientId) {
-        this.emitStatus(clientId, { 
-          status: 'completed', 
-          progress: 100, 
+        this.emitStatus(clientId, {
+          status: 'completed',
+          progress: 100,
           message: 'Subida completada con éxito',
-          data: response 
+          data: response,
         });
         this.statusStreams.get(clientId)?.complete();
         this.statusStreams.delete(clientId);
@@ -151,10 +192,10 @@ export class UploadHomeVideoHandler {
       return response;
     } catch (error) {
       if (clientId) {
-        this.emitStatus(clientId, { 
-          status: 'error', 
-          progress: 0, 
-          message: `Error en la subida: ${error.message}` 
+        this.emitStatus(clientId, {
+          status: 'error',
+          progress: 0,
+          message: `Error en la subida: ${error.message}`,
         });
         this.statusStreams.get(clientId)?.complete();
         this.statusStreams.delete(clientId);

@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 import { IPanterRatingRepository } from '../interfaces/rate-panter.repository.interface';
-import { RatePanterRequest, RatePanterResponse, GetPanterRatingSummaryResponse } from '../rate-panter.models';
+import {
+  RatePanterRequest,
+  RatePanterResponse,
+  GetPanterRatingSummaryResponse,
+} from '../rate-panter.models';
 
 @Injectable()
 export class PostgresPanterRatingRepository implements IPanterRatingRepository {
@@ -14,7 +18,10 @@ export class PostgresPanterRatingRepository implements IPanterRatingRepository {
     });
   }
 
-  async upsertRating(subscriberId: string, data: RatePanterRequest): Promise<RatePanterResponse> {
+  async upsertRating(
+    subscriberId: string,
+    data: RatePanterRequest,
+  ): Promise<RatePanterResponse> {
     const query = `
       INSERT INTO public.panter_ratings (creator_id, subscriber_id, rating, comment, updated_at)
       VALUES ($1, $2, $3, $4, now())
@@ -26,11 +33,18 @@ export class PostgresPanterRatingRepository implements IPanterRatingRepository {
       RETURNING id, creator_id as "creatorId", subscriber_id as "subscriberId", rating, comment, created_at as "createdAt";
     `;
 
-    const result = await this.pool.query(query, [data.creatorId, subscriberId, data.rating, data.comment]);
+    const result = await this.pool.query(query, [
+      data.creatorId,
+      subscriberId,
+      data.rating,
+      data.comment,
+    ]);
     return result.rows[0];
   }
 
-  async getRatingSummary(creatorId: string): Promise<GetPanterRatingSummaryResponse> {
+  async getRatingSummary(
+    creatorId: string,
+  ): Promise<GetPanterRatingSummaryResponse> {
     const query = `
       SELECT 
         creator_id as "creatorId",
@@ -42,7 +56,7 @@ export class PostgresPanterRatingRepository implements IPanterRatingRepository {
     `;
 
     const result = await this.pool.query(query, [creatorId]);
-    
+
     if (result.rows.length === 0) {
       return {
         creatorId,

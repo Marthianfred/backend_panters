@@ -20,7 +20,7 @@ export class GetEarningsSummaryController {
   constructor(private readonly handler: GetEarningsSummaryHandler) {}
 
   @Get('summary')
-  @Roles(Role.MODEL) 
+  @Roles(Role.MODEL)
   public async getSummary(
     @Req() req: AuthenticatedRequest,
     @Res() res: Response,

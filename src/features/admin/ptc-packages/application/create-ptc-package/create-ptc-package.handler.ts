@@ -12,8 +12,6 @@ export class CreatePtcPackageHandler {
   ) {}
 
   async handle(dto: CreatePtcPackageDto): Promise<PtcPackageEntity> {
-    
-    
     return await this.ptcPackageRepository.create({
       name: dto.name,
       ptcAmount: dto.ptcAmount,

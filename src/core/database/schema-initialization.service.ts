@@ -31,8 +31,14 @@ export class SchemaInitializationService implements OnModuleInit {
 
     try {
       const possiblePaths = [
-        path.join(process.cwd(), 'src/features/auth/infrastructure/init-schema.sql'),
-        path.join(process.cwd(), 'dist/features/auth/infrastructure/init-schema.sql'),
+        path.join(
+          process.cwd(),
+          'src/features/auth/infrastructure/init-schema.sql',
+        ),
+        path.join(
+          process.cwd(),
+          'dist/features/auth/infrastructure/init-schema.sql',
+        ),
       ];
 
       const sqlPath = possiblePaths.find((p) => fs.existsSync(p));

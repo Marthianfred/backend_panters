@@ -8,29 +8,35 @@ export class StripeService {
   private readonly logger = new Logger(StripeService.name);
 
   constructor(private readonly configService: ConfigService) {
-    const secretKey = this.configService.getOrThrow<string>('STRIPE_SECRET_KEY');
+    const secretKey =
+      this.configService.getOrThrow<string>('STRIPE_SECRET_KEY');
     this.stripe = new Stripe(secretKey, {
       apiVersion: '2025-01-27.acacia' as any,
     });
   }
 
-  
   constructEvent(payload: Buffer, signature: string): Stripe.Event {
-    const webhookSecret = this.configService.getOrThrow<string>('STRIPE_WEBHOOK_SECRET');
+    const webhookSecret = this.configService.getOrThrow<string>(
+      'STRIPE_WEBHOOK_SECRET',
+    );
     try {
-      return this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+      return this.stripe.webhooks.constructEvent(
+        payload,
+        signature,
+        webhookSecret,
+      );
     } catch (err) {
       this.logger.error(`Error verificando firma de Stripe: ${err.message}`);
       throw err;
     }
   }
 
-  
-  async getCheckoutSession(sessionId: string): Promise<Stripe.Checkout.Session> {
+  async getCheckoutSession(
+    sessionId: string,
+  ): Promise<Stripe.Checkout.Session> {
     return this.stripe.checkout.sessions.retrieve(sessionId);
   }
 
-  
   async createCheckoutSession(params: {
     customerId?: string;
     customerEmail?: string;
@@ -55,13 +61,14 @@ export class StripeService {
       cancel_url: params.cancelUrl,
       metadata: {
         type: 'subscription',
-        ...(params.subscriptionId ? { subscriptionId: params.subscriptionId } : {}),
+        ...(params.subscriptionId
+          ? { subscriptionId: params.subscriptionId }
+          : {}),
         ...params.metadata,
       },
     });
   }
 
-  
   async getOrCreateCustomer(email: string, name?: string): Promise<string> {
     const customers = await this.stripe.customers.list({
       email: email,
@@ -80,7 +87,6 @@ export class StripeService {
     return customer.id;
   }
 
-  
   async createWalletTopUpSession(params: {
     userId: string;
     coinsAmount: number;

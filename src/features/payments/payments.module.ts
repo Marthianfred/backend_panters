@@ -10,13 +10,7 @@ import { PurchasePtcModule } from './purchase-ptc/purchase-ptc.module';
 
 @Global()
 @Module({
-  imports: [
-    ConfigModule,
-    
-    SubscriptionsModule,
-    WalletModule,
-    PurchasePtcModule,
-  ],
+  imports: [ConfigModule, SubscriptionsModule, WalletModule, PurchasePtcModule],
   controllers: [StripeWebhookController],
   providers: [
     StripeService,

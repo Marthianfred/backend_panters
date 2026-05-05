@@ -19,7 +19,6 @@ import { SubscriptionGuard } from '../../../features/subscriptions/guards/subscr
 @Controller('api/v1/content')
 @UseGuards(AuthGuard, RolesGuard, SubscriptionGuard)
 export class ListContentController {
-
   constructor(private readonly handler: ListContentHandler) {}
 
   @Get('list')
@@ -33,7 +32,6 @@ export class ListContentController {
     @Query('limit') limit: number,
   ): Promise<void> {
     try {
-      
       const userRole = req.user?.role || Role.SUBSCRIBER;
 
       const response = await this.handler.execute({

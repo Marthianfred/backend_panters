@@ -49,7 +49,7 @@ export class PostgresCreatorsRankingsRepository implements ICreatorsRankingsRepo
     `;
 
     const result = await this.pool.query(query, [limit]);
-    return result.rows.map(row => ({
+    return result.rows.map((row) => ({
       userId: row.userId,
       username: row.username,
       fullName: row.fullName,

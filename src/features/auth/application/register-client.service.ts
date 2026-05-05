@@ -1,16 +1,24 @@
-import { Injectable, Inject, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  BadRequestException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { BETTER_AUTH_TOKEN } from '../infrastructure/auth.constants';
 import type { BetterAuthInstance } from '../types/auth.types';
-import { RegisterClientRequest, RegisterClientResponse, VerifyEmailRequest } from '../domain/register-client.models';
+import {
+  RegisterClientRequest,
+  RegisterClientResponse,
+  VerifyEmailRequest,
+} from '../domain/register-client.models';
 
 @Injectable()
 export class RegisterClientService {
   constructor(
     @Inject(BETTER_AUTH_TOKEN)
-    private readonly authInstance: any, 
+    private readonly authInstance: any,
   ) {}
 
-  
   async register(data: RegisterClientRequest): Promise<RegisterClientResponse> {
     try {
       const result = await this.authInstance.api.signUpEmail({
@@ -41,7 +49,10 @@ export class RegisterClientService {
     } catch (error: any) {
       console.error('[AUTH_REGISTER_ERROR]', error);
 
-      if (error instanceof BadRequestException || error instanceof InternalServerErrorException) {
+      if (
+        error instanceof BadRequestException ||
+        error instanceof InternalServerErrorException
+      ) {
         throw error;
       }
 
@@ -49,44 +60,49 @@ export class RegisterClientService {
       if (typeof errorBody === 'string') {
         try {
           errorBody = JSON.parse(errorBody);
-        } catch (e) {
-        }
+        } catch (e) {}
       }
 
-      const errorCode = (errorBody && typeof errorBody === 'object' ? errorBody.code : null) || 
-                        error.code || 
-                        (typeof error.message === 'string' ? error.message : '');
+      const errorCode =
+        (errorBody && typeof errorBody === 'object' ? errorBody.code : null) ||
+        error.code ||
+        (typeof error.message === 'string' ? error.message : '');
 
-      if (errorCode.toString().includes('USER_ALREADY_EXISTS') || 
-          errorCode.toString().includes('EMAIL_ALREADY_EXISTS')) {
-        throw new BadRequestException('El correo electrónico ya está registrado.');
+      if (
+        errorCode.toString().includes('USER_ALREADY_EXISTS') ||
+        errorCode.toString().includes('EMAIL_ALREADY_EXISTS')
+      ) {
+        throw new BadRequestException(
+          'El correo electrónico ya está registrado.',
+        );
       }
 
       if (errorCode.toString().includes('USERNAME_IS_ALREADY_TAKEN')) {
-        throw new BadRequestException('El nombre de usuario ya está en uso. Por favor, elige otro.');
+        throw new BadRequestException(
+          'El nombre de usuario ya está en uso. Por favor, elige otro.',
+        );
       }
 
       if (error.status === 400 || error.statusCode === 400) {
-        const message = (errorBody && typeof errorBody === 'object' ? errorBody.message : null) || 
-                        error.message || 
-                        'Los datos de registro son inválidos.';
+        const message =
+          (errorBody && typeof errorBody === 'object'
+            ? errorBody.message
+            : null) ||
+          error.message ||
+          'Los datos de registro son inválidos.';
         throw new BadRequestException(message);
       }
 
       throw new InternalServerErrorException(
-        `Error interno al procesar el registro. Detalle: ${error.message || 'Error desconocido'}`
+        `Error interno al procesar el registro. Detalle: ${error.message || 'Error desconocido'}`,
       );
     }
   }
 
-  
-  async verify(data: VerifyEmailRequest): Promise<{ success: boolean; message: string }> {
+  async verify(
+    data: VerifyEmailRequest,
+  ): Promise<{ success: boolean; message: string }> {
     try {
-      
-      
-      
-      
-      
       const result = await this.authInstance.api.verifyEmail({
         query: {
           token: data.token,
@@ -94,7 +110,9 @@ export class RegisterClientService {
       });
 
       if (!result) {
-        throw new BadRequestException('Token de verificación inválido o expirado.');
+        throw new BadRequestException(
+          'Token de verificación inválido o expirado.',
+        );
       }
 
       return {
@@ -104,9 +122,13 @@ export class RegisterClientService {
     } catch (error: any) {
       const errorCode = error.body?.code || error.code;
       if (errorCode === 'INVALID_TOKEN' || errorCode === 'EXPIRED_TOKEN') {
-        throw new BadRequestException('El enlace de verificación es inválido o ha expirado.');
+        throw new BadRequestException(
+          'El enlace de verificación es inválido o ha expirado.',
+        );
       }
-      throw new BadRequestException('Error al verificar el correo electrónico.');
+      throw new BadRequestException(
+        'Error al verificar el correo electrónico.',
+      );
     }
   }
 }

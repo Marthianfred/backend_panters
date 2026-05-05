@@ -10,7 +10,10 @@ export class UserSubscriptionDto {
   @ApiProperty({ example: 'plan_uuid' })
   planId: string;
 
-  @ApiProperty({ example: 'pending', enum: ['pending', 'active', 'cancelled', 'expired'] })
+  @ApiProperty({
+    example: 'pending',
+    enum: ['pending', 'active', 'cancelled', 'expired'],
+  })
   status: string;
 
   @ApiProperty({ example: 'stripe', required: false })
@@ -45,4 +48,3 @@ export class CreateUserSubscriptionDto {
   startsAt?: Date;
   endsAt?: Date;
 }
-

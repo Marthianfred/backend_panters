@@ -24,8 +24,9 @@ describe('RefundGiftHandler', () => {
 
   it('debe lanzar TransactionNotFoundError si la transacción no existe', async () => {
     mockRepository.processRefundTransaction.mockResolvedValue(null);
-    await expect(handler.execute({ transactionId: 'invalid-id' }))
-      .rejects.toThrow(TransactionNotFoundError);
+    await expect(
+      handler.execute({ transactionId: 'invalid-id' }),
+    ).rejects.toThrow(TransactionNotFoundError);
   });
 
   it('debe procesar el reembolso exitosamente', async () => {
@@ -35,9 +36,15 @@ describe('RefundGiftHandler', () => {
     };
     mockRepository.processRefundTransaction.mockResolvedValue(mockResult);
 
-    const result = await handler.execute({ transactionId: 'trans-123', reason: 'Error de red' });
+    const result = await handler.execute({
+      transactionId: 'trans-123',
+      reason: 'Error de red',
+    });
 
-    expect(mockRepository.processRefundTransaction).toHaveBeenCalledWith('trans-123', 'Error de red');
+    expect(mockRepository.processRefundTransaction).toHaveBeenCalledWith(
+      'trans-123',
+      'Error de red',
+    );
     expect(result).toEqual(mockResult);
   });
 });

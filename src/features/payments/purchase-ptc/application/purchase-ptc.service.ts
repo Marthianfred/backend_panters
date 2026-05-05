@@ -13,16 +13,20 @@ export class PurchasePtcService {
     private readonly ptcPackageRepository: PtcPackageRepository,
   ) {}
 
-  
   async createSession(userId: string, priceId: string) {
-    this.logger.log(`Iniciando creación de sesión de pago para usuario ${userId} con priceId ${priceId}`);
+    this.logger.log(
+      `Iniciando creación de sesión de pago para usuario ${userId} con priceId ${priceId}`,
+    );
 
-    
     const ptcPackage = await this.ptcPackageRepository.findByPriceId(priceId);
-    
+
     if (!ptcPackage) {
-      this.logger.error(`PriceId no reconocido o no está activo en la base de datos: ${priceId}`);
-      throw new BadRequestException('El paquete de PTC seleccionado no es válido o no está disponible.');
+      this.logger.error(
+        `PriceId no reconocido o no está activo en la base de datos: ${priceId}`,
+      );
+      throw new BadRequestException(
+        'El paquete de PTC seleccionado no es válido o no está disponible.',
+      );
     }
 
     const ptcAmount = ptcPackage.ptcAmount;
@@ -41,7 +45,9 @@ export class PurchasePtcService {
         },
       });
 
-      this.logger.log(`Sesión de Checkout creada exitosamente: ${session.id} para ${ptcAmount} PTC`);
+      this.logger.log(
+        `Sesión de Checkout creada exitosamente: ${session.id} para ${ptcAmount} PTC`,
+      );
       return {
         url: session.url,
         sessionId: session.id,
@@ -52,7 +58,6 @@ export class PurchasePtcService {
     }
   }
 
-  
   async getAvailablePackages() {
     return await this.ptcPackageRepository.findAllActive();
   }

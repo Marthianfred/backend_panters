@@ -17,12 +17,6 @@ export class PostgresPantersRepository implements IPantersRepository {
   }
 
   public async getAllPanters(): Promise<PanterData[]> {
-    
-    
-    
-    
-    
-    
     const query = `
       SELECT 
         p.id as "id",

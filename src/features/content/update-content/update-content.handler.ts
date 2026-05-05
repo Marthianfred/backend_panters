@@ -18,7 +18,6 @@ export class UpdateContentHandler {
   public async execute(
     request: UpdateContentRequest,
   ): Promise<UpdateContentResponse> {
-    
     const content = await this.contentRepository.getContentById(
       request.contentId,
     );
@@ -27,17 +26,12 @@ export class UpdateContentHandler {
       throw new ContentNotFoundError();
     }
 
-    
     if (content.creatorId !== request.creatorId) {
       throw new UnauthorizedUpdateError();
     }
 
-    
     const { updates } = request;
     await this.contentRepository.updateContent(request.contentId, updates);
-
-    
-    
 
     return new UpdateContentResponse(
       true,

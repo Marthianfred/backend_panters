@@ -13,19 +13,28 @@ export class CheckExpiredSubscriptionsTask {
 
   @Cron(CronExpression.EVERY_HOUR)
   async handleCron() {
-    this.logger.log('Iniciando tarea automática de verificación de suscripciones expiradas...');
+    this.logger.log(
+      'Iniciando tarea automática de verificación de suscripciones expiradas...',
+    );
 
     try {
       const now = new Date();
-      const expiredCount = await this.userSubscriptionsRepository.markExpiredSubscriptions(now);
+      const expiredCount =
+        await this.userSubscriptionsRepository.markExpiredSubscriptions(now);
 
       if (expiredCount > 0) {
-        this.logger.log(`Se han marcado ${expiredCount} suscripciones como expiradas exitosamente.`);
+        this.logger.log(
+          `Se han marcado ${expiredCount} suscripciones como expiradas exitosamente.`,
+        );
       } else {
-        this.logger.log('No se encontraron suscripciones por expirar en este ciclo.');
+        this.logger.log(
+          'No se encontraron suscripciones por expirar en este ciclo.',
+        );
       }
     } catch (error) {
-      this.logger.error(`Error durante la verificación de suscripciones: ${error.message}`);
+      this.logger.error(
+        `Error durante la verificación de suscripciones: ${error.message}`,
+      );
     }
   }
 }

@@ -32,9 +32,9 @@ export class S3HomeVideoStorageService implements IHomeVideoStorageService {
   }
 
   public async uploadVideo(
-    file: Express.Multer.File, 
+    file: Express.Multer.File,
     key: string,
-    onProgress?: (bytesSent: number, totalBytes: number) => void
+    onProgress?: (bytesSent: number, totalBytes: number) => void,
   ): Promise<string> {
     try {
       const command = new PutObjectCommand({
@@ -75,17 +75,20 @@ export class S3HomeVideoStorageService implements IHomeVideoStorageService {
       Bucket: this.bucketName,
       Key: key,
     });
-    
+
     return await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
   }
 
-  public async getUploadPresignedUrl(key: string, contentType: string): Promise<string> {
+  public async getUploadPresignedUrl(
+    key: string,
+    contentType: string,
+  ): Promise<string> {
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: key,
       ContentType: contentType,
     });
-    
+
     return await getSignedUrl(this.s3Client, command, { expiresIn: 600 }); // 10 minutos para subir
   }
 }

@@ -4,7 +4,6 @@ import { LiveChatService } from '../application/live-chat.service';
 import { AuthService } from '../../auth/application/auth.service';
 import { Server, Socket } from 'socket.io';
 
-
 jest.mock('better-auth/node', () => ({
   fromNodeHeaders: jest.fn(),
   toNodeHandler: jest.fn(),
@@ -40,15 +39,17 @@ describe('LiveChatGateway', () => {
         time: new Date().toISOString(),
         isGift: false,
       })),
-      createGiftPayload: jest.fn().mockImplementation((_, username, giftName, iconUrl, giftId) => ({
-        id: 'test-gift-id',
-        username,
-        text: `¡Envió un ${giftName}!`,
-        time: '12:00',
-        isGift: true,
-        giftType: giftId || giftName,
-        iconUrl,
-      })),
+      createGiftPayload: jest
+        .fn()
+        .mockImplementation((_, username, giftName, iconUrl, giftId) => ({
+          id: 'test-gift-id',
+          username,
+          text: `¡Envió un ${giftName}!`,
+          time: '12:00',
+          isGift: true,
+          giftType: giftId || giftName,
+          iconUrl,
+        })),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -80,7 +81,10 @@ describe('LiveChatGateway', () => {
     const username = '@freddy';
     const text = 'Hello world';
 
-    await gateway.handleSendMessage({ creatorId, username, text }, mockSocket as Socket);
+    await gateway.handleSendMessage(
+      { creatorId, username, text },
+      mockSocket as Socket,
+    );
 
     expect(mockServer.to).toHaveBeenCalledWith(`live_${creatorId}`);
     expect(mockServer.emit).toHaveBeenCalledWith(

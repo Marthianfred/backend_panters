@@ -21,7 +21,6 @@ export class PtcPackageRepository {
     });
   }
 
-  
   async findAllActive(): Promise<PtcPackage[]> {
     const query = `
       SELECT 
@@ -44,7 +43,6 @@ export class PtcPackageRepository {
     }
   }
 
-  
   async findByPriceId(priceId: string): Promise<PtcPackage | null> {
     const query = `
       SELECT 
@@ -61,7 +59,9 @@ export class PtcPackageRepository {
       const result = await this.pool.query<PtcPackage>(query, [priceId]);
       return result.rows.length > 0 ? result.rows[0] : null;
     } catch (error) {
-      this.logger.error(`Error al buscar paquete de PTC por priceId ${priceId}: ${error.message}`);
+      this.logger.error(
+        `Error al buscar paquete de PTC por priceId ${priceId}: ${error.message}`,
+      );
       throw error;
     }
   }

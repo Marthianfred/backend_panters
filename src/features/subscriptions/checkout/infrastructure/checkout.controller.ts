@@ -10,8 +10,12 @@ export class CheckoutController {
   ) {}
 
   @Post('session')
-  @ApiOperation({ summary: 'Genera una sesión de pago en Stripe para una suscripción' })
-  async createSession(@Body() dto: createCheckoutSessionUseCase_1.CreateCheckoutSessionDto) {
+  @ApiOperation({
+    summary: 'Genera una sesión de pago en Stripe para una suscripción',
+  })
+  async createSession(
+    @Body() dto: createCheckoutSessionUseCase_1.CreateCheckoutSessionDto,
+  ) {
     return this.createCheckoutSessionUseCase.execute(dto);
   }
 }

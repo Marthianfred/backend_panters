@@ -37,9 +37,9 @@ export class GetTransactionHistoryController {
       res.status(HttpStatus.OK).json(response);
     } catch (error) {
       console.error('Error in GetTransactionHistoryController:', error);
-      res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .json({ error: 'Error interno al obtener el historial de transacciones.' });
+      res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+        error: 'Error interno al obtener el historial de transacciones.',
+      });
     }
   }
 }

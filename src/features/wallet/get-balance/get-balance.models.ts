@@ -12,6 +12,8 @@ export interface GetBalanceResponse {
 
 export class WalletNotFoundError extends NotFoundException {
   constructor(userId: string) {
-    super(`No se encontró una billetera de Panter Coin para el usuario ${userId}`);
+    super(
+      `No se encontró una billetera de Panter Coin para el usuario ${userId}`,
+    );
   }
 }

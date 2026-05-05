@@ -8,18 +8,15 @@ import { STREAM_REPOSITORY } from './get-viewer-access/interfaces/stream.reposit
 import { KINESIS_VIDEO_SERVICE } from './get-viewer-access/interfaces/kinesis.service.interface';
 import { S3_SERVICE } from './get-viewer-access/interfaces/s3.service.interface';
 
-
 import { SendGiftController } from './send-gift/send-gift.controller';
 import { SendGiftHandler } from './send-gift/send-gift.handler';
 import { SEND_GIFT_REPOSITORY } from './send-gift/interfaces/send-gift.repository.interface';
 import { PostgresSendGiftRepository } from './send-gift/infrastructure/postgres.send-gift.repository';
 
-
 import { RefundGiftController } from './refund-gift/refund-gift.controller';
 import { RefundGiftHandler } from './refund-gift/refund-gift.handler';
 import { REFUND_GIFT_REPOSITORY } from './refund-gift/interfaces/refund-gift.repository.interface';
 import { PostgresRefundGiftRepository } from './refund-gift/infrastructure/postgres.refund-gift.repository';
-
 
 import { ListGiftsController } from './list-gifts/list-gifts.controller';
 import { ListGiftsHandler } from './list-gifts/list-gifts.handler';
@@ -28,14 +25,11 @@ import { PostgresListGiftsRepository } from './list-gifts/infrastructure/postgre
 
 import { LiveChatModule } from '../live-chat/live-chat.module';
 
-
 import { CreateStreamController } from './create-stream/create-stream.controller';
 import { CreateStreamHandler } from './create-stream/create-stream.handler';
 
-
 import { GetActiveStreamsController } from './get-active-streams/get-active-streams.controller';
 import { GetActiveStreamsHandler } from './get-active-streams/get-active-streams.handler';
-
 
 import { StopStreamController } from './stop-stream/stop-stream.controller';
 import { StopStreamHandler } from './stop-stream/stop-stream.handler';

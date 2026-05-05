@@ -1,5 +1,11 @@
-import { IsEmail, IsInt, IsNotEmpty, IsString, Min, MinLength } from 'class-validator';
-
+import {
+  IsEmail,
+  IsInt,
+  IsNotEmpty,
+  IsString,
+  Min,
+  MinLength,
+} from 'class-validator';
 
 export class RegisterClientRequest {
   @IsEmail()
@@ -33,7 +39,6 @@ export class RegisterClientRequest {
   age!: number;
 }
 
-
 export class RegisterClientResponse {
   success!: boolean;
   message!: string;
@@ -43,7 +48,6 @@ export class RegisterClientResponse {
     name: string;
   };
 }
-
 
 export class VerifyEmailRequest {
   @IsString()

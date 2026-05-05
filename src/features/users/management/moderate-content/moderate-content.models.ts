@@ -2,7 +2,7 @@ import { IsEnum } from 'class-validator';
 
 export enum ModerationAction {
   ARCHIVE = 'archived',
-  BLOCK = 'blocked'
+  BLOCK = 'blocked',
 }
 
 export class ModerateContentRequest {

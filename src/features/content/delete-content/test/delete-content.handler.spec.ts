@@ -63,7 +63,9 @@ describe('DeleteContentHandler', () => {
 
     const request = new DeleteContentRequest('invalid', 'any');
 
-    await expect(handler.execute(request)).rejects.toThrow(ContentNotFoundError);
+    await expect(handler.execute(request)).rejects.toThrow(
+      ContentNotFoundError,
+    );
   });
 
   it('debería lanzar UnauthorizedDeleteError si otra persona intenta borrarlo', async () => {

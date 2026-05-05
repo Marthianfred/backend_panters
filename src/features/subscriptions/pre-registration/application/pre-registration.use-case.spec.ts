@@ -50,7 +50,7 @@ describe('PreRegistrationUseCase', () => {
     plansRepository = module.get(SUBSCRIPTION_PLANS_REPOSITORY);
     userSubscriptionsRepository = module.get(USER_SUBSCRIPTIONS_REPOSITORY);
     createCheckoutSessionUseCase = module.get(CreateCheckoutSessionUseCase);
-    
+
     createCheckoutSessionUseCase.execute.mockResolvedValue({
       url: 'https://stripe.com/checkout',
       sessionId: 'sess_123',
@@ -75,14 +75,24 @@ describe('PreRegistrationUseCase', () => {
   });
 
   it('debe lanzar BadRequestException si el registro de usuario falla', async () => {
-    plansRepository.findById.mockResolvedValue({ id: 'plan-uuid', isActive: true });
-    registerClientService.register.mockResolvedValue({ success: false, message: 'Error', user: null as any });
+    plansRepository.findById.mockResolvedValue({
+      id: 'plan-uuid',
+      isActive: true,
+    });
+    registerClientService.register.mockResolvedValue({
+      success: false,
+      message: 'Error',
+      user: null as any,
+    });
 
     await expect(useCase.execute(mockDto)).rejects.toThrow(BadRequestException);
   });
 
   it('debe completar el pre-registro exitosamente', async () => {
-    plansRepository.findById.mockResolvedValue({ id: 'plan-uuid', isActive: true });
+    plansRepository.findById.mockResolvedValue({
+      id: 'plan-uuid',
+      isActive: true,
+    });
     registerClientService.register.mockResolvedValue({
       success: true,
       message: 'Ok',
@@ -97,10 +107,12 @@ describe('PreRegistrationUseCase', () => {
     expect(result.subscriptionId).toBe('sub-id');
     expect(result.checkoutUrl).toBe('https://stripe.com/checkout');
     expect(result.sessionId).toBe('sess_123');
-    expect(userSubscriptionsRepository.create).toHaveBeenCalledWith(expect.objectContaining({
-      userId: 'user-id',
-      planId: 'plan-uuid',
-      status: 'pending',
-    }));
+    expect(userSubscriptionsRepository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        userId: 'user-id',
+        planId: 'plan-uuid',
+        status: 'pending',
+      }),
+    );
   });
 });

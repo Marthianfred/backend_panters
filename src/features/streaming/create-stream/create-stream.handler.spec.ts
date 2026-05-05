@@ -16,7 +16,11 @@ describe('CreateStreamHandler', () => {
     };
 
     mockKinesisVideoService = {
-      createSignalingChannel: jest.fn().mockResolvedValue('arn:aws:kinesisvideo:us-east-2:123456789012:signaling-channel/test-stream'),
+      createSignalingChannel: jest
+        .fn()
+        .mockResolvedValue(
+          'arn:aws:kinesisvideo:us-east-2:123456789012:signaling-channel/test-stream',
+        ),
       generateProducerCredentials: jest.fn().mockResolvedValue({
         accessKeyId: 'test-key',
         secretAccessKey: 'test-secret',
@@ -67,12 +71,14 @@ describe('CreateStreamHandler', () => {
     const result = await handler.execute(request);
 
     expect(mockKinesisVideoService.createSignalingChannel).toHaveBeenCalled();
-    expect(mockKinesisVideoService.generateProducerCredentials).toHaveBeenCalledWith(
+    expect(
+      mockKinesisVideoService.generateProducerCredentials,
+    ).toHaveBeenCalledWith(
       expect.stringContaining('arn:aws:kinesisvideo'),
       'creator-123',
     );
     expect(mockStreamRepository.createStream).toHaveBeenCalled();
-    
+
     expect(result).toHaveProperty('streamId');
     expect(result).toHaveProperty('credentials');
     expect(result.credentials.accessKeyId).toBe('test-key');

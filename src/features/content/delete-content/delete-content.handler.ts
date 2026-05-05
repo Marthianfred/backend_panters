@@ -22,7 +22,6 @@ export class DeleteContentHandler {
   public async execute(
     request: DeleteContentRequest,
   ): Promise<DeleteContentResponse> {
-    
     const content = await this.contentRepository.getContentById(
       request.contentId,
     );
@@ -31,13 +30,10 @@ export class DeleteContentHandler {
       throw new ContentNotFoundError();
     }
 
-    
     if (content.creatorId !== request.creatorId) {
       throw new UnauthorizedDeleteError();
     }
 
-    
-    
     if (content.url) {
       const extension = content.url.substring(content.url.lastIndexOf('.'));
       await this.storageService.deleteContent(
@@ -48,9 +44,10 @@ export class DeleteContentHandler {
       );
     }
 
-    
     if (content.thumbnailUrl) {
-      const thumbExt = content.thumbnailUrl.substring(content.thumbnailUrl.lastIndexOf('.'));
+      const thumbExt = content.thumbnailUrl.substring(
+        content.thumbnailUrl.lastIndexOf('.'),
+      );
       await this.storageService.deleteContent(
         request.creatorId,
         request.contentId,
@@ -59,11 +56,7 @@ export class DeleteContentHandler {
       );
     }
 
-    
     await this.contentRepository.deleteContent(request.contentId);
-
-    
-    
 
     return new DeleteContentResponse(
       true,

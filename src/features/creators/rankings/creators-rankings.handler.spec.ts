@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreatorsRankingsHandler } from './creators-rankings.handler';
-import { CREATORS_RANKINGS_REPOSITORY, ICreatorsRankingsRepository } from './infrastructure/postgres.creators-rankings.repository';
+import {
+  CREATORS_RANKINGS_REPOSITORY,
+  ICreatorsRankingsRepository,
+} from './infrastructure/postgres.creators-rankings.repository';
 
 describe('CreatorsRankingsHandler', () => {
   let handler: CreatorsRankingsHandler;
@@ -50,7 +53,7 @@ describe('CreatorsRankingsHandler', () => {
     expect(result).toHaveLength(2);
     expect(result[0].userId).toBe('girl-1');
     expect(result[0].totalReactions).toBe(500);
-    expect(result[0].rating).toBe(500); 
+    expect(result[0].rating).toBe(500);
     expect(repository.getTopCreators).toHaveBeenCalledWith(2);
   });
 

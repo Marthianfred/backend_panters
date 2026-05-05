@@ -12,7 +12,7 @@ export class DeletePlanHandler {
   async execute(id: string): Promise<void> {
     const existing = await this.repository.findById(id);
     if (!existing) {
-        throw new NotFoundException(`El plan ${id} no existe.`);
+      throw new NotFoundException(`El plan ${id} no existe.`);
     }
     await this.repository.delete(id);
   }

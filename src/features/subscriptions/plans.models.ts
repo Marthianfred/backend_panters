@@ -1,5 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsUUID, IsNotEmpty, IsString, IsNumber, Min, IsArray, IsOptional, IsBoolean } from 'class-validator';
+import {
+  IsUUID,
+  IsNotEmpty,
+  IsString,
+  IsNumber,
+  Min,
+  IsArray,
+  IsOptional,
+  IsBoolean,
+} from 'class-validator';
 
 export class SubscriptionPlanDto {
   @ApiProperty({ description: 'ID del plan', example: '123e4567-er89...' })
@@ -8,19 +17,28 @@ export class SubscriptionPlanDto {
   @ApiProperty({ description: 'Nombre del plan', example: 'PLAN MISIONERO' })
   name: string;
 
-  @ApiProperty({ description: 'Descripción opcional', example: 'Beneficios VIP' })
+  @ApiProperty({
+    description: 'Descripción opcional',
+    example: 'Beneficios VIP',
+  })
   description?: string;
 
-  @ApiProperty({ description: 'Precio en USD', example: 25.00 })
+  @ApiProperty({ description: 'Precio en USD', example: 25.0 })
   priceUsd: number;
 
   @ApiProperty({ description: 'Duración en días', example: 30 })
   durationDays: number;
 
-  @ApiProperty({ description: 'Lista de beneficios', example: ['Chat ilimitado'] })
+  @ApiProperty({
+    description: 'Lista de beneficios',
+    example: ['Chat ilimitado'],
+  })
   benefits: string[];
 
-  @ApiProperty({ description: 'ID del precio en Stripe', example: 'price_1...' })
+  @ApiProperty({
+    description: 'ID del precio en Stripe',
+    example: 'price_1...',
+  })
   stripePriceId?: string;
 
   @ApiProperty({ description: 'Si el plan está activo', example: true })
@@ -44,7 +62,7 @@ export class CreatePlanDto {
   @IsOptional()
   description?: string;
 
-  @ApiProperty({ example: 25.00 })
+  @ApiProperty({ example: 25.0 })
   @IsNumber()
   @Min(0)
   priceUsd: number;

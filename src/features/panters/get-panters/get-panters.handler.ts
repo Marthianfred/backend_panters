@@ -14,20 +14,17 @@ export class GetPantersHandler {
   ) {}
 
   public async execute(
-    
     request: GetPantersRequest,
   ): Promise<GetPantersResponse> {
     const rawPanters = await this.pantersRepository.getAllPanters();
 
     const panters = rawPanters.map((panter) => {
-      
-      
       let parsedServices: import('./interfaces/panters.repository.interface').PanterServiceItem[] =
         [];
       if (typeof panter.services === 'string') {
         try {
           parsedServices = JSON.parse(
-            panter.services as string,
+            panter.services,
           ) as import('./interfaces/panters.repository.interface').PanterServiceItem[];
         } catch {
           parsedServices = [];
@@ -63,7 +60,7 @@ export class GetPantersHandler {
       isOnline: Boolean(panter.isOnline),
       reviewsCount: Number(panter.reviewsCount) || 0,
       isVip: Boolean(panter.isVip),
-      services: [], 
+      services: [],
       rating: Number(panter.rating) || 0,
     }));
 

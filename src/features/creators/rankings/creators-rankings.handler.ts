@@ -10,17 +10,16 @@ export class CreatorsRankingsHandler {
     private readonly repository: ICreatorsRankingsRepository,
   ) {}
 
-  
   async handle(limit: number = 10): Promise<CreatorRankingResponse[]> {
     const rankings = await this.repository.getTopCreators(limit);
 
-    return rankings.map(ranking => ({
+    return rankings.map((ranking) => ({
       userId: ranking.userId,
       username: ranking.username,
       fullName: ranking.fullName,
       avatarUrl: ranking.avatarUrl || undefined,
       totalReactions: ranking.totalReactions,
-      rating: ranking.totalReactions, 
+      rating: ranking.totalReactions,
     }));
   }
 }

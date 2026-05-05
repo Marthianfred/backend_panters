@@ -5,7 +5,10 @@ import type { IStreamRepository } from '../get-viewer-access/interfaces/stream.r
 import { STREAM_REPOSITORY } from '../get-viewer-access/interfaces/stream.repository.interface';
 import type { IKinesisVideoService } from '../get-viewer-access/interfaces/kinesis.service.interface';
 import { KINESIS_VIDEO_SERVICE } from '../get-viewer-access/interfaces/kinesis.service.interface';
-import { CreateStreamRequest, CreateStreamResponse } from './create-stream.models';
+import {
+  CreateStreamRequest,
+  CreateStreamResponse,
+} from './create-stream.models';
 
 @Injectable()
 export class CreateStreamHandler {
@@ -17,41 +20,46 @@ export class CreateStreamHandler {
     private readonly configService: ConfigService,
   ) {}
 
-  public async execute(request: CreateStreamRequest): Promise<CreateStreamResponse> {
+  public async execute(
+    request: CreateStreamRequest,
+  ): Promise<CreateStreamResponse> {
     if (!request.title || request.title.trim().length === 0) {
       throw new Error('El título de la transmisión es obligatorio.');
     }
 
     const streamId = randomUUID();
 
-    const region = this.configService.get<string>('KN_STREAMS_REGION', 'us-east-2');
+    const region = this.configService.get<string>(
+      'KN_STREAMS_REGION',
+      'us-east-2',
+    );
     const channelName = `Stream-${request.creatorId}-${Date.now()}`;
 
-    
-    await this.streamRepository.deactivateAllStreamsByCreator(request.creatorId);
-
-    
-    const channelArn = await this.kinesisVideoService.createSignalingChannel(channelName);
-
-    
-    const credentials = await this.kinesisVideoService.generateProducerCredentials(
-      channelArn,
+    await this.streamRepository.deactivateAllStreamsByCreator(
       request.creatorId,
     );
 
-    
-    const signalingEndpoint = await this.kinesisVideoService.getSignalingEndpoint(
-      channelArn,
-      'MASTER',
-    );
+    const channelArn =
+      await this.kinesisVideoService.createSignalingChannel(channelName);
 
-    
+    const credentials =
+      await this.kinesisVideoService.generateProducerCredentials(
+        channelArn,
+        request.creatorId,
+      );
+
+    const signalingEndpoint =
+      await this.kinesisVideoService.getSignalingEndpoint(channelArn, 'MASTER');
+
     await this.streamRepository.createStream({
       id: streamId,
       creatorId: request.creatorId,
       channelArn: channelArn,
       region: region,
-      s3ThumbnailBucket: this.configService.get<string>('AWS_BUCKET', 'panters'),
+      s3ThumbnailBucket: this.configService.get<string>(
+        'AWS_BUCKET',
+        'panters',
+      ),
       s3ThumbnailKey: `thumbnails/streams/${streamId}.jpg`,
       isActive: true,
     });

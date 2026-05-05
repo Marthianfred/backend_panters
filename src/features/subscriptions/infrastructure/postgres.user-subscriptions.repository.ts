@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 import { IUserSubscriptionsRepository } from '../interfaces/user.subscriptions.repository.interface';
-import { UserSubscriptionDto, CreateUserSubscriptionDto } from '../subscriptions.models';
+import {
+  UserSubscriptionDto,
+  CreateUserSubscriptionDto,
+} from '../subscriptions.models';
 
 @Injectable()
 export class PostgresUserSubscriptionsRepository implements IUserSubscriptionsRepository {
@@ -63,7 +66,9 @@ export class PostgresUserSubscriptionsRepository implements IUserSubscriptionsRe
     return result.rows;
   }
 
-  async findActiveByUserId(userId: string): Promise<UserSubscriptionDto | null> {
+  async findActiveByUserId(
+    userId: string,
+  ): Promise<UserSubscriptionDto | null> {
     const query = `
       SELECT 
         id, user_id as "userId", plan_id as "planId", status, 
@@ -78,7 +83,11 @@ export class PostgresUserSubscriptionsRepository implements IUserSubscriptionsRe
     return result.rows[0] || null;
   }
 
-  async updateStatus(id: string, status: string, externalId?: string): Promise<UserSubscriptionDto> {
+  async updateStatus(
+    id: string,
+    status: string,
+    externalId?: string,
+  ): Promise<UserSubscriptionDto> {
     const query = `
       UPDATE user_subscriptions
       SET status = $2, external_subscription_id = COALESCE($3, external_subscription_id), updated_at = NOW()
@@ -107,7 +116,9 @@ export class PostgresUserSubscriptionsRepository implements IUserSubscriptionsRe
     return result.rows[0] || null;
   }
 
-  async findByExternalId(externalId: string): Promise<UserSubscriptionDto | null> {
+  async findByExternalId(
+    externalId: string,
+  ): Promise<UserSubscriptionDto | null> {
     const query = `
       SELECT 
         id, user_id as "userId", plan_id as "planId", status, 
@@ -122,7 +133,11 @@ export class PostgresUserSubscriptionsRepository implements IUserSubscriptionsRe
     return result.rows[0] || null;
   }
 
-  async updatePeriod(id: string, startsAt: Date, endsAt: Date): Promise<UserSubscriptionDto> {
+  async updatePeriod(
+    id: string,
+    startsAt: Date,
+    endsAt: Date,
+  ): Promise<UserSubscriptionDto> {
     const query = `
       UPDATE user_subscriptions
       SET starts_at = $2, ends_at = $3, status = 'active', updated_at = NOW()
@@ -155,7 +170,12 @@ export class PostgresUserSubscriptionsRepository implements IUserSubscriptionsRe
     return result.rows[0] || null;
   }
 
-  async changePlan(id: string, planId: string, startsAt: Date, endsAt: Date): Promise<UserSubscriptionDto> {
+  async changePlan(
+    id: string,
+    planId: string,
+    startsAt: Date,
+    endsAt: Date,
+  ): Promise<UserSubscriptionDto> {
     const query = `
       UPDATE user_subscriptions
       SET plan_id = $2, starts_at = $3, ends_at = $4, status = 'active', updated_at = NOW()
@@ -180,6 +200,3 @@ export class PostgresUserSubscriptionsRepository implements IUserSubscriptionsRe
     return result.rowCount || 0;
   }
 }
-
-
-

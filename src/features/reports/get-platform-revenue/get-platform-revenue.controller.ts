@@ -1,7 +1,10 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { GetPlatformRevenueHandler } from './get-platform-revenue.handler';
-import { GetPlatformRevenueQueryDto, PlatformRevenueResponseDto } from './get-platform-revenue.models';
+import {
+  GetPlatformRevenueQueryDto,
+  PlatformRevenueResponseDto,
+} from './get-platform-revenue.models';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import { RolesGuard } from '../../auth/guards/roles.guard';
 import { Roles } from '../../../core/auth/decorators/roles.decorator';

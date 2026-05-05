@@ -1,5 +1,4 @@
 export interface IRefundGiftRepository {
-  
   processRefundTransaction(
     transactionId: string,
     reason?: string,

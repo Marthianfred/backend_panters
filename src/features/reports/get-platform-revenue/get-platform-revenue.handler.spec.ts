@@ -22,7 +22,9 @@ describe('GetPlatformRevenueHandler', () => {
     }).compile();
 
     handler = module.get<GetPlatformRevenueHandler>(GetPlatformRevenueHandler);
-    repository = module.get<IPlatformRevenueRepository>('IPlatformRevenueRepository');
+    repository = module.get<IPlatformRevenueRepository>(
+      'IPlatformRevenueRepository',
+    );
   });
 
   it('should be defined', () => {

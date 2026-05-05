@@ -3,7 +3,6 @@ import { AuthGuard } from '@/features/auth/guards/auth.guard';
 import { SubscriptionGuard } from './subscription.guard';
 import { ApiForbiddenResponse, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
-
 export function RequiresSubscription() {
   return applyDecorators(
     UseGuards(AuthGuard, SubscriptionGuard),

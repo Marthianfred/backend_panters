@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GetTransactionHistoryHandler } from './get-transaction-history.handler';
-import { TRANSACTION_REPOSITORY, ITransactionRepository } from './interfaces/transaction.repository.interface';
+import {
+  TRANSACTION_REPOSITORY,
+  ITransactionRepository,
+} from './interfaces/transaction.repository.interface';
 import { TransactionData } from './get-transaction-history.models';
 
 describe('GetTransactionHistoryHandler', () => {
@@ -22,7 +25,9 @@ describe('GetTransactionHistoryHandler', () => {
       ],
     }).compile();
 
-    handler = module.get<GetTransactionHistoryHandler>(GetTransactionHistoryHandler);
+    handler = module.get<GetTransactionHistoryHandler>(
+      GetTransactionHistoryHandler,
+    );
     repository = module.get<ITransactionRepository>(TRANSACTION_REPOSITORY);
   });
 
@@ -59,7 +64,11 @@ describe('GetTransactionHistoryHandler', () => {
       limit: 10,
       totalPages: 1,
     });
-    expect(repository.getTransactionsByUserId).toHaveBeenCalledWith(userId, page, limit);
+    expect(repository.getTransactionsByUserId).toHaveBeenCalledWith(
+      userId,
+      page,
+      limit,
+    );
   });
 
   it('debería retornar una lista vacía y totalPages 0 si el usuario no tiene transacciones', async () => {
@@ -75,6 +84,10 @@ describe('GetTransactionHistoryHandler', () => {
 
     expect(result.transactions).toEqual([]);
     expect(result.meta.totalPages).toBe(0);
-    expect(repository.getTransactionsByUserId).toHaveBeenCalledWith(userId, page, limit);
+    expect(repository.getTransactionsByUserId).toHaveBeenCalledWith(
+      userId,
+      page,
+      limit,
+    );
   });
 });

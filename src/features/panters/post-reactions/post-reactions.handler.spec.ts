@@ -38,7 +38,7 @@ describe('ReactToPostHandler', () => {
 
     repository.postExists.mockResolvedValue(true);
     repository.getPostOwnerId.mockResolvedValue(creatorId);
-    repository.upsertReaction.mockResolvedValue(99); 
+    repository.upsertReaction.mockResolvedValue(99);
 
     const result = await handler.execute(userId, dto);
 
@@ -51,22 +51,24 @@ describe('ReactToPostHandler', () => {
         postId: dto.postId,
         creatorId,
         type: 'pantera',
-      })
+      }),
     );
   });
 
   it('debe fallar si el post no existe en el muro', async () => {
     repository.postExists.mockResolvedValue(false);
 
-    await expect(handler.execute('sub-id', { postId: 'wrong-id' }))
-      .rejects.toThrow(NotFoundException);
+    await expect(
+      handler.execute('sub-id', { postId: 'wrong-id' }),
+    ).rejects.toThrow(NotFoundException);
   });
 
   it('debe fallar si no se encuentra la dueña del post', async () => {
     repository.postExists.mockResolvedValue(true);
     repository.getPostOwnerId.mockResolvedValue(null);
 
-    await expect(handler.execute('sub-id', { postId: 'post-id' }))
-      .rejects.toThrow(NotFoundException);
+    await expect(
+      handler.execute('sub-id', { postId: 'post-id' }),
+    ).rejects.toThrow(NotFoundException);
   });
 });

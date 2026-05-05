@@ -10,11 +10,16 @@ export class GetSubscriptionStatusUseCase {
     private readonly subscriptionsRepository: IUserSubscriptionsRepository,
   ) {}
 
-  async execute(subscriptionId: string): Promise<SubscriptionStatusResponseDto> {
-    const subscription = await this.subscriptionsRepository.findById(subscriptionId);
+  async execute(
+    subscriptionId: string,
+  ): Promise<SubscriptionStatusResponseDto> {
+    const subscription =
+      await this.subscriptionsRepository.findById(subscriptionId);
 
     if (!subscription) {
-      throw new NotFoundException(`Suscripción con ID ${subscriptionId} no encontrada`);
+      throw new NotFoundException(
+        `Suscripción con ID ${subscriptionId} no encontrada`,
+      );
     }
 
     return {

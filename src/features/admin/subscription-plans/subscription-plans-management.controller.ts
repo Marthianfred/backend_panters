@@ -60,13 +60,17 @@ export class SubscriptionPlansManagementController {
   }
 
   @Patch(':id/activate')
-  @ApiOperation({ summary: 'Activar un plan de suscripción previamente desactivado' })
+  @ApiOperation({
+    summary: 'Activar un plan de suscripción previamente desactivado',
+  })
   async activate(@Param('id', ParseUUIDPipe) id: string) {
     return await this.activateHandler.handle(id);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todos los planes de suscripción para administración' })
+  @ApiOperation({
+    summary: 'Listar todos los planes de suscripción para administración',
+  })
   async list() {
     return await this.listHandler.handle();
   }

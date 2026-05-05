@@ -2,7 +2,10 @@ import { Module, Global, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { AuthController } from './api/auth.controller';
 import { AuthService } from './application/auth.service';
 import { RegisterClientService } from './application/register-client.service';
-import { BetterAuthProvider, AuthPoolProvider } from './infrastructure/better-auth.provider';
+import {
+  BetterAuthProvider,
+  AuthPoolProvider,
+} from './infrastructure/better-auth.provider';
 import { AuthGuard } from './guards/auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { AuthSeedingService } from './infrastructure/auth-seeding.service';
@@ -27,12 +30,16 @@ import { CheckUserActivityUseCase } from './application/use-cases/check-user-act
     AuthMiddleware,
     CheckUserActivityUseCase,
   ],
-  exports: [AuthService, AuthGuard, RolesGuard, BetterAuthProvider, RegisterClientService],
+  exports: [
+    AuthService,
+    AuthGuard,
+    RolesGuard,
+    BetterAuthProvider,
+    RegisterClientService,
+  ],
 })
 export class AuthModule implements NestModule {
   public configure(consumer: MiddlewareConsumer): void {
-    
-    
     consumer.apply(AuthMiddleware).forRoutes('*');
   }
 }

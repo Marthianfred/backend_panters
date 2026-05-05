@@ -1,7 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import type { 
-  IListGiftsRepository, 
-} from './interfaces/list-gifts.repository.interface';
+import type { IListGiftsRepository } from './interfaces/list-gifts.repository.interface';
 import { LIST_GIFTS_REPOSITORY } from './interfaces/list-gifts.repository.interface';
 import { ListGiftsResponse } from './list-gifts.models';
 

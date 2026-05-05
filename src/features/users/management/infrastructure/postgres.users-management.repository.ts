@@ -62,7 +62,7 @@ export class PostgresUsersManagementRepository {
       'UPDATE public."user" SET is_active = $1 WHERE id = $2',
       [isActive, userId],
     );
-    
+
     await this.pool.query(
       'UPDATE public.antigravity_profiles SET is_active = $1 WHERE user_id = $2',
       [isActive, userId],
@@ -70,8 +70,10 @@ export class PostgresUsersManagementRepository {
   }
 
   async updateUserRole(userId: string, roleId: string): Promise<void> {
-    
-    const roleRes = await this.pool.query('SELECT name FROM public.roles WHERE id = $1', [roleId]);
+    const roleRes = await this.pool.query(
+      'SELECT name FROM public.roles WHERE id = $1',
+      [roleId],
+    );
     const roleName = roleRes.rows[0]?.name || 'subscriber';
 
     await this.pool.query(

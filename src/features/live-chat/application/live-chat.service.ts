@@ -21,7 +21,6 @@ export class LiveChatService {
     private readonly usersRepository: PostgresUsersManagementRepository,
   ) {}
 
-  
   async createMessagePayload(
     client: Socket,
     data: { username: string; text: string; id?: string },
@@ -37,7 +36,6 @@ export class LiveChatService {
     };
   }
 
-  
   async createGiftPayload(
     client: Socket | null,
     username: string,
@@ -45,8 +43,7 @@ export class LiveChatService {
     iconUrl?: string,
     giftId?: string,
   ): Promise<ChatMessagePayload> {
-    
-    const finalUsername = client 
+    const finalUsername = client
       ? await this.resolveUserIdentifier(client, username)
       : username;
 
@@ -63,43 +60,47 @@ export class LiveChatService {
     };
   }
 
-  
-  private async resolveUserIdentifier(client: Socket, providedUsername: string): Promise<string> {
+  private async resolveUserIdentifier(
+    client: Socket,
+    providedUsername: string,
+  ): Promise<string> {
     try {
-      
       const sessionResponse = await this.authService.instance.api.getSession({
         headers: fromNodeHeaders(client.handshake.headers as any),
       });
 
       if (sessionResponse?.user) {
-        
-        
-        const userDetails = await this.usersRepository.getUserDetails(sessionResponse.user.id);
-        
+        const userDetails = await this.usersRepository.getUserDetails(
+          sessionResponse.user.id,
+        );
+
         if (userDetails) {
-          
-          
-          if (userDetails.displayUsername && userDetails.displayUsername.trim() !== '') {
+          if (
+            userDetails.displayUsername &&
+            userDetails.displayUsername.trim() !== ''
+          ) {
             return userDetails.displayUsername;
           }
 
-          
           if (userDetails.username && userDetails.username.trim() !== '') {
-             const handle = userDetails.username.startsWith('@') 
-               ? userDetails.username 
-               : `@${userDetails.username}`;
-             return handle;
+            const handle = userDetails.username.startsWith('@')
+              ? userDetails.username
+              : `@${userDetails.username}`;
+            return handle;
           }
 
-          
           return userDetails.name || providedUsername || 'Usuario';
         }
       }
     } catch (error) {
-      console.warn('[LiveChatService] Error al recuperar identidad del usuario:', error.message);
+      console.warn(
+        '[LiveChatService] Error al recuperar identidad del usuario:',
+        error.message,
+      );
     }
 
-    
-    return providedUsername && providedUsername !== '' ? providedUsername : 'Usuario';
+    return providedUsername && providedUsername !== ''
+      ? providedUsername
+      : 'Usuario';
   }
 }

@@ -9,10 +9,7 @@ import { PostgresEarningsRepository } from './infrastructure/postgres.earnings.r
 
 @Module({
   imports: [AuthModule],
-  controllers: [
-    GetEarningsSummaryController,
-    GetEarningsHistoryController
-  ],
+  controllers: [GetEarningsSummaryController, GetEarningsHistoryController],
   providers: [
     GetEarningsSummaryHandler,
     GetEarningsHistoryHandler,
@@ -21,9 +18,6 @@ import { PostgresEarningsRepository } from './infrastructure/postgres.earnings.r
       useClass: PostgresEarningsRepository,
     },
   ],
-  exports: [
-    GetEarningsSummaryHandler,
-    GetEarningsHistoryHandler
-  ],
+  exports: [GetEarningsSummaryHandler, GetEarningsHistoryHandler],
 })
 export class EarningsModule {}

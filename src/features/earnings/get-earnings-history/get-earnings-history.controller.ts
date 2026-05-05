@@ -1,6 +1,9 @@
 import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
 import { GetEarningsHistoryHandler } from './get-earnings-history.handler';
-import { EarningsHistoryRequest, EarningsHistoryResponse } from './get-earnings-history.models';
+import {
+  EarningsHistoryRequest,
+  EarningsHistoryResponse,
+} from './get-earnings-history.models';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import { RolesGuard } from '../../../core/auth/guards/roles.guard';
 import { Roles } from '../../../core/auth/decorators/roles.decorator';

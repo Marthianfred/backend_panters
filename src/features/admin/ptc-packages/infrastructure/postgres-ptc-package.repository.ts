@@ -15,7 +15,9 @@ export class PostgresPtcPackageRepository implements IPtcPackageRepository {
     });
   }
 
-  async create(data: Omit<PtcPackageEntity, 'id' | 'createdAt' | 'updatedAt'>): Promise<PtcPackageEntity> {
+  async create(
+    data: Omit<PtcPackageEntity, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<PtcPackageEntity> {
     const query = `
       INSERT INTO ptc_packages (name, ptc_amount, price_usd, stripe_price_id, is_active)
       VALUES ($1, $2, $3, $4, $5)
@@ -37,15 +39,23 @@ export class PostgresPtcPackageRepository implements IPtcPackageRepository {
     }
   }
 
-  async update(id: string, data: Partial<Omit<PtcPackageEntity, 'id' | 'createdAt' | 'updatedAt'>>): Promise<PtcPackageEntity> {
+  async update(
+    id: string,
+    data: Partial<Omit<PtcPackageEntity, 'id' | 'createdAt' | 'updatedAt'>>,
+  ): Promise<PtcPackageEntity> {
     const fields = Object.keys(data);
     const setClause = fields
       .map((field, index) => {
-        const dbField = 
-          field === 'ptcAmount' ? 'ptc_amount' : 
-          field === 'priceUsd' ? 'price_usd' :
-          field === 'stripePriceId' ? 'stripe_price_id' : 
-          field === 'isActive' ? 'is_active' : field;
+        const dbField =
+          field === 'ptcAmount'
+            ? 'ptc_amount'
+            : field === 'priceUsd'
+              ? 'price_usd'
+              : field === 'stripePriceId'
+                ? 'stripe_price_id'
+                : field === 'isActive'
+                  ? 'is_active'
+                  : field;
         return `${dbField} = $${index + 2}`;
       })
       .join(', ');
@@ -61,7 +71,9 @@ export class PostgresPtcPackageRepository implements IPtcPackageRepository {
       const result = await this.pool.query(query, [id, ...Object.values(data)]);
       return result.rows[0];
     } catch (error) {
-      this.logger.error(`Error al actualizar paquete de PTC ${id}: ${error.message}`);
+      this.logger.error(
+        `Error al actualizar paquete de PTC ${id}: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -76,7 +88,9 @@ export class PostgresPtcPackageRepository implements IPtcPackageRepository {
     try {
       await this.pool.query(query, [id]);
     } catch (error) {
-      this.logger.error(`Error al desactivar paquete de PTC ${id}: ${error.message}`);
+      this.logger.error(
+        `Error al desactivar paquete de PTC ${id}: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -91,7 +105,9 @@ export class PostgresPtcPackageRepository implements IPtcPackageRepository {
     try {
       await this.pool.query(query, [id]);
     } catch (error) {
-      this.logger.error(`Error al activar paquete de PTC ${id}: ${error.message}`);
+      this.logger.error(
+        `Error al activar paquete de PTC ${id}: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -107,7 +123,9 @@ export class PostgresPtcPackageRepository implements IPtcPackageRepository {
       const result = await this.pool.query(query, [id]);
       return result.rows.length > 0 ? result.rows[0] : null;
     } catch (error) {
-      this.logger.error(`Error al buscar paquete de PTC ${id}: ${error.message}`);
+      this.logger.error(
+        `Error al buscar paquete de PTC ${id}: ${error.message}`,
+      );
       throw error;
     }
   }

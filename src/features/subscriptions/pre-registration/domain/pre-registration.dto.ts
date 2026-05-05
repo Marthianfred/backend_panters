@@ -1,5 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString, IsOptional, IsDateString, IsInt, Min, IsUUID } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  IsOptional,
+  IsDateString,
+  IsInt,
+  Min,
+  IsUUID,
+} from 'class-validator';
 
 export class PreRegistrationRequestDto {
   @ApiProperty({ example: 'juan.perez@example.com' })
@@ -35,7 +44,10 @@ export class PreRegistrationRequestDto {
   @Min(18)
   age: number;
 
-  @ApiProperty({ example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479', description: 'ID del plan de suscripción elegido' })
+  @ApiProperty({
+    example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+    description: 'ID del plan de suscripción elegido',
+  })
   @IsUUID()
   @IsNotEmpty()
   planId: string;

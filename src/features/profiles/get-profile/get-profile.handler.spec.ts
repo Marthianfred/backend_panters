@@ -50,6 +50,8 @@ describe('GetProfileHandler', () => {
     const userId = 'user-456';
     mockRepository.getProfileByUserId.mockResolvedValue(null);
 
-    await expect(handler.execute({ userId })).rejects.toThrow(ProfileNotFoundError);
+    await expect(handler.execute({ userId })).rejects.toThrow(
+      ProfileNotFoundError,
+    );
   });
 });

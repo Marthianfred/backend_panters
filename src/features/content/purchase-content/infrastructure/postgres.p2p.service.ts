@@ -34,7 +34,6 @@ export class PostgresP2PTransactionService implements IP2PTransactionService {
     try {
       await client.query('BEGIN');
 
-      
       const existingPurchase = await client.query<IdRow>(
         'SELECT id FROM content_purchases WHERE user_id = $1 AND content_item_id = $2',
         [subscriberId, contentId],
@@ -44,7 +43,6 @@ export class PostgresP2PTransactionService implements IP2PTransactionService {
         throw new Error('El contenido ya fue adquirido previamente.');
       }
 
-      
       const subscriberWalletRes = await client.query<WalletRow>(
         'SELECT id, panter_coin_balance FROM antigravity_wallets WHERE user_id = $1 FOR UPDATE',
         [subscriberId],
@@ -61,13 +59,11 @@ export class PostgresP2PTransactionService implements IP2PTransactionService {
         throw new Error('Saldo insuficiente.');
       }
 
-      
       await client.query(
         'UPDATE antigravity_wallets SET panter_coin_balance = panter_coin_balance - $1, updated_at = NOW() WHERE id = $2',
         [amountInCoins, subscriberWallet.id],
       );
 
-      
       const txRef = `PURCHASE-${Date.now()}-${subscriberId.slice(0, 4)}`;
       const txResult = await client.query<IdRow>(
         'INSERT INTO wallet_transactions (wallet_id, type, amount, description, reference_id) VALUES ($1, $2, $3, $4, $5) RETURNING id',
@@ -81,7 +77,6 @@ export class PostgresP2PTransactionService implements IP2PTransactionService {
       );
       const transactionId = txResult.rows[0].id;
 
-      
       const creatorAmount = amountInCoins * 0.7;
       const platformCommission = amountInCoins * 0.3;
 
@@ -96,7 +91,6 @@ export class PostgresP2PTransactionService implements IP2PTransactionService {
         [creatorId, amountInCoins, platformCommission, creatorAmount],
       );
 
-      
       await client.query(
         'INSERT INTO content_purchases (user_id, content_item_id, price_paid, transaction_id) VALUES ($1, $2, $3, $4)',
         [subscriberId, contentId, amountInCoins, transactionId],

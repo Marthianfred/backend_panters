@@ -23,7 +23,6 @@ export class PostgresRefundGiftRepository implements IRefundGiftRepository {
     try {
       await client.query('BEGIN');
 
-      
       const checkQuery = `
         SELECT gt.user_id, gt.creator_id, gt.gift_id, gt.coins_spent, wt.id as original_wallet_id, wt.wallet_id
         FROM gift_transactions gt
@@ -41,23 +40,23 @@ export class PostgresRefundGiftRepository implements IRefundGiftRepository {
 
       const original = originalRes.rows[0];
 
-      
       const refundCheckQuery = `
         SELECT id FROM wallet_transactions 
         WHERE type = 'credit' AND description LIKE $1;
       `;
-      const refundCheckRes = await client.query(refundCheckQuery, [`%Reembolso de regalo: ${transactionId}%`]);
-      
+      const refundCheckRes = await client.query(refundCheckQuery, [
+        `%Reembolso de regalo: ${transactionId}%`,
+      ]);
+
       if (refundCheckRes.rowCount && refundCheckRes.rowCount > 0) {
         await client.query('ROLLBACK');
         throw new RefundAlreadyProcessedError(transactionId);
       }
 
       const amountToRefund = parseFloat(original.coins_spent);
-      const netToCreator = amountToRefund * 0.70;
-      const platformCommission = amountToRefund * 0.30;
+      const netToCreator = amountToRefund * 0.7;
+      const platformCommission = amountToRefund * 0.3;
 
-      
       const updateUserWallet = `
         UPDATE antigravity_wallets
         SET panter_coin_balance = panter_coin_balance + $1,
@@ -65,11 +64,13 @@ export class PostgresRefundGiftRepository implements IRefundGiftRepository {
         WHERE user_id = $2
         RETURNING id as wallet_id, panter_coin_balance;
       `;
-      const walletRes = await client.query(updateUserWallet, [amountToRefund, original.user_id]);
+      const walletRes = await client.query(updateUserWallet, [
+        amountToRefund,
+        original.user_id,
+      ]);
       const newBalance = parseFloat(walletRes.rows[0].panter_coin_balance);
       const walletId = walletRes.rows[0].wallet_id;
 
-      
       const updateCreatorWallet = `
         UPDATE creator_wallets
         SET total_earned = total_earned - $1,
@@ -78,28 +79,30 @@ export class PostgresRefundGiftRepository implements IRefundGiftRepository {
             updated_at = CURRENT_TIMESTAMP
         WHERE creator_id = $3;
       `;
-      await client.query(updateCreatorWallet, [netToCreator, platformCommission, original.creator_id]);
+      await client.query(updateCreatorWallet, [
+        netToCreator,
+        platformCommission,
+        original.creator_id,
+      ]);
 
-      
       const logRefundQuery = `
         INSERT INTO wallet_transactions (wallet_id, type, amount, description, reference_id, created_at)
         VALUES ($1, 'credit', $2, $3, $4, CURRENT_TIMESTAMP)
         RETURNING id as transaction_id;
       `;
       const refundRes = await client.query(logRefundQuery, [
-        walletId, 
-        amountToRefund, 
+        walletId,
+        amountToRefund,
         `Reembolso de regalo: ${transactionId}. Razón: ${reason || 'No especificada'}`,
-        transactionId
+        transactionId,
       ]);
 
       await client.query('COMMIT');
 
       return {
         refundTransactionId: refundRes.rows[0].transaction_id,
-        newBalance
+        newBalance,
       };
-
     } catch (error) {
       await client.query('ROLLBACK');
       console.error('Error en transacción de reembolso:', error);

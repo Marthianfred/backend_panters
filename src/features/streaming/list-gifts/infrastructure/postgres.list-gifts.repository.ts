@@ -27,8 +27,8 @@ export class PostgresListGiftsRepository implements IListGiftsRepository {
       ORDER BY price_coins ASC;
     `;
     const result = await this.pool.query(query);
-    
-    return result.rows.map(row => ({
+
+    return result.rows.map((row) => ({
       id: row.id,
       name: row.name,
       priceCoins: parseFloat(row.priceCoins),

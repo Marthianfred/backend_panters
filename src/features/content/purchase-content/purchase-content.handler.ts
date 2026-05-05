@@ -28,7 +28,6 @@ export class PurchaseContentHandler {
   public async execute(
     request: PurchaseContentRequest,
   ): Promise<PurchaseContentResponse> {
-    
     const content = await this.contentRepository.getContentById(
       request.contentId,
     );
@@ -37,7 +36,6 @@ export class PurchaseContentHandler {
       throw new ContentNotFoundError();
     }
 
-    
     const txSuccess = await this.p2pTransactionService.executeContentPurchase(
       request.subscriberId,
       content.creatorId,
@@ -49,8 +47,9 @@ export class PurchaseContentHandler {
       throw new InsufficientCoinsError();
     }
 
-    
-    const extension = content.url ? content.url.substring(content.url.lastIndexOf('.')) : '.mp4';
+    const extension = content.url
+      ? content.url.substring(content.url.lastIndexOf('.'))
+      : '.mp4';
     const signedDeliveryUrl = await this.storageService.getPresignedDownloadUrl(
       content.creatorId,
       content.id,

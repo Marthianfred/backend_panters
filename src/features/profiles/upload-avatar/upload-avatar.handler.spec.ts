@@ -60,8 +60,8 @@ describe('UploadAvatarHandler', () => {
 
       expect(mockStorageService.uploadAvatar).toHaveBeenCalledWith(
         mockRequest.userId,
-        
-        'image.webp', 
+
+        'image.webp',
         'image/webp',
         mockWebpBuffer,
       );

@@ -10,7 +10,10 @@ export class GetNotificationsUseCase {
     private readonly repository: NotificationRepository,
   ) {}
 
-  async execute(userId: string, onlyUnread: boolean = false): Promise<Notification[]> {
+  async execute(
+    userId: string,
+    onlyUnread: boolean = false,
+  ): Promise<Notification[]> {
     return this.repository.findByUserId(userId, onlyUnread);
   }
 }

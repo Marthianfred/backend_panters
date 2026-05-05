@@ -1,6 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PostgresUsersManagementRepository } from '../infrastructure/postgres.users-management.repository';
-import { UpdateUserStatusRequest, UpdateUserStatusResponse } from './update-user-status.models';
+import {
+  UpdateUserStatusRequest,
+  UpdateUserStatusResponse,
+} from './update-user-status.models';
 
 @Injectable()
 export class UpdateUserStatusHandler {

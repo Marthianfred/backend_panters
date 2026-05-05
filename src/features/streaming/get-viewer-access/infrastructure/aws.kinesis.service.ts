@@ -38,7 +38,6 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
     this.kvsClient = new KinesisVideoClient({ region, credentials });
   }
 
-
   private async assumeRole(
     channelArn: string,
     role: 'MASTER' | 'VIEWER',
@@ -76,7 +75,6 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
         },
       ],
     });
-
 
     const command = new AssumeRoleCommand({
       RoleArn: roleArn,
@@ -142,7 +140,6 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
       'us-east-2',
     );
 
-    
     const getEndpointCommand = new GetSignalingChannelEndpointCommand({
       ChannelARN: channelArn,
       SingleMasterChannelEndpointConfiguration: {
@@ -160,7 +157,6 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
       throw new Error('No se pudo obtener el endpoint HTTPS para ICE Servers.');
     }
 
-    
     const signalingClient = new KinesisVideoSignalingClient({
       region,
       endpoint: httpsEndpoint,
@@ -173,7 +169,6 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
         ),
       },
     });
-
 
     const command = new GetIceServerConfigCommand({
       ChannelARN: channelArn,
@@ -190,9 +185,7 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
     );
   }
 
-
   public async createSignalingChannel(channelName: string): Promise<string> {
-
     try {
       const command = new CreateSignalingChannelCommand({
         ChannelName: channelName,
@@ -211,4 +204,3 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
     }
   }
 }
-

@@ -66,20 +66,38 @@ describe('RenewSubscriptionUseCase', () => {
   it('debería lanzar NotFoundException si la suscripción no existe', async () => {
     userSubscriptionsRepository.findActiveByUserId.mockResolvedValue(null);
 
-    await expect(useCase.execute({ userId: 'user-1' }))
-      .rejects.toThrow(NotFoundException);
+    await expect(useCase.execute({ userId: 'user-1' })).rejects.toThrow(
+      NotFoundException,
+    );
   });
 
   it('debería generar una sesión de Stripe correctamente', async () => {
-    const mockSubscription = { id: 'sub-1', userId: 'user-1', planId: 'plan-1' };
-    const mockPlan = { id: 'plan-1', stripePriceId: 'price-1', durationDays: 30 };
-    const mockUser = { id: 'user-1', email: 'test@test.com', name: 'Test User' };
+    const mockSubscription = {
+      id: 'sub-1',
+      userId: 'user-1',
+      planId: 'plan-1',
+    };
+    const mockPlan = {
+      id: 'plan-1',
+      stripePriceId: 'price-1',
+      durationDays: 30,
+    };
+    const mockUser = {
+      id: 'user-1',
+      email: 'test@test.com',
+      name: 'Test User',
+    };
 
-    userSubscriptionsRepository.findActiveByUserId.mockResolvedValue(mockSubscription);
+    userSubscriptionsRepository.findActiveByUserId.mockResolvedValue(
+      mockSubscription,
+    );
     plansRepository.findById.mockResolvedValue(mockPlan);
     usersRepository.getUserDetails.mockResolvedValue(mockUser);
     stripeService.getOrCreateCustomer.mockResolvedValue('cus-1');
-    stripeService.createCheckoutSession.mockResolvedValue({ url: 'http://stripe.url', id: 'session-1' });
+    stripeService.createCheckoutSession.mockResolvedValue({
+      url: 'http://stripe.url',
+      id: 'session-1',
+    });
 
     const result = await useCase.execute({ userId: 'user-1' });
 
@@ -87,26 +105,41 @@ describe('RenewSubscriptionUseCase', () => {
       url: 'http://stripe.url',
       sessionId: 'session-1',
     });
-    expect(stripeService.createCheckoutSession).toHaveBeenCalledWith(expect.objectContaining({
-      metadata: expect.objectContaining({
-        action: 'renew',
-        userId: 'user-1',
+    expect(stripeService.createCheckoutSession).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: expect.objectContaining({
+          action: 'renew',
+          userId: 'user-1',
+        }),
       }),
-    }));
+    );
   });
 
   it('debería lanzar BadRequestException si Stripe falla', async () => {
-    const mockSubscription = { id: 'sub-1', userId: 'user-1', planId: 'plan-1' };
+    const mockSubscription = {
+      id: 'sub-1',
+      userId: 'user-1',
+      planId: 'plan-1',
+    };
     const mockPlan = { id: 'plan-1', stripePriceId: 'price-1' };
-    const mockUser = { id: 'user-1', email: 'test@test.com', name: 'Test User' };
+    const mockUser = {
+      id: 'user-1',
+      email: 'test@test.com',
+      name: 'Test User',
+    };
 
-    userSubscriptionsRepository.findActiveByUserId.mockResolvedValue(mockSubscription);
+    userSubscriptionsRepository.findActiveByUserId.mockResolvedValue(
+      mockSubscription,
+    );
     plansRepository.findById.mockResolvedValue(mockPlan);
     usersRepository.getUserDetails.mockResolvedValue(mockUser);
     stripeService.getOrCreateCustomer.mockResolvedValue('cus-1');
-    stripeService.createCheckoutSession.mockRejectedValue(new Error('Stripe error'));
+    stripeService.createCheckoutSession.mockRejectedValue(
+      new Error('Stripe error'),
+    );
 
-    await expect(useCase.execute({ userId: 'user-1' }))
-      .rejects.toThrow(BadRequestException);
+    await expect(useCase.execute({ userId: 'user-1' })).rejects.toThrow(
+      BadRequestException,
+    );
   });
 });

@@ -26,7 +26,6 @@ export class PostgresPostReactionRepository implements IPostReactionRepository {
   }
 
   async upsertReaction(userId: string, postId: string): Promise<number> {
-    
     const upsertQuery = `
       INSERT INTO public.post_reactions (user_id, post_id, created_at)
       VALUES ($1, $2, now())
@@ -34,7 +33,6 @@ export class PostgresPostReactionRepository implements IPostReactionRepository {
     `;
     await this.pool.query(upsertQuery, [userId, postId]);
 
-    
     const countQuery = `
       SELECT COUNT(*)::INT as total 
       FROM public.post_reactions 

@@ -41,7 +41,11 @@ describe('ListContentHandler', () => {
           accessType: 'free',
           url: 'url1',
           thumbnailUrl: 'thumb1',
-          creatorDetails: { fullName: 'Creator 1', avatarUrl: 'avatar1', isOnline: true },
+          creatorDetails: {
+            fullName: 'Creator 1',
+            avatarUrl: 'avatar1',
+            isOnline: true,
+          },
         },
         {
           id: '2',
@@ -52,7 +56,11 @@ describe('ListContentHandler', () => {
           accessType: 'premium',
           url: 'url2',
           thumbnailUrl: 'thumb2',
-          creatorDetails: { fullName: 'Creator 2', avatarUrl: 'avatar2', isOnline: false },
+          creatorDetails: {
+            fullName: 'Creator 2',
+            avatarUrl: 'avatar2',
+            isOnline: false,
+          },
         },
       ];
 
@@ -77,29 +85,34 @@ describe('ListContentHandler', () => {
         limit: 10,
       });
       expect(result.contents).toHaveLength(2);
-      expect(result.pagination).toEqual({ page: 1, limit: 10, total: 2, totalPages: 1 });
-      expect(result.creator).toBeUndefined(); 
+      expect(result.pagination).toEqual({
+        page: 1,
+        limit: 10,
+        total: 2,
+        totalPages: 1,
+      });
+      expect(result.creator).toBeUndefined();
     });
 
     it('debe filtrar por tipo de contenido si se especifica', async () => {
-        repository.listContents.mockResolvedValue([]);
-        repository.countContents.mockResolvedValue(0);
-        repository.getPurchasedContentIds.mockResolvedValue([]);
-  
-        await handler.execute({
-          isSubscriber: true,
-          type: 'video',
-        });
-  
-        expect(repository.listContents).toHaveBeenCalledWith({
-          creatorId: undefined,
-          subscriberId: undefined,
-          published: true,
-          type: 'video',
-          page: 1,
-          limit: 20,
-        });
+      repository.listContents.mockResolvedValue([]);
+      repository.countContents.mockResolvedValue(0);
+      repository.getPurchasedContentIds.mockResolvedValue([]);
+
+      await handler.execute({
+        isSubscriber: true,
+        type: 'video',
       });
+
+      expect(repository.listContents).toHaveBeenCalledWith({
+        creatorId: undefined,
+        subscriberId: undefined,
+        published: true,
+        type: 'video',
+        page: 1,
+        limit: 20,
+      });
+    });
 
     it('debe incluir información del creador cuando se filtra por creatorId (Muro mode)', async () => {
       const mockResult = [
@@ -112,7 +125,11 @@ describe('ListContentHandler', () => {
           accessType: 'free',
           url: 'url1',
           thumbnailUrl: 'thumb1',
-          creatorDetails: { fullName: 'Creator 1', avatarUrl: 'avatar1', isOnline: true },
+          creatorDetails: {
+            fullName: 'Creator 1',
+            avatarUrl: 'avatar1',
+            isOnline: true,
+          },
         },
       ];
 

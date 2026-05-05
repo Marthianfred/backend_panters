@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
 import { CreatorsRankingsController } from './rankings/creators-rankings.controller';
 import { CreatorsRankingsHandler } from './rankings/creators-rankings.handler';
-import { CREATORS_RANKINGS_REPOSITORY, PostgresCreatorsRankingsRepository } from './rankings/infrastructure/postgres.creators-rankings.repository';
+import {
+  CREATORS_RANKINGS_REPOSITORY,
+  PostgresCreatorsRankingsRepository,
+} from './rankings/infrastructure/postgres.creators-rankings.repository';
 
 @Module({
   controllers: [CreatorsRankingsController],

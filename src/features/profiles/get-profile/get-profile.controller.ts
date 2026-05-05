@@ -24,6 +24,7 @@ export class GetProfileController {
   ): Promise<void> {
     try {
       const userId = req.user.id;
+      const role = req.user.role;
 
       if (!userId) {
         res
@@ -34,7 +35,13 @@ export class GetProfileController {
 
       const response = await this.handler.execute({ userId });
 
-      res.status(HttpStatus.OK).json(response);
+      // Adjuntar el rol de la sesión al perfil
+      const profileWithRole = {
+        ...response,
+        role: role,
+      };
+
+      res.status(HttpStatus.OK).json(profileWithRole);
     } catch (error) {
       if (error instanceof ProfileNotFoundError) {
         res.status(HttpStatus.NOT_FOUND).json({ error: error.message });

@@ -35,9 +35,9 @@ export class BinanceWebhookHandler {
     try {
       data = Buffer.isBuffer(payload)
         ? (JSON.parse(payload.toString('utf-8')) as BinanceWebhookPayload)
-        : (typeof payload === 'string'
-            ? (JSON.parse(payload) as BinanceWebhookPayload)
-            : (payload as BinanceWebhookPayload));
+        : typeof payload === 'string'
+          ? (JSON.parse(payload) as BinanceWebhookPayload)
+          : (payload as BinanceWebhookPayload);
     } catch (e) {
       throw new Error('Invalid JSON payload');
     }

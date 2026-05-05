@@ -46,13 +46,12 @@ export class PostgresTransactionRepository implements ITransactionRepository {
       LIMIT $2 OFFSET $3;
     `;
 
-    const result = await this.pool.query<TransactionQueryRow & { totalCount: string }>(query, [
-      userId,
-      limit,
-      offset,
-    ]);
+    const result = await this.pool.query<
+      TransactionQueryRow & { totalCount: string }
+    >(query, [userId, limit, offset]);
 
-    const total = result.rows.length > 0 ? parseInt(result.rows[0].totalCount, 10) : 0;
+    const total =
+      result.rows.length > 0 ? parseInt(result.rows[0].totalCount, 10) : 0;
 
     const transactions = result.rows.map((row) => ({
       id: row.id,

@@ -1,8 +1,16 @@
-import { Injectable, Inject, ConflictException, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  ConflictException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { BETTER_AUTH_TOKEN } from '../../../auth/infrastructure/auth.constants';
 import type { BetterAuthInstance } from '../../../auth/types/auth.types';
 import { PostgresUsersManagementRepository } from '../infrastructure/postgres.users-management.repository';
-import { AdminCreateUserRequest, AdminCreateUserResponse } from './admin-create-user.models';
+import {
+  AdminCreateUserRequest,
+  AdminCreateUserResponse,
+} from './admin-create-user.models';
 
 @Injectable()
 export class AdminCreateUserHandler {
@@ -12,9 +20,10 @@ export class AdminCreateUserHandler {
     private readonly repository: PostgresUsersManagementRepository,
   ) {}
 
-  async handle(request: AdminCreateUserRequest): Promise<AdminCreateUserResponse> {
+  async handle(
+    request: AdminCreateUserRequest,
+  ): Promise<AdminCreateUserResponse> {
     try {
-      
       const authResult = (await this.authInstance.api.signUpEmail({
         body: {
           email: request.email,
@@ -31,7 +40,6 @@ export class AdminCreateUserHandler {
 
       const userId = authResult.user.id;
 
-      
       await this.repository.updateUserRole(userId, request.role);
       await this.repository.setMustChangePassword(userId, true);
 
@@ -42,8 +50,13 @@ export class AdminCreateUserHandler {
         mustChangePassword: true,
       };
     } catch (error: any) {
-      if (error.code === 'P2002' || (error.message && error.message.includes('already exists'))) {
-        throw new ConflictException('El correo electrónico ya está registrado.');
+      if (
+        error.code === 'P2002' ||
+        (error.message && error.message.includes('already exists'))
+      ) {
+        throw new ConflictException(
+          'El correo electrónico ya está registrado.',
+        );
       }
       throw error;
     }

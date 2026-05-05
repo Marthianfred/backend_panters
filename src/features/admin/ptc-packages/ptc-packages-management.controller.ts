@@ -60,13 +60,17 @@ export class PtcPackagesManagementController {
   }
 
   @Patch(':id/activate')
-  @ApiOperation({ summary: 'Activar un paquete de PTC previamente desactivado' })
+  @ApiOperation({
+    summary: 'Activar un paquete de PTC previamente desactivado',
+  })
   async activate(@Param('id', ParseUUIDPipe) id: string) {
     return await this.activateHandler.handle(id);
   }
 
   @Get()
-  @ApiOperation({ summary: 'Listar todos los paquetes de PTC para administración' })
+  @ApiOperation({
+    summary: 'Listar todos los paquetes de PTC para administración',
+  })
   async list() {
     return await this.listHandler.handle();
   }

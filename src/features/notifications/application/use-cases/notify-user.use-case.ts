@@ -19,18 +19,17 @@ export class NotifyUserUseCase {
     private readonly notificationRepository: NotificationRepository,
     private readonly configService: ConfigService,
   ) {
-    
     if (!this.configService.get('VAPID_PUBLIC_KEY')) return;
-    
+
     const publicKey = this.configService.getOrThrow<string>('VAPID_PUBLIC_KEY');
-    const privateKey = this.configService.getOrThrow<string>('VAPID_PRIVATE_KEY');
+    const privateKey =
+      this.configService.getOrThrow<string>('VAPID_PRIVATE_KEY');
     const subject = this.configService.getOrThrow<string>('VAPID_SUBJECT');
 
     webpush.setVapidDetails(subject, publicKey, privateKey);
   }
 
   async execute(userId: string, payload: NotificationPayload): Promise<void> {
-    
     const notification = Notification.create({
       userId,
       title: payload.title,
@@ -39,11 +38,12 @@ export class NotifyUserUseCase {
     });
     await this.notificationRepository.save(notification);
 
-    
     const subscriptions = await this.pushRepository.findByUserId(userId);
-    
+
     if (subscriptions.length === 0) {
-      this.logger.debug(`Usuario ${userId} no tiene suscripciones push activas.`);
+      this.logger.debug(
+        `Usuario ${userId} no tiene suscripciones push activas.`,
+      );
       return;
     }
 
@@ -57,10 +57,16 @@ export class NotifyUserUseCase {
           },
         };
 
-        await webpush.sendNotification(pushSubscription, JSON.stringify(payload));
+        await webpush.sendNotification(
+          pushSubscription,
+          JSON.stringify(payload),
+        );
       } catch (error) {
-        this.logger.error(`Error enviando notificación push a usuario ${userId}:`, error);
-        
+        this.logger.error(
+          `Error enviando notificación push a usuario ${userId}:`,
+          error,
+        );
+
         if (error.statusCode === 410 || error.statusCode === 404) {
           await this.pushRepository.deleteByEndpoint(sub.endpoint);
         }

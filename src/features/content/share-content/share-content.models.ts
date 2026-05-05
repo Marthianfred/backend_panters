@@ -26,6 +26,11 @@ export class ShareInfoResponse {
     isSubscribed: boolean;
     isPurchased: boolean;
     canView: boolean;
-    requiredAction: 'NONE' | 'LOGIN' | 'SUBSCRIBE' | 'BUY_COINS' | 'BUY_CONTENT';
+    requiredAction:
+      | 'NONE'
+      | 'LOGIN'
+      | 'SUBSCRIBE'
+      | 'BUY_COINS'
+      | 'BUY_CONTENT';
   };
 }

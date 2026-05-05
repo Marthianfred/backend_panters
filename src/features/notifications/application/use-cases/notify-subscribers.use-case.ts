@@ -26,23 +26,29 @@ export class NotifySubscribersUseCase {
     private readonly configService: ConfigService,
   ) {
     const publicKey = this.configService.getOrThrow<string>('VAPID_PUBLIC_KEY');
-    const privateKey = this.configService.getOrThrow<string>('VAPID_PRIVATE_KEY');
+    const privateKey =
+      this.configService.getOrThrow<string>('VAPID_PRIVATE_KEY');
     const subject = this.configService.getOrThrow<string>('VAPID_SUBJECT');
 
     webpush.setVapidDetails(subject, publicKey, privateKey);
   }
 
-  async execute(payload: NotificationPayload): Promise<{ success: number; failed: number }> {
+  async execute(
+    payload: NotificationPayload,
+  ): Promise<{ success: number; failed: number }> {
     const subscribers = await this.pushRepository.findByRole('subscriber');
-    this.logger.log(`Iniciando envío de notificación a ${subscribers.length} suscriptores`);
+    this.logger.log(
+      `Iniciando envío de notificación a ${subscribers.length} suscriptores`,
+    );
 
-    
-    const notifications = subscribers.map(sub => Notification.create({
-      userId: sub.userId,
-      title: payload.title,
-      body: payload.body,
-      data: payload.data,
-    }));
+    const notifications = subscribers.map((sub) =>
+      Notification.create({
+        userId: sub.userId,
+        title: payload.title,
+        body: payload.body,
+        data: payload.data,
+      }),
+    );
     await this.notificationRepository.saveMany(notifications);
 
     let successCount = 0;
@@ -58,13 +64,18 @@ export class NotifySubscribersUseCase {
           },
         };
 
-        await webpush.sendNotification(pushSubscription, JSON.stringify(payload));
+        await webpush.sendNotification(
+          pushSubscription,
+          JSON.stringify(payload),
+        );
         successCount++;
       } catch (error) {
         failedCount++;
-        this.logger.error(`Error enviando notificación a endpoint: ${sub.endpoint}`, error);
-        
-        
+        this.logger.error(
+          `Error enviando notificación a endpoint: ${sub.endpoint}`,
+          error,
+        );
+
         if (error.statusCode === 410 || error.statusCode === 404) {
           await this.pushRepository.deleteByEndpoint(sub.endpoint);
         }

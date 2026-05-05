@@ -1,4 +1,12 @@
-import { Controller, Post, Headers, Req, BadRequestException, RawBodyRequest, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Headers,
+  Req,
+  BadRequestException,
+  RawBodyRequest,
+  Logger,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { StripeService } from '@/core/infrastructure/stripe/stripe.service';
 import { HandleStripeWebhookUseCase } from '../application/handle-stripe-webhook.use-case';
@@ -25,12 +33,13 @@ export class StripeWebhookController {
     }
 
     try {
-      
-      const event = this.stripeService.constructEvent(request.rawBody, signature);
+      const event = this.stripeService.constructEvent(
+        request.rawBody,
+        signature,
+      );
 
-      
       await this.handleStripeWebhookUseCase.execute(event);
-      
+
       return { received: true };
     } catch (err) {
       this.logger.error(`Error procesando webhook de Stripe: ${err.message}`);

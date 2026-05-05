@@ -21,7 +21,9 @@ describe('HandleStripeWebhookUseCase', () => {
       ],
     }).compile();
 
-    useCase = module.get<HandleStripeWebhookUseCase>(HandleStripeWebhookUseCase);
+    useCase = module.get<HandleStripeWebhookUseCase>(
+      HandleStripeWebhookUseCase,
+    );
     userSubscriptionsRepository = module.get(USER_SUBSCRIPTIONS_REPOSITORY);
   });
 
@@ -42,7 +44,7 @@ describe('HandleStripeWebhookUseCase', () => {
     expect(userSubscriptionsRepository.updateStatus).toHaveBeenCalledWith(
       'sub-123',
       'active',
-      'stripe-sub-id'
+      'stripe-sub-id',
     );
   });
 
@@ -56,7 +58,6 @@ describe('HandleStripeWebhookUseCase', () => {
       data: { object: mockSession },
     } as any;
 
-    
     await useCase.execute(mockEvent);
 
     expect(userSubscriptionsRepository.updateStatus).not.toHaveBeenCalled();
@@ -73,8 +74,12 @@ describe('HandleStripeWebhookUseCase', () => {
       data: { object: mockSession },
     } as any;
 
-    userSubscriptionsRepository.updateStatus.mockRejectedValue(new Error('DB Error'));
+    userSubscriptionsRepository.updateStatus.mockRejectedValue(
+      new Error('DB Error'),
+    );
 
-    await expect(useCase.execute(mockEvent)).rejects.toThrow(BadRequestException);
+    await expect(useCase.execute(mockEvent)).rejects.toThrow(
+      BadRequestException,
+    );
   });
 });

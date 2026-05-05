@@ -12,50 +12,41 @@ import { DeletePlanHandler } from './plans/delete-plan.handler';
 import { SUBSCRIPTION_PLANS_REPOSITORY } from './interfaces/subscription.plans.repository.interface';
 import { PostgresSubscriptionPlansRepository } from './infrastructure/postgres.subscription-plans.repository';
 
-
 import { PreRegistrationController } from './pre-registration/infrastructure/pre-registration.controller';
 import { PreRegistrationUseCase } from './pre-registration/application/pre-registration.use-case';
 import { USER_SUBSCRIPTIONS_REPOSITORY } from './interfaces/user.subscriptions.repository.interface';
 import { PostgresUserSubscriptionsRepository } from './infrastructure/postgres.user-subscriptions.repository';
 
-
 import { HandleStripeWebhookUseCase } from './webhooks/stripe/application/handle-stripe-webhook.use-case';
-
 
 import { CheckoutController } from './checkout/infrastructure/checkout.controller';
 import { CreateCheckoutSessionUseCase } from './checkout/application/create-checkout-session.use-case';
 
-
 import { RenewSubscriptionController } from './renew/infrastructure/renew-subscription.controller';
 import { RenewSubscriptionUseCase } from './renew/application/renew-subscription.use-case';
-
 
 import { UpgradeSubscriptionController } from './upgrade-subscription/infrastructure/upgrade-subscription.controller';
 import { UpgradeSubscriptionUseCase } from './upgrade-subscription/application/upgrade-subscription.use-case';
 
-
 import { GetSubscriptionStatusController } from './get-status/infrastructure/get-subscription-status.controller';
 import { GetSubscriptionStatusUseCase } from './get-status/application/get-subscription-status.use-case';
-
 
 import { GetMySubscriptionController } from './get-my-subscription/infrastructure/get-my-subscription.controller';
 import { GetMySubscriptionUseCase } from './get-my-subscription/application/get-my-subscription.use-case';
 
-
 import { SubscriptionGuard } from './guards/subscription.guard';
 import { CheckExpiredSubscriptionsTask } from './check-expired/application/check-expired-subscriptions.task';
-
 
 @Module({
   imports: [ConfigModule, DatabaseModule, AuthModule, UsersManagementModule],
   controllers: [
-    PlansController, 
-    PreRegistrationController, 
+    PlansController,
+    PreRegistrationController,
     CheckoutController,
     RenewSubscriptionController,
     UpgradeSubscriptionController,
     GetMySubscriptionController,
-    GetSubscriptionStatusController
+    GetSubscriptionStatusController,
   ],
   providers: [
     ListPlansHandler,
@@ -82,17 +73,14 @@ import { CheckExpiredSubscriptionsTask } from './check-expired/application/check
     },
   ],
   exports: [
-    SUBSCRIPTION_PLANS_REPOSITORY, 
+    SUBSCRIPTION_PLANS_REPOSITORY,
     USER_SUBSCRIPTIONS_REPOSITORY,
-    HandleStripeWebhookUseCase, 
+    HandleStripeWebhookUseCase,
     CreateCheckoutSessionUseCase,
     RenewSubscriptionUseCase,
     UpgradeSubscriptionUseCase,
     GetMySubscriptionUseCase,
-    CheckExpiredSubscriptionsTask
+    CheckExpiredSubscriptionsTask,
   ],
-
-
 })
 export class SubscriptionsModule {}
-

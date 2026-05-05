@@ -42,6 +42,8 @@ describe('UpdatePlanHandler', () => {
 
   it('should throw NotFoundException if plan does not exist', async () => {
     repository.findById.mockResolvedValue(null);
-    await expect(handler.handle('non-existent', {})).rejects.toThrow(NotFoundException);
+    await expect(handler.handle('non-existent', {})).rejects.toThrow(
+      NotFoundException,
+    );
   });
 });

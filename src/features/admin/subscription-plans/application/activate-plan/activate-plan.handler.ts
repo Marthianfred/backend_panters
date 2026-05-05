@@ -12,7 +12,9 @@ export class ActivatePlanHandler {
   async handle(id: string): Promise<void> {
     const existingPlan = await this.planRepository.findById(id);
     if (!existingPlan) {
-      throw new NotFoundException(`Plan de suscripción con ID ${id} no encontrado`);
+      throw new NotFoundException(
+        `Plan de suscripción con ID ${id} no encontrado`,
+      );
     }
 
     await this.planRepository.toggleStatus(id, true);

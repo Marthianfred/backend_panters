@@ -43,12 +43,12 @@ describe('PurchasePtcService', () => {
   it('should create a checkout session for a valid priceId found in DB', async () => {
     const userId = 'user-123';
     const priceId = 'price_real_from_stripe';
-    const mockPackage = { 
-      id: 'uuid-1', 
-      name: '100 PTC', 
-      ptcAmount: 100, 
-      stripePriceId: priceId, 
-      isActive: true 
+    const mockPackage = {
+      id: 'uuid-1',
+      name: '100 PTC',
+      ptcAmount: 100,
+      stripePriceId: priceId,
+      isActive: true,
     };
     const mockSession = { id: 'sess_123', url: 'http://stripe.com/checkout' };
 
@@ -62,13 +62,15 @@ describe('PurchasePtcService', () => {
       sessionId: mockSession.id,
     });
     expect(ptcPackageRepository.findByPriceId).toHaveBeenCalledWith(priceId);
-    expect(stripeService.createCheckoutSession).toHaveBeenCalledWith(expect.objectContaining({
-      priceId,
-      metadata: expect.objectContaining({
-        userId,
-        coinsAmount: '100',
+    expect(stripeService.createCheckoutSession).toHaveBeenCalledWith(
+      expect.objectContaining({
+        priceId,
+        metadata: expect.objectContaining({
+          userId,
+          coinsAmount: '100',
+        }),
       }),
-    }));
+    );
   });
 
   it('should throw BadRequestException if priceId is not in DB', async () => {
@@ -77,6 +79,8 @@ describe('PurchasePtcService', () => {
 
     ptcPackageRepository.findByPriceId.mockResolvedValue(null);
 
-    await expect(service.createSession(userId, priceId)).rejects.toThrow(BadRequestException);
+    await expect(service.createSession(userId, priceId)).rejects.toThrow(
+      BadRequestException,
+    );
   });
 });

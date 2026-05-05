@@ -11,17 +11,22 @@ export class GetMySubscriptionUseCase {
   ) {}
 
   async execute(userId: string): Promise<MySubscriptionResponseDto> {
-    const subscription = await this.subscriptionsRepository.findActiveWithPlanByUserId(userId);
+    const subscription =
+      await this.subscriptionsRepository.findActiveWithPlanByUserId(userId);
 
     if (!subscription) {
-      throw new NotFoundException('No se encontró una suscripción activa para este usuario.');
+      throw new NotFoundException(
+        'No se encontró una suscripción activa para este usuario.',
+      );
     }
 
     return {
       id: subscription.id,
       status: subscription.status,
       planName: subscription.planName,
-      currentPeriodEnd: subscription.currentPeriodEnd ? subscription.currentPeriodEnd.toISOString() : null,
+      currentPeriodEnd: subscription.currentPeriodEnd
+        ? subscription.currentPeriodEnd.toISOString()
+        : null,
       cancelAtPeriodEnd: subscription.cancelAtPeriodEnd,
     };
   }

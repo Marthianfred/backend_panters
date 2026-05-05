@@ -15,17 +15,20 @@ export class AwsKinesisWallReactionPublisher implements IPostReactionEventPublis
 
     this.streamName = this.configService.get<string>(
       'KN_KINESIS_WALL_REACTIONS_STREAM',
-      'wall-post-reactions-stream'
+      'wall-post-reactions-stream',
     );
 
     this.kinesisClient = new KinesisClient({
       region,
       endpoint: endpoint,
       credentials: {
-        accessKeyId: this.configService.get<string>('KN_AWS_ACCESS_KEY_ID', 'test'),
+        accessKeyId: this.configService.get<string>(
+          'KN_AWS_ACCESS_KEY_ID',
+          'test',
+        ),
         secretAccessKey: this.configService.get<string>(
           'KN_AWS_SECRET_ACCESS_KEY',
-          'test'
+          'test',
         ),
       },
     });
@@ -33,25 +36,27 @@ export class AwsKinesisWallReactionPublisher implements IPostReactionEventPublis
 
   async publish(event: PostReactionEvent): Promise<void> {
     const payload = JSON.stringify({
-      eventType: 'WALL_POST_REACTION_ADDED', 
+      eventType: 'WALL_POST_REACTION_ADDED',
       data: event,
       meta: {
         vsa_path: 'panters/post-reactions',
-        version: '1.1.0'
-      }
+        version: '1.1.0',
+      },
     });
 
     try {
       const command = new PutRecordCommand({
         StreamName: this.streamName,
         Data: Buffer.from(payload),
-        PartitionKey: event.creatorId, 
+        PartitionKey: event.creatorId,
       });
 
       await this.kinesisClient.send(command);
     } catch (error) {
-      
-      console.error('[Kinesis/Wall] Fallo la publicación de pantera:', error.message);
+      console.error(
+        '[Kinesis/Wall] Fallo la publicación de pantera:',
+        error.message,
+      );
     }
   }
 }

@@ -27,7 +27,7 @@ export class PostgresHomeVideoRepository implements IHomeVideoRepository {
       ORDER BY created_at DESC;
     `;
     const result = await this.pool.query(query);
-    return result.rows.map(row => ({
+    return result.rows.map((row) => ({
       ...row,
       createdAt: new Date(row.createdAt),
     }));

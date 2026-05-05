@@ -7,8 +7,8 @@ export interface UploadContentRequest {
   priceInPanterCoins: number;
   type?: string;
   mimeType: string;
-  thumbnailMimeType?: string; 
-  accessType: string; 
+  thumbnailMimeType?: string;
+  accessType: string;
   clientId?: string;
 }
 
@@ -23,8 +23,8 @@ export interface UploadContentResponse {
   contentId: string;
   status: string;
   message: string;
-  presignedUploadUrl: string; 
-  presignedThumbnailUploadUrl?: string; 
+  presignedUploadUrl: string;
+  presignedThumbnailUploadUrl?: string;
 }
 
 export class InvalidPriceError extends BadRequestException {

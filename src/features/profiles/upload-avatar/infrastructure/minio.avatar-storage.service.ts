@@ -34,8 +34,6 @@ export class MinioAvatarStorageService implements IAvatarStorageService {
     mimeType: string,
     fileBuffer: Buffer,
   ): Promise<string> {
-    
-    
     const key = `${userId}/avatars/profile_picture.webp`;
 
     const command = new PutObjectCommand({
@@ -43,7 +41,7 @@ export class MinioAvatarStorageService implements IAvatarStorageService {
       Key: key,
       Body: fileBuffer,
       ContentType: mimeType,
-      CacheControl: 'max-age=0, no-cache, no-store, must-revalidate', 
+      CacheControl: 'max-age=0, no-cache, no-store, must-revalidate',
     });
 
     await this.s3Client.send(command);
@@ -51,7 +49,6 @@ export class MinioAvatarStorageService implements IAvatarStorageService {
     const publicUrlBase = this.configService.get<string>('AWS_URL');
 
     if (publicUrlBase) {
-      
       const formattedBase = publicUrlBase.endsWith('/')
         ? publicUrlBase.slice(0, -1)
         : publicUrlBase;

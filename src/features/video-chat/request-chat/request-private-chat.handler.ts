@@ -7,7 +7,10 @@ import type { IKinesisVideoService } from '../../streaming/get-viewer-access/int
 import { KINESIS_VIDEO_SERVICE } from '../../streaming/get-viewer-access/interfaces/kinesis.service.interface';
 import type { IStreamRepository } from '../../streaming/get-viewer-access/interfaces/stream.repository.interface';
 import { STREAM_REPOSITORY } from '../../streaming/get-viewer-access/interfaces/stream.repository.interface';
-import { RequestPrivateChatDto, RequestPrivateChatResponse } from './request-private-chat.models';
+import {
+  RequestPrivateChatDto,
+  RequestPrivateChatResponse,
+} from './request-private-chat.models';
 import { LiveChatGateway } from '../../live-chat/infrastructure/live-chat.gateway';
 
 @Injectable()
@@ -25,7 +28,10 @@ export class RequestPrivateChatHandler {
     private readonly liveChatGateway: LiveChatGateway,
   ) {}
 
-  async execute(userId: string, dto: RequestPrivateChatDto): Promise<RequestPrivateChatResponse> {
+  async execute(
+    userId: string,
+    dto: RequestPrivateChatDto,
+  ): Promise<RequestPrivateChatResponse> {
     const { creatorId, durationMinutes } = dto;
 
     if (durationMinutes <= 0) {
@@ -38,7 +44,7 @@ export class RequestPrivateChatHandler {
       userId,
       creatorId,
       totalPrice,
-      `Chat privado de ${durationMinutes} minutos`
+      `Chat privado de ${durationMinutes} minutos`,
     );
 
     if (!paymentResult) {
@@ -47,15 +53,22 @@ export class RequestPrivateChatHandler {
 
     const streamId = randomUUID();
     const channelName = `Private-${creatorId}-${userId}-${Date.now()}`;
-    const channelArn = await this.kinesisVideoService.createSignalingChannel(channelName);
-    const region = this.configService.get<string>('KN_STREAMS_REGION', 'us-east-2');
+    const channelArn =
+      await this.kinesisVideoService.createSignalingChannel(channelName);
+    const region = this.configService.get<string>(
+      'KN_STREAMS_REGION',
+      'us-east-2',
+    );
 
     await this.streamRepository.createStream({
       id: streamId,
       creatorId: creatorId,
       channelArn: channelArn,
       region: region,
-      s3ThumbnailBucket: this.configService.get<string>('AWS_BUCKET', 'panters'),
+      s3ThumbnailBucket: this.configService.get<string>(
+        'AWS_BUCKET',
+        'panters',
+      ),
       s3ThumbnailKey: `thumbnails/private-streams/${streamId}.jpg`,
       isActive: false,
     });
@@ -69,15 +82,14 @@ export class RequestPrivateChatHandler {
       streamId,
     });
 
-    const credentials = await this.kinesisVideoService.generateViewerCredentials(
-      channelArn,
-      userId
-    );
+    const credentials =
+      await this.kinesisVideoService.generateViewerCredentials(
+        channelArn,
+        userId,
+      );
 
-    const signalingEndpoint = await this.kinesisVideoService.getSignalingEndpoint(
-      channelArn,
-      'VIEWER'
-    );
+    const signalingEndpoint =
+      await this.kinesisVideoService.getSignalingEndpoint(channelArn, 'VIEWER');
 
     this.liveChatGateway.notifyPrivateChatRequest(creatorId, {
       sessionId: session.id,

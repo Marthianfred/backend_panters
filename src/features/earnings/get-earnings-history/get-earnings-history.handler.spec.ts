@@ -27,13 +27,15 @@ describe('GetEarningsHistoryHandler', () => {
       transactions: [],
       totalCount: 0,
       currentPage: 1,
-      totalPages: 0
+      totalPages: 0,
     };
     mockRepository.getCreatorEarningsHistory.mockResolvedValue(mockResponse);
 
     const result = await handler.execute(request);
 
-    expect(mockRepository.getCreatorEarningsHistory).toHaveBeenCalledWith(request);
+    expect(mockRepository.getCreatorEarningsHistory).toHaveBeenCalledWith(
+      request,
+    );
     expect(result).toEqual(mockResponse);
   });
 });

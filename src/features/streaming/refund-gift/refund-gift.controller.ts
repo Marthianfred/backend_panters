@@ -1,6 +1,9 @@
 import { Controller, Post, Body } from '@nestjs/common';
 import { RefundGiftHandler } from './refund-gift.handler';
-import type { RefundGiftRequest, RefundGiftResponse } from './refund-gift.models';
+import type {
+  RefundGiftRequest,
+  RefundGiftResponse,
+} from './refund-gift.models';
 
 @Controller('api/v1/gifts')
 export class RefundGiftController {

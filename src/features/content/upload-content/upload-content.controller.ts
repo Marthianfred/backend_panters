@@ -20,7 +20,10 @@ import { Role } from '../../../core/auth/roles.enum';
 import { RolesGuard } from '../../../core/auth/guards/roles.guard';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import type { AuthenticatedRequest } from '../../auth/types/auth.types';
-import { InvalidPriceError, ProfileNotFoundError } from './upload-content.models';
+import {
+  InvalidPriceError,
+  ProfileNotFoundError,
+} from './upload-content.models';
 
 @Controller('api/v1/content')
 @UseGuards(AuthGuard, RolesGuard)
@@ -28,7 +31,9 @@ export class UploadContentController {
   constructor(private readonly handler: UploadContentHandler) {}
 
   @Sse('upload-status/:clientId')
-  public uploadStatus(@Param('clientId') clientId: string): Observable<MessageEvent> {
+  public uploadStatus(
+    @Param('clientId') clientId: string,
+  ): Observable<MessageEvent> {
     return this.handler.getStatusStream(clientId);
   }
 
@@ -40,7 +45,9 @@ export class UploadContentController {
     @Res() res: Response,
   ): Promise<void> {
     if (!clientId) {
-      res.status(HttpStatus.BAD_REQUEST).json({ error: 'clientId es requerido para confirmar.' });
+      res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ error: 'clientId es requerido para confirmar.' });
       return;
     }
     await this.handler.confirmUpload(contentId, clientId);
@@ -51,7 +58,16 @@ export class UploadContentController {
   @Roles(Role.MODEL, Role.ADMIN)
   public async upload(
     @Req() req: AuthenticatedRequest,
-    @Body() body: { title: string; description: string; price: number, type?: string, mimeType: string, thumbnailMimeType?: string, accessType: string },
+    @Body()
+    body: {
+      title: string;
+      description: string;
+      price: number;
+      type?: string;
+      mimeType: string;
+      thumbnailMimeType?: string;
+      accessType: string;
+    },
     @Query('clientId') clientId: string,
     @Res() res: Response,
   ): Promise<void> {

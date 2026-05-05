@@ -1,4 +1,9 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as userSubscriptionsRepositoryInterface from '@/features/subscriptions/interfaces/user.subscriptions.repository.interface';
 import * as subscriptionPlansRepositoryInterface from '@/features/subscriptions/interfaces/subscription.plans.repository.interface';
@@ -26,9 +31,12 @@ export class CreateCheckoutSessionUseCase {
     private readonly usersRepository: PostgresUsersManagementRepository,
   ) {}
 
-  async execute(dto: CreateCheckoutSessionDto): Promise<CheckoutSessionResponse> {
-    
-    const subscription = await this.userSubscriptionsRepository.findById(dto.subscriptionId);
+  async execute(
+    dto: CreateCheckoutSessionDto,
+  ): Promise<CheckoutSessionResponse> {
+    const subscription = await this.userSubscriptionsRepository.findById(
+      dto.subscriptionId,
+    );
     if (!subscription) {
       throw new NotFoundException('Suscripción no encontrada.');
     }
@@ -37,26 +45,28 @@ export class CreateCheckoutSessionUseCase {
       throw new BadRequestException('Esta suscripción ya está activa.');
     }
 
-    
     const plan = await this.plansRepository.findById(subscription.planId);
     if (!plan || !plan.stripePriceId) {
-      throw new BadRequestException('El plan seleccionado no tiene configurada una pasarela de pago válida.');
+      throw new BadRequestException(
+        'El plan seleccionado no tiene configurada una pasarela de pago válida.',
+      );
     }
 
-    
-    const successUrl = this.configService.getOrThrow<string>('STRIPE_SUCCESS_URL');
-    const cancelUrl = this.configService.getOrThrow<string>('STRIPE_CANCEL_URL');
+    const successUrl =
+      this.configService.getOrThrow<string>('STRIPE_SUCCESS_URL');
+    const cancelUrl =
+      this.configService.getOrThrow<string>('STRIPE_CANCEL_URL');
 
-    
     const user = await this.usersRepository.getUserDetails(subscription.userId);
     if (!user) {
       throw new NotFoundException('Usuario no encontrado para la suscripción.');
     }
 
-    
-    const stripeCustomerId = await this.stripeService.getOrCreateCustomer(user.email, user.name);
+    const stripeCustomerId = await this.stripeService.getOrCreateCustomer(
+      user.email,
+      user.name,
+    );
 
-    
     try {
       const session = await this.stripeService.createCheckoutSession({
         priceId: plan.stripePriceId,
@@ -78,7 +88,9 @@ export class CreateCheckoutSessionUseCase {
         sessionId: session.id,
       };
     } catch (error) {
-      throw new BadRequestException(`Error al generar la sesión de pago: ${error.message}`);
+      throw new BadRequestException(
+        `Error al generar la sesión de pago: ${error.message}`,
+      );
     }
   }
 }

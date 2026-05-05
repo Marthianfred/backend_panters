@@ -1,4 +1,9 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as userSubscriptionsRepositoryInterface from '@/features/subscriptions/interfaces/user.subscriptions.repository.interface';
 import * as subscriptionPlansRepositoryInterface from '@/features/subscriptions/interfaces/subscription.plans.repository.interface';
@@ -27,33 +32,44 @@ export class RenewSubscriptionUseCase {
   ) {}
 
   async execute(dto: RenewSubscriptionDto): Promise<RenewSessionResponse> {
-    const subscriptions = await this.userSubscriptionsRepository.findByUserId(dto.userId);
+    const subscriptions = await this.userSubscriptionsRepository.findByUserId(
+      dto.userId,
+    );
     const subscription = subscriptions[0];
 
     if (!subscription) {
-      throw new NotFoundException('No se encontró una suscripción previa para renovar.');
+      throw new NotFoundException(
+        'No se encontró una suscripción previa para renovar.',
+      );
     }
 
     if (subscription.status !== 'active' && subscription.status !== 'expired') {
-      throw new BadRequestException('Solo se pueden renovar suscripciones activas o expiradas.');
+      throw new BadRequestException(
+        'Solo se pueden renovar suscripciones activas o expiradas.',
+      );
     }
-
-
 
     const plan = await this.plansRepository.findById(subscription.planId);
     if (!plan || !plan.stripePriceId) {
-      throw new BadRequestException('El plan asociado no tiene una pasarela de pago válida configurada.');
+      throw new BadRequestException(
+        'El plan asociado no tiene una pasarela de pago válida configurada.',
+      );
     }
 
-    const successUrl = this.configService.getOrThrow<string>('STRIPE_SUCCESS_URL');
-    const cancelUrl = this.configService.getOrThrow<string>('STRIPE_CANCEL_URL');
+    const successUrl =
+      this.configService.getOrThrow<string>('STRIPE_SUCCESS_URL');
+    const cancelUrl =
+      this.configService.getOrThrow<string>('STRIPE_CANCEL_URL');
 
     const user = await this.usersRepository.getUserDetails(subscription.userId);
     if (!user) {
       throw new NotFoundException('Usuario no encontrado.');
     }
 
-    const stripeCustomerId = await this.stripeService.getOrCreateCustomer(user.email, user.name);
+    const stripeCustomerId = await this.stripeService.getOrCreateCustomer(
+      user.email,
+      user.name,
+    );
 
     try {
       const session = await this.stripeService.createCheckoutSession({
@@ -78,7 +94,9 @@ export class RenewSubscriptionUseCase {
         sessionId: session.id,
       };
     } catch (error) {
-      throw new BadRequestException(`Error al generar la sesión de renovación: ${error.message}`);
+      throw new BadRequestException(
+        `Error al generar la sesión de renovación: ${error.message}`,
+      );
     }
   }
 }

@@ -1,6 +1,5 @@
 import { PanterServiceItem } from './interfaces/panters.repository.interface';
 
-
 export type GetPantersRequest = Record<string, never>;
 
 export interface PanterSummary {

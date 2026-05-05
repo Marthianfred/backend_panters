@@ -10,15 +10,15 @@ export class ShareContentController {
   constructor(private readonly handler: GetShareInfoHandler) {}
 
   @Get('share-info/:id')
-  @ApiOperation({ summary: 'Obtener información pública del post para links compartidos' })
+  @ApiOperation({
+    summary: 'Obtener información pública del post para links compartidos',
+  })
   @ApiResponse({ status: 200, type: ShareInfoResponse })
   @ApiResponse({ status: 404, description: 'Post no encontrado' })
   public async getInfo(
     @Param('id') contentId: string,
-    @Request() req: AuthenticatedRequest
+    @Request() req: AuthenticatedRequest,
   ): Promise<ShareInfoResponse> {
-    
-    
     const userId = req.user?.id;
     return await this.handler.execute(contentId, userId);
   }

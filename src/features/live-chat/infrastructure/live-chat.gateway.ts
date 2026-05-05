@@ -65,7 +65,10 @@ export class LiveChatGateway
     @ConnectedSocket() client: Socket,
   ) {
     const room = `live_${data.creatorId}`;
-    const messagePayload = await this.liveChatService.createMessagePayload(client, data);
+    const messagePayload = await this.liveChatService.createMessagePayload(
+      client,
+      data,
+    );
 
     this.server.to(room).emit('receiveChatMessage', messagePayload);
   }
@@ -122,4 +125,3 @@ export class LiveChatGateway
     this.server.to(room).emit('privateChatRequest', data);
   }
 }
-

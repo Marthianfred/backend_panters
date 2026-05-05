@@ -7,7 +7,9 @@ export class StopStreamController {
 
   @Post('stop')
   @HttpCode(HttpStatus.OK)
-  public async stopStream(@Body() body: { streamId: string }): Promise<{ success: boolean }> {
+  public async stopStream(
+    @Body() body: { streamId: string },
+  ): Promise<{ success: boolean }> {
     await this.stopStreamHandler.execute(body.streamId);
     return { success: true };
   }

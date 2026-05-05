@@ -31,7 +31,7 @@ describe('UpdatePtcPackageHandler', () => {
     const id = 'uuid-123';
     const dto: UpdatePtcPackageDto = { name: 'Updated Name' };
     const existing = { id, name: 'Old Name' };
-    
+
     repository.findById.mockResolvedValue(existing);
     repository.update.mockResolvedValue({ ...existing, ...dto });
 
@@ -44,6 +44,8 @@ describe('UpdatePtcPackageHandler', () => {
   it('debería lanzar NotFoundException si el paquete no existe', async () => {
     repository.findById.mockResolvedValue(null);
 
-    await expect(handler.handle('invalid-id', {})).rejects.toThrow(NotFoundException);
+    await expect(handler.handle('invalid-id', {})).rejects.toThrow(
+      NotFoundException,
+    );
   });
 });

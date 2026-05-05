@@ -15,7 +15,9 @@ export class PostgresSubscriptionPlanRepository implements ISubscriptionPlanRepo
     });
   }
 
-  async create(plan: Partial<SubscriptionPlanEntity>): Promise<SubscriptionPlanEntity> {
+  async create(
+    plan: Partial<SubscriptionPlanEntity>,
+  ): Promise<SubscriptionPlanEntity> {
     const query = `
       INSERT INTO subscription_plans (
         name, description, price_usd, duration_days, benefits, stripe_price_id, is_active
@@ -50,19 +52,43 @@ export class PostgresSubscriptionPlanRepository implements ISubscriptionPlanRepo
     }
   }
 
-  async update(id: string, plan: Partial<SubscriptionPlanEntity>): Promise<SubscriptionPlanEntity> {
+  async update(
+    id: string,
+    plan: Partial<SubscriptionPlanEntity>,
+  ): Promise<SubscriptionPlanEntity> {
     const fields: string[] = [];
     const values: any[] = [];
     let idx = 1;
 
-    if (plan.name) { fields.push(`name = $${idx++}`); values.push(plan.name); }
-    if (plan.description !== undefined) { fields.push(`description = $${idx++}`); values.push(plan.description); }
-    if (plan.priceUsd !== undefined) { fields.push(`price_usd = $${idx++}`); values.push(plan.priceUsd); }
-    if (plan.durationDays !== undefined) { fields.push(`duration_days = $${idx++}`); values.push(plan.durationDays); }
-    if (plan.benefits) { fields.push(`benefits = $${idx++}`); values.push(JSON.stringify(plan.benefits)); }
-    if (plan.stripePriceId !== undefined) { fields.push(`stripe_price_id = $${idx++}`); values.push(plan.stripePriceId); }
-    if (plan.isActive !== undefined) { fields.push(`is_active = $${idx++}`); values.push(plan.isActive); }
-    
+    if (plan.name) {
+      fields.push(`name = $${idx++}`);
+      values.push(plan.name);
+    }
+    if (plan.description !== undefined) {
+      fields.push(`description = $${idx++}`);
+      values.push(plan.description);
+    }
+    if (plan.priceUsd !== undefined) {
+      fields.push(`price_usd = $${idx++}`);
+      values.push(plan.priceUsd);
+    }
+    if (plan.durationDays !== undefined) {
+      fields.push(`duration_days = $${idx++}`);
+      values.push(plan.durationDays);
+    }
+    if (plan.benefits) {
+      fields.push(`benefits = $${idx++}`);
+      values.push(JSON.stringify(plan.benefits));
+    }
+    if (plan.stripePriceId !== undefined) {
+      fields.push(`stripe_price_id = $${idx++}`);
+      values.push(plan.stripePriceId);
+    }
+    if (plan.isActive !== undefined) {
+      fields.push(`is_active = $${idx++}`);
+      values.push(plan.isActive);
+    }
+
     fields.push(`updated_at = NOW()`);
     values.push(id);
 
@@ -85,7 +111,9 @@ export class PostgresSubscriptionPlanRepository implements ISubscriptionPlanRepo
       const result = await this.pool.query(query, values);
       return new SubscriptionPlanEntity(result.rows[0]);
     } catch (error) {
-      this.logger.error(`Error al actualizar plan de suscripción ${id}: ${error.message}`);
+      this.logger.error(
+        `Error al actualizar plan de suscripción ${id}: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -107,9 +135,13 @@ export class PostgresSubscriptionPlanRepository implements ISubscriptionPlanRepo
 
     try {
       const result = await this.pool.query(query, [id]);
-      return result.rows.length > 0 ? new SubscriptionPlanEntity(result.rows[0]) : null;
+      return result.rows.length > 0
+        ? new SubscriptionPlanEntity(result.rows[0])
+        : null;
     } catch (error) {
-      this.logger.error(`Error al buscar plan de suscripción ${id}: ${error.message}`);
+      this.logger.error(
+        `Error al buscar plan de suscripción ${id}: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -131,9 +163,11 @@ export class PostgresSubscriptionPlanRepository implements ISubscriptionPlanRepo
 
     try {
       const result = await this.pool.query(query);
-      return result.rows.map(row => new SubscriptionPlanEntity(row));
+      return result.rows.map((row) => new SubscriptionPlanEntity(row));
     } catch (error) {
-      this.logger.error(`Error al listar planes de suscripción: ${error.message}`);
+      this.logger.error(
+        `Error al listar planes de suscripción: ${error.message}`,
+      );
       throw error;
     }
   }
@@ -143,7 +177,9 @@ export class PostgresSubscriptionPlanRepository implements ISubscriptionPlanRepo
     try {
       await this.pool.query(query, [isActive, id]);
     } catch (error) {
-      this.logger.error(`Error al cambiar estado del plan ${id}: ${error.message}`);
+      this.logger.error(
+        `Error al cambiar estado del plan ${id}: ${error.message}`,
+      );
       throw error;
     }
   }

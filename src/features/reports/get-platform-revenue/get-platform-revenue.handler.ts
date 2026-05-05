@@ -1,6 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { IPlatformRevenueRepository } from './interfaces/platform-revenue-repository.interface';
-import { PlatformRevenueResponseDto, GetPlatformRevenueQueryDto } from './get-platform-revenue.models';
+import {
+  PlatformRevenueResponseDto,
+  GetPlatformRevenueQueryDto,
+} from './get-platform-revenue.models';
 
 @Injectable()
 export class GetPlatformRevenueHandler {
@@ -11,8 +14,12 @@ export class GetPlatformRevenueHandler {
     private readonly repository: IPlatformRevenueRepository,
   ) {}
 
-  async execute(queryDto: GetPlatformRevenueQueryDto): Promise<PlatformRevenueResponseDto> {
-    const startDate = queryDto.startDate ? new Date(queryDto.startDate) : undefined;
+  async execute(
+    queryDto: GetPlatformRevenueQueryDto,
+  ): Promise<PlatformRevenueResponseDto> {
+    const startDate = queryDto.startDate
+      ? new Date(queryDto.startDate)
+      : undefined;
     const endDate = queryDto.endDate ? new Date(queryDto.endDate) : undefined;
 
     const metrics = await this.repository.getRevenueMetrics(startDate, endDate);

@@ -1,7 +1,19 @@
-import { Controller, Post, Body, Req, Param, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  Req,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { RequestPrivateChatHandler } from './request-chat/request-private-chat.handler';
 import { JoinPrivateChatHandler } from './join-chat/join-private-chat.handler';
+import { EndPrivateChatHandler } from './end-chat/end-private-chat.handler';
+import { StartPrivateChatHandler } from './start-chat/start-private-chat.handler';
+import { ListUserAppointmentsHandler } from './list-appointments/list-user-appointments.handler';
 import { RequestPrivateChatDto } from './request-chat/request-private-chat.models';
+import { EndPrivateChatDto } from './end-chat/end-private-chat.models';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../../core/auth/decorators/roles.decorator';
@@ -14,7 +26,17 @@ export class VideoChatController {
   constructor(
     private readonly requestHandler: RequestPrivateChatHandler,
     private readonly joinHandler: JoinPrivateChatHandler,
+    private readonly endHandler: EndPrivateChatHandler,
+    private readonly startHandler: StartPrivateChatHandler,
+    private readonly listHandler: ListUserAppointmentsHandler,
   ) {}
+
+  @Get('appointments')
+  @Roles(Role.SUBSCRIBER, Role.MODEL, Role.ADMIN)
+  async listAppointments(@Req() req: AuthenticatedRequest) {
+    const userId = req.user.id;
+    return this.listHandler.execute(userId);
+  }
 
   @Post('request')
   @Roles(Role.SUBSCRIBER, Role.MODEL, Role.ADMIN)
@@ -34,5 +56,26 @@ export class VideoChatController {
   ) {
     const userId = req.user.id;
     return this.joinHandler.execute(userId, sessionId);
+  }
+
+  @Post('start/:sessionId')
+  @Roles(Role.SUBSCRIBER, Role.MODEL, Role.ADMIN)
+  async startPrivateChat(
+    @Req() req: AuthenticatedRequest,
+    @Param('sessionId') sessionId: string,
+  ) {
+    const userId = req.user.id;
+    return this.startHandler.execute(userId, sessionId);
+  }
+
+  @Post('end/:sessionId')
+  @Roles(Role.SUBSCRIBER, Role.MODEL, Role.ADMIN)
+  async endPrivateChat(
+    @Req() req: AuthenticatedRequest,
+    @Param('sessionId') sessionId: string,
+    @Body() dto: EndPrivateChatDto,
+  ) {
+    const userId = req.user.id;
+    return this.endHandler.execute(userId, sessionId, dto);
   }
 }

@@ -21,13 +21,17 @@ describe('PostgresCreatorsRankingsRepository', () => {
         {
           provide: ConfigService,
           useValue: {
-            getOrThrow: jest.fn().mockReturnValue('postgresql://user:pass@localhost:5432/db'),
+            getOrThrow: jest
+              .fn()
+              .mockReturnValue('postgresql://user:pass@localhost:5432/db'),
           },
         },
       ],
     }).compile();
 
-    repository = module.get<PostgresCreatorsRankingsRepository>(PostgresCreatorsRankingsRepository);
+    repository = module.get<PostgresCreatorsRankingsRepository>(
+      PostgresCreatorsRankingsRepository,
+    );
     pool = new Pool();
   });
 
@@ -52,7 +56,7 @@ describe('PostgresCreatorsRankingsRepository', () => {
 
     expect(pool.query).toHaveBeenCalledWith(
       expect.stringContaining("WHERE r.name = 'model'"),
-      [5]
+      [5],
     );
     expect(result).toHaveLength(1);
     expect(result[0].userId).toBe('1');

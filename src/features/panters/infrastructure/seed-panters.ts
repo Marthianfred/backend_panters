@@ -2,7 +2,6 @@ import { Client } from 'pg';
 import * as fs from 'fs';
 import * as path from 'path';
 
-
 const envPath = path.resolve(__dirname, '../../../../.env');
 const envContent = fs.readFileSync(envPath, 'utf8');
 const dbUrlMatch = envContent.match(/DATABASE_URL=(.*)/);

@@ -21,7 +21,11 @@ import { HomeVideosModule } from './home-videos/home-videos.module';
 
 @Module({
   imports: [DatabaseModule, ConfigModule, HomeVideosModule],
-  controllers: [GetPantersController, RatePanterController, PostReactionsController],
+  controllers: [
+    GetPantersController,
+    RatePanterController,
+    PostReactionsController,
+  ],
   providers: [
     GetPantersHandler,
     {

@@ -10,7 +10,10 @@ export class PostgresPlatformRevenueRepository implements IPlatformRevenueReposi
     private readonly entityManager: EntityManager,
   ) {}
 
-  async getRevenueMetrics(startDate?: Date, endDate?: Date): Promise<{
+  async getRevenueMetrics(
+    startDate?: Date,
+    endDate?: Date,
+  ): Promise<{
     totalGrossPtc: number;
     totalPlatformPtc: number;
     totalCreatorPtc: number;

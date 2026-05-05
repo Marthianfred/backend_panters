@@ -45,9 +45,13 @@ export class WebhooksTopUpController {
     @Headers('binancepay-signature') signature: string,
   ): Promise<WebhookResponse> {
     try {
-      return await this.binanceHandler.execute(req.rawBody || (req.body as Buffer), signature || '');
+      return await this.binanceHandler.execute(
+        req.rawBody || (req.body as Buffer),
+        signature || '',
+      );
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
       if (error instanceof InvalidSignatureError) {
         throw new HttpException(errorMessage, HttpStatus.UNAUTHORIZED);
       }

@@ -19,7 +19,6 @@ export interface GetViewerAccessResponse {
   iceServers: any[];
 }
 
-
 export class StreamNotFoundError extends Error {
   constructor(streamId: string) {
     super(`El stream con ID ${streamId} no fue encontrado o no está activo.`);

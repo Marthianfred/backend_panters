@@ -86,7 +86,6 @@ export class PostgresEarningsRepository implements IEarningsRepository {
     const { creatorId, page = 1, limit = 10, startDate, endDate } = request;
     const offset = (page - 1) * limit;
 
-    
     const query = `
       WITH all_earnings AS (
         -- Ventas de Contenido

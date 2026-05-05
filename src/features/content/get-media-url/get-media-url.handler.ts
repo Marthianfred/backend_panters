@@ -22,21 +22,22 @@ export class GetMediaUrlHandler {
   public async execute(
     request: GetMediaUrlRequest,
   ): Promise<GetMediaUrlResponse> {
-    
-    const content = await this.contentRepository.getContentById(request.contentId);
+    const content = await this.contentRepository.getContentById(
+      request.contentId,
+    );
 
     if (!content) {
       throw new ContentNotFoundError();
     }
 
-    
-    
     const isOwner = content.creatorId === request.subscriberId;
-    
+
     let hasPurchased = false;
     if (!isOwner && content.accessType !== 'free') {
-       const purchasedIds = await this.contentRepository.getPurchasedContentIds(request.subscriberId);
-       hasPurchased = purchasedIds.includes(content.id);
+      const purchasedIds = await this.contentRepository.getPurchasedContentIds(
+        request.subscriberId,
+      );
+      hasPurchased = purchasedIds.includes(content.id);
     }
 
     const canView = content.accessType === 'free' || isOwner || hasPurchased;
@@ -45,7 +46,6 @@ export class GetMediaUrlHandler {
       throw new ContentAccessDeniedError();
     }
 
-    
     const extension = content.url.substring(content.url.lastIndexOf('.'));
     const mediaUrl = await this.storageService.getPresignedDownloadUrl(
       content.creatorId,

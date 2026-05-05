@@ -21,4 +21,3 @@ export interface IKinesisVideoService {
   ): Promise<any[]>;
   createSignalingChannel(channelName: string): Promise<string>;
 }
-

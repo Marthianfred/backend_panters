@@ -8,10 +8,7 @@ import { GetPlatformSummaryHandler } from '@/features/reports/get-platform-summa
 import { PostgresPlatformSummaryRepository } from '@/features/reports/get-platform-summary/infrastructure/postgres-platform-summary.repository';
 
 @Module({
-  controllers: [
-    GetPlatformRevenueController,
-    GetPlatformSummaryController,
-  ],
+  controllers: [GetPlatformRevenueController, GetPlatformSummaryController],
   providers: [
     GetPlatformRevenueHandler,
     GetPlatformSummaryHandler,

@@ -11,7 +11,10 @@ export class UpdatePtcPackageHandler {
     private readonly ptcPackageRepository: IPtcPackageRepository,
   ) {}
 
-  async handle(id: string, dto: UpdatePtcPackageDto): Promise<PtcPackageEntity> {
+  async handle(
+    id: string,
+    dto: UpdatePtcPackageDto,
+  ): Promise<PtcPackageEntity> {
     const existing = await this.ptcPackageRepository.findById(id);
     if (!existing) {
       throw new NotFoundException(`Paquete de PTC con ID ${id} no encontrado`);

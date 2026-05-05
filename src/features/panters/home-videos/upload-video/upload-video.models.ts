@@ -25,7 +25,9 @@ export interface UploadProgressData {
 
 export class UnsupportedMimeTypeError extends Error {
   constructor(mimeType: string) {
-    super(`El formato de video '${mimeType}' no está soportado. Se requiere video/webm.`);
+    super(
+      `El formato de video '${mimeType}' no está soportado. Se requiere video/webm.`,
+    );
     this.name = 'UnsupportedMimeTypeError';
   }
 }

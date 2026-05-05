@@ -36,7 +36,9 @@ describe('CreateCheckoutSessionUseCase', () => {
       ],
     }).compile();
 
-    useCase = module.get<CreateCheckoutSessionUseCase>(CreateCheckoutSessionUseCase);
+    useCase = module.get<CreateCheckoutSessionUseCase>(
+      CreateCheckoutSessionUseCase,
+    );
     userSubscriptionsRepository = module.get(USER_SUBSCRIPTIONS_REPOSITORY);
     plansRepository = module.get(SUBSCRIPTION_PLANS_REPOSITORY);
     stripeService = module.get(StripeService);
@@ -45,40 +47,53 @@ describe('CreateCheckoutSessionUseCase', () => {
 
   it('debe lanzar NotFoundException si la suscripción no existe', async () => {
     userSubscriptionsRepository.findById.mockResolvedValue(null);
-    await expect(useCase.execute({ subscriptionId: 'sub-1' })).rejects.toThrow(NotFoundException);
+    await expect(useCase.execute({ subscriptionId: 'sub-1' })).rejects.toThrow(
+      NotFoundException,
+    );
   });
 
   it('debe lanzar BadRequestException si el plan no tiene stripePriceId', async () => {
-    userSubscriptionsRepository.findById.mockResolvedValue({ id: 'sub-1', planId: 'plan-1', status: 'pending' });
-    plansRepository.findById.mockResolvedValue({ id: 'plan-1', stripePriceId: null });
+    userSubscriptionsRepository.findById.mockResolvedValue({
+      id: 'sub-1',
+      planId: 'plan-1',
+      status: 'pending',
+    });
+    plansRepository.findById.mockResolvedValue({
+      id: 'plan-1',
+      stripePriceId: null,
+    });
 
-    await expect(useCase.execute({ subscriptionId: 'sub-1' })).rejects.toThrow(BadRequestException);
+    await expect(useCase.execute({ subscriptionId: 'sub-1' })).rejects.toThrow(
+      BadRequestException,
+    );
   });
 
   it('debe generar una sesión de Stripe exitosamente', async () => {
-    userSubscriptionsRepository.findById.mockResolvedValue({ 
-      id: 'sub-1', 
-      planId: 'plan-1', 
-      userId: 'user-1', 
-      status: 'pending' 
+    userSubscriptionsRepository.findById.mockResolvedValue({
+      id: 'sub-1',
+      planId: 'plan-1',
+      userId: 'user-1',
+      status: 'pending',
     });
-    plansRepository.findById.mockResolvedValue({ 
-      id: 'plan-1', 
-      stripePriceId: 'price_abc' 
+    plansRepository.findById.mockResolvedValue({
+      id: 'plan-1',
+      stripePriceId: 'price_abc',
     });
     configService.getOrThrow.mockReturnValue('http://success.com');
-    stripeService.createCheckoutSession.mockResolvedValue({ 
-      id: 'session-1', 
-      url: 'http://stripe.com/pay' 
+    stripeService.createCheckoutSession.mockResolvedValue({
+      id: 'session-1',
+      url: 'http://stripe.com/pay',
     });
 
     const result = await useCase.execute({ subscriptionId: 'sub-1' });
 
     expect(result.url).toBe('http://stripe.com/pay');
     expect(result.sessionId).toBe('session-1');
-    expect(stripeService.createCheckoutSession).toHaveBeenCalledWith(expect.objectContaining({
-      priceId: 'price_abc',
-      subscriptionId: 'sub-1',
-    }));
+    expect(stripeService.createCheckoutSession).toHaveBeenCalledWith(
+      expect.objectContaining({
+        priceId: 'price_abc',
+        subscriptionId: 'sub-1',
+      }),
+    );
   });
 });

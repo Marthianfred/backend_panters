@@ -1,5 +1,5 @@
 export enum Role {
   ADMIN = 'admin',
-  MODEL = 'model', 
-  SUBSCRIBER = 'subscriber', 
+  MODEL = 'model',
+  SUBSCRIBER = 'subscriber',
 }

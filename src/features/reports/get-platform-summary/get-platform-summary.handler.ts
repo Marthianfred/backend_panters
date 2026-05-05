@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import type { IPlatformSummaryRepository } from './interfaces/platform-summary-repository.interface';
-import { 
-  PlatformSummaryResponseDto, 
-  GetPlatformSummaryQueryDto 
+import {
+  PlatformSummaryResponseDto,
+  GetPlatformSummaryQueryDto,
 } from './get-platform-summary.models';
 
 @Injectable()
@@ -14,8 +14,12 @@ export class GetPlatformSummaryHandler {
     private readonly repository: IPlatformSummaryRepository,
   ) {}
 
-  async execute(queryDto: GetPlatformSummaryQueryDto): Promise<PlatformSummaryResponseDto> {
-    const startDate = queryDto.startDate ? new Date(queryDto.startDate) : undefined;
+  async execute(
+    queryDto: GetPlatformSummaryQueryDto,
+  ): Promise<PlatformSummaryResponseDto> {
+    const startDate = queryDto.startDate
+      ? new Date(queryDto.startDate)
+      : undefined;
     const endDate = queryDto.endDate ? new Date(queryDto.endDate) : undefined;
 
     const [totalSubscribers, newUsersCount, modelStats] = await Promise.all([
@@ -27,9 +31,11 @@ export class GetPlatformSummaryHandler {
     return {
       totalSubscribers,
       newUsersCount,
-      topModelsByRevenue: modelStats.map(stat => ({
+      topModelsByRevenue: modelStats.map((stat) => ({
         ...stat,
-        totalEarnedUsd: parseFloat((stat.totalEarnedPtc * this.PTC_TO_USD_RATE).toFixed(2)),
+        totalEarnedUsd: parseFloat(
+          (stat.totalEarnedPtc * this.PTC_TO_USD_RATE).toFixed(2),
+        ),
       })),
       generatedAt: new Date().toISOString(),
     };

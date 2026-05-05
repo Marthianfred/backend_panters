@@ -1,6 +1,12 @@
-import { SubscriptionPlanDto, CreatePlanDto, UpdatePlanDto } from '../plans.models';
+import {
+  SubscriptionPlanDto,
+  CreatePlanDto,
+  UpdatePlanDto,
+} from '../plans.models';
 
-export const SUBSCRIPTION_PLANS_REPOSITORY = Symbol('ISubscriptionPlansRepository');
+export const SUBSCRIPTION_PLANS_REPOSITORY = Symbol(
+  'ISubscriptionPlansRepository',
+);
 
 export interface ISubscriptionPlansRepository {
   create(plan: CreatePlanDto): Promise<SubscriptionPlanDto>;
@@ -8,5 +14,7 @@ export interface ISubscriptionPlansRepository {
   findById(id: string): Promise<SubscriptionPlanDto | null>;
   update(id: string, updates: UpdatePlanDto): Promise<SubscriptionPlanDto>;
   delete(id: string): Promise<void>;
-  findByStripePriceId(stripePriceId: string): Promise<SubscriptionPlanDto | null>;
+  findByStripePriceId(
+    stripePriceId: string,
+  ): Promise<SubscriptionPlanDto | null>;
 }

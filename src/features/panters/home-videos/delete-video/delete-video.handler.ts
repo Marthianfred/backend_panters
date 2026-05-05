@@ -24,7 +24,10 @@ export class DeleteHomeVideoHandler {
     try {
       await this.storageService.deleteVideo(video.key);
     } catch (error) {
-       console.error(`[DeleteHomeVideoHandler] Error deleting S3 object: ${video.key}`, error);
+      console.error(
+        `[DeleteHomeVideoHandler] Error deleting S3 object: ${video.key}`,
+        error,
+      );
     }
 
     await this.repository.delete(id);

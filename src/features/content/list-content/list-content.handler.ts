@@ -22,7 +22,7 @@ export class ListContentHandler {
     request: ListContentRequest,
   ): Promise<ListContentResponse> {
     const page = request.page || 1;
-    const limit = Math.min(request.limit || 20, 20); 
+    const limit = Math.min(request.limit || 20, 20);
 
     const rawContents = await this.contentRepository.listContents({
       creatorId: request.creatorId,
@@ -52,10 +52,10 @@ export class ListContentHandler {
 
         let thumbnailUrl: string = '';
 
-        
-        
         if (content.thumbnailUrl) {
-          const thumbExt = content.thumbnailUrl.substring(content.thumbnailUrl.lastIndexOf('.'));
+          const thumbExt = content.thumbnailUrl.substring(
+            content.thumbnailUrl.lastIndexOf('.'),
+          );
           thumbnailUrl = await this.storageService.getPresignedDownloadUrl(
             content.creatorId,
             content.id,
@@ -63,7 +63,6 @@ export class ListContentHandler {
             'thumbnails',
           );
         } else if (content.type === 'photo' && content.url) {
-          
           const imgExt = content.url.substring(content.url.lastIndexOf('.'));
           thumbnailUrl = await this.storageService.getPresignedDownloadUrl(
             content.creatorId,
@@ -90,9 +89,14 @@ export class ListContentHandler {
       }),
     );
 
-    
-    let creatorInfo: { fullName: string; avatarUrl: string; isOnline: boolean } | undefined = undefined;
-    if (request.creatorId && rawContents.length > 0 && rawContents[0].creatorDetails) {
+    let creatorInfo:
+      | { fullName: string; avatarUrl: string; isOnline: boolean }
+      | undefined = undefined;
+    if (
+      request.creatorId &&
+      rawContents.length > 0 &&
+      rawContents[0].creatorDetails
+    ) {
       const details = rawContents[0].creatorDetails;
       creatorInfo = {
         fullName: details.fullName,
@@ -114,7 +118,6 @@ export class ListContentHandler {
   }
 }
 
-
 function rowHasReacted(content: any): boolean {
-    return content.hasReacted === true;
+  return content.hasReacted === true;
 }

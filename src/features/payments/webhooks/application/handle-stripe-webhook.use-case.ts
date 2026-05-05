@@ -16,43 +16,50 @@ export class HandleUnifiedStripeWebhookUseCase {
 
   async execute(event: Stripe.Event): Promise<void> {
     const eventId = event.id;
-    
-    
+
     const existingEvent = await this.stripeEventRepository.findById(eventId);
     if (existingEvent && existingEvent.status === 'completed') {
-      this.logger.warn(`Evento de Stripe ${eventId} ya fue procesado anteriormente.`);
+      this.logger.warn(
+        `Evento de Stripe ${eventId} ya fue procesado anteriormente.`,
+      );
       return;
     }
 
     if (existingEvent && existingEvent.status === 'processing') {
-      this.logger.warn(`Evento de Stripe ${eventId} está siendo procesado actualmente.`);
+      this.logger.warn(
+        `Evento de Stripe ${eventId} está siendo procesado actualmente.`,
+      );
       return;
     }
 
-    
-    await this.stripeEventRepository.recordProcessing(eventId, event.type, event.data.object['metadata']);
+    await this.stripeEventRepository.recordProcessing(
+      eventId,
+      event.type,
+      event.data.object['metadata'],
+    );
 
     try {
-      this.logger.log(`Iniciando despacho de evento: ${event.type} [${eventId}]`);
+      this.logger.log(
+        `Iniciando despacho de evento: ${event.type} [${eventId}]`,
+      );
 
-      
       switch (event.type) {
         case 'checkout.session.completed':
-          await this.handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session, eventId);
+          await this.handleCheckoutSessionCompleted(event.data.object, eventId);
           break;
-        
+
         case 'invoice.paid':
         case 'customer.subscription.deleted':
         case 'customer.subscription.updated':
-          
           await this.subscriptionWebhookUseCase.execute(event);
           break;
-        
+
         default:
-          this.logger.warn(`Evento de Stripe no manejado por el despachador unificado: ${event.type}`);
+          this.logger.warn(
+            `Evento de Stripe no manejado por el despachador unificado: ${event.type}`,
+          );
       }
 
-      
       await this.stripeEventRepository.markAsCompleted(eventId);
       this.logger.log(`Evento ${eventId} procesado y marcado como completado.`);
     } catch (error) {
@@ -62,24 +69,37 @@ export class HandleUnifiedStripeWebhookUseCase {
     }
   }
 
-  private async handleCheckoutSessionCompleted(session: Stripe.Checkout.Session, originalEventId: string): Promise<void> {
+  private async handleCheckoutSessionCompleted(
+    session: Stripe.Checkout.Session,
+    originalEventId: string,
+  ): Promise<void> {
     const metadata = session.metadata || {};
     const type = metadata.type;
 
-    
-    if (type === 'wallet_top_up' || type === 'ptc_purchase' || metadata.coinsAmount) {
+    if (
+      type === 'wallet_top_up' ||
+      type === 'ptc_purchase' ||
+      metadata.coinsAmount
+    ) {
       this.logger.log('Delegando checkout a la vertical de Wallet...');
-      const event: any = { id: originalEventId, type: 'checkout.session.completed', data: { object: session } };
+      const event: any = {
+        id: originalEventId,
+        type: 'checkout.session.completed',
+        data: { object: session },
+      };
       await this.walletWebhookHandler.execute(event, 'VALIDATED_BY_DISPATCHER');
-    }
-    
-    else if (type === 'subscription' || metadata.subscriptionId) {
+    } else if (type === 'subscription' || metadata.subscriptionId) {
       this.logger.log('Delegando checkout a la vertical de Suscripciones...');
-      const event: any = { id: originalEventId, type: 'checkout.session.completed', data: { object: session } };
+      const event: any = {
+        id: originalEventId,
+        type: 'checkout.session.completed',
+        data: { object: session },
+      };
       await this.subscriptionWebhookUseCase.execute(event);
-    }
-    else {
-      this.logger.warn('Evento checkout.session.completed sin tipo definido en metadata. No se puede enrutar.');
+    } else {
+      this.logger.warn(
+        'Evento checkout.session.completed sin tipo definido en metadata. No se puede enrutar.',
+      );
     }
   }
 }

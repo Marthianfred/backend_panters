@@ -11,10 +11,13 @@ export class KinesisDataPublisherService implements OnModuleInit {
 
   onModuleInit() {
     this.client = new KinesisClient({
-      region: this.configService.get<string>('KN_STREAMS_REGION') || 'us-east-1',
+      region:
+        this.configService.get<string>('KN_STREAMS_REGION') || 'us-east-1',
       credentials: {
-        accessKeyId: this.configService.get<string>('KN_STREAMS_ACCESS_KEY_ID') || '',
-        secretAccessKey: this.configService.get<string>('KN_STREAMS_SECRET_ACCESS_KEY') || '',
+        accessKeyId:
+          this.configService.get<string>('KN_STREAMS_ACCESS_KEY_ID') || '',
+        secretAccessKey:
+          this.configService.get<string>('KN_STREAMS_SECRET_ACCESS_KEY') || '',
       },
     });
     this.streamName = this.configService.get<string>('KN_STREAMS_NAME') || '';
@@ -35,9 +38,6 @@ export class KinesisDataPublisherService implements OnModuleInit {
 
     try {
       await this.client.send(command);
-    } catch (error) {
-      
-      
-    }
+    } catch (error) {}
   }
 }

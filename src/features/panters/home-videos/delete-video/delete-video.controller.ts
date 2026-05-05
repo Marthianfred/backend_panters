@@ -1,13 +1,25 @@
-import { Controller, Delete, Param, HttpStatus, HttpException, ParseUUIDPipe } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Param,
+  HttpStatus,
+  HttpException,
+  ParseUUIDPipe,
+} from '@nestjs/common';
 import { DeleteHomeVideoHandler } from './delete-video.handler';
-import { HomeVideoDeleteResponse, VideoNotFoundError } from './delete-video.models';
+import {
+  HomeVideoDeleteResponse,
+  VideoNotFoundError,
+} from './delete-video.models';
 
 @Controller('api/v1/panters/home-videos')
 export class DeleteHomeVideoController {
   constructor(private readonly handler: DeleteHomeVideoHandler) {}
 
   @Delete(':id')
-  public async delete(@Param('id', new ParseUUIDPipe()) id: string): Promise<HomeVideoDeleteResponse> {
+  public async delete(
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<HomeVideoDeleteResponse> {
     try {
       return await this.handler.execute(id);
     } catch (error) {

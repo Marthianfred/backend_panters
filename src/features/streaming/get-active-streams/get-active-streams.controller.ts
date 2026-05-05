@@ -1,5 +1,8 @@
 import { Controller, Get } from '@nestjs/common';
-import { GetActiveStreamsHandler, ActiveStream } from './get-active-streams.handler';
+import {
+  GetActiveStreamsHandler,
+  ActiveStream,
+} from './get-active-streams.handler';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('Streaming')
@@ -9,11 +12,11 @@ export class GetActiveStreamsController {
 
   @Get('active')
   @ApiOperation({ summary: 'Obtener listado de transmisiones activas' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Listado de streams en vivo',
     type: Object,
-    isArray: true 
+    isArray: true,
   })
   public async getActiveStreams(): Promise<ActiveStream[]> {
     return this.handler.execute();

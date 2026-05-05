@@ -11,7 +11,6 @@ export class AuthGuard implements CanActivate {
   public canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
-    
     if (!request.user) {
       throw new UnauthorizedException(
         'Acceso denegado: Se requiere autenticación válida.',

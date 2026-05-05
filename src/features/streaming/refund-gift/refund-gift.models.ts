@@ -7,7 +7,9 @@ export class TransactionNotFoundError extends Error {
 
 export class RefundAlreadyProcessedError extends Error {
   constructor(public readonly transactionId: string) {
-    super(`El reembolso ya ha sido procesado para la transacción: ${transactionId}`);
+    super(
+      `El reembolso ya ha sido procesado para la transacción: ${transactionId}`,
+    );
     this.name = 'RefundAlreadyProcessedError';
   }
 }

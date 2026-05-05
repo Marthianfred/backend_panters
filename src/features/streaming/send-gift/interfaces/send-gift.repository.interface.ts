@@ -7,11 +7,9 @@ export interface GiftDefinition {
 
 export interface ISendGiftRepository {
   getGiftById(giftId: string): Promise<GiftDefinition | null>;
-  
-  
+
   userExists(userId: string): Promise<boolean>;
-  
-  
+
   processGiftTransaction(
     userId: string,
     creatorId: string,

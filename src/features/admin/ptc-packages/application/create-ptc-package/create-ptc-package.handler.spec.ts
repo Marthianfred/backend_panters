@@ -34,7 +34,12 @@ describe('CreatePtcPackageHandler', () => {
       isActive: true,
     };
 
-    const expectedResult = { id: 'uuid', ...dto, createdAt: new Date(), updatedAt: new Date() };
+    const expectedResult = {
+      id: 'uuid',
+      ...dto,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
     repository.create.mockResolvedValue(expectedResult);
 
     const result = await handler.handle(dto);
@@ -59,8 +64,10 @@ describe('CreatePtcPackageHandler', () => {
 
     await handler.handle(dto);
 
-    expect(repository.create).toHaveBeenCalledWith(expect.objectContaining({
-      isActive: true,
-    }));
+    expect(repository.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        isActive: true,
+      }),
+    );
   });
 });

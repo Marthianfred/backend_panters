@@ -3,7 +3,7 @@ import { IsEmail, IsString, IsEnum, MinLength } from 'class-validator';
 export enum UserRoleFlag {
   ADMIN = 'admin',
   MODEL = 'model',
-  SUBSCRIBER = 'subscriber'
+  SUBSCRIBER = 'subscriber',
 }
 
 export class AdminCreateUserRequest {

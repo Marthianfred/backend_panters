@@ -2,16 +2,13 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from '@/core/database/database.module';
 
-
 import { UploadHomeVideoHandler } from './upload-video/upload-video.handler';
 import { GetHomeVideosHandler } from './list-videos/list-videos.handler';
 import { DeleteHomeVideoHandler } from './delete-video/delete-video.handler';
 
-
 import { UploadHomeVideoController } from './upload-video/upload-video.controller';
 import { ListHomeVideosController } from './list-videos/list-videos.controller';
 import { DeleteHomeVideoController } from './delete-video/delete-video.controller';
-
 
 import { PostgresHomeVideoRepository } from './infrastructure/postgres.home-video.repository';
 import { HOME_VIDEO_REPOSITORY } from './interfaces/home-video.repository.interface';

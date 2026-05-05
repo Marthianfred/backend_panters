@@ -34,8 +34,12 @@ describe('GetSubscriptionStatusUseCase', () => {
       ],
     }).compile();
 
-    useCase = module.get<GetSubscriptionStatusUseCase>(GetSubscriptionStatusUseCase);
-    repository = module.get<IUserSubscriptionsRepository>(USER_SUBSCRIPTIONS_REPOSITORY);
+    useCase = module.get<GetSubscriptionStatusUseCase>(
+      GetSubscriptionStatusUseCase,
+    );
+    repository = module.get<IUserSubscriptionsRepository>(
+      USER_SUBSCRIPTIONS_REPOSITORY,
+    );
   });
 
   it('debe estar definido', () => {
@@ -60,6 +64,8 @@ describe('GetSubscriptionStatusUseCase', () => {
   it('debe lanzar NotFoundException si la suscripción no existe', async () => {
     jest.spyOn(repository, 'findById').mockResolvedValue(null);
 
-    await expect(useCase.execute('non-existent-id')).rejects.toThrow(NotFoundException);
+    await expect(useCase.execute('non-existent-id')).rejects.toThrow(
+      NotFoundException,
+    );
   });
 });

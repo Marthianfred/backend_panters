@@ -1,4 +1,11 @@
-import { IsString, IsInt, IsBoolean, IsOptional, Min, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsInt,
+  IsBoolean,
+  IsOptional,
+  Min,
+  IsNumber,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreatePtcPackageDto {

@@ -6,9 +6,10 @@ import { ModerateContentRequest } from './moderate-content.models';
 export class ModerateContentHandler {
   constructor(private readonly repository: PostgresUsersManagementRepository) {}
 
-  async handle(contentId: string, request: ModerateContentRequest): Promise<{ success: boolean }> {
-    
-    
+  async handle(
+    contentId: string,
+    request: ModerateContentRequest,
+  ): Promise<{ success: boolean }> {
     await this.repository.moderateUserContent(contentId, request.action);
     return { success: true };
   }

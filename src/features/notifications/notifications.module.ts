@@ -17,7 +17,10 @@ import { NOTIFICATION_REPOSITORY_TOKEN } from './domain/notification.repository'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([PushSubscriptionOrmEntity, NotificationOrmEntity]),
+    TypeOrmModule.forFeature([
+      PushSubscriptionOrmEntity,
+      NotificationOrmEntity,
+    ]),
     ConfigModule,
   ],
   controllers: [NotificationsController],
@@ -36,6 +39,10 @@ import { NOTIFICATION_REPOSITORY_TOKEN } from './domain/notification.repository'
       useClass: TypeOrmNotificationRepository,
     },
   ],
-  exports: [NotifySubscribersUseCase, NotifyUserUseCase, GetNotificationsUseCase],
+  exports: [
+    NotifySubscribersUseCase,
+    NotifyUserUseCase,
+    GetNotificationsUseCase,
+  ],
 })
 export class NotificationsModule {}

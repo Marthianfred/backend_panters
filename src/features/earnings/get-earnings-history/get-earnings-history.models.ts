@@ -11,8 +11,8 @@ export interface EarningTransactionDTO {
   type: 'CONTENT_SALE' | 'GIFT' | 'VIDEO_CALL';
   description: string;
   grossAmount: number;
-  netAmount: number; 
-  platformFee: number; 
+  netAmount: number;
+  platformFee: number;
   date: Date;
   buyerName: string;
 }

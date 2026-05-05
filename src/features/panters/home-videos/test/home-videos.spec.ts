@@ -54,16 +54,18 @@ describe('HomeVideos Handlers', () => {
   describe('UploadHomeVideoHandler', () => {
     it('should throw UnsupportedMimeTypeError if file is not webm', async () => {
       const mockFile = { mimetype: 'video/mp4' } as Express.Multer.File;
-      await expect(uploadHandler.execute(mockFile)).rejects.toThrow(UnsupportedMimeTypeError);
+      await expect(uploadHandler.execute(mockFile)).rejects.toThrow(
+        UnsupportedMimeTypeError,
+      );
     });
 
     it('should upload video and save to repository if file is webm', async () => {
-      const mockFile = { 
-        mimetype: 'video/webm', 
+      const mockFile = {
+        mimetype: 'video/webm',
         originalname: 'test.webm',
-        buffer: Buffer.from('test')
+        buffer: Buffer.from('test'),
       } as Express.Multer.File;
-      
+
       mockStorageService.uploadVideo.mockResolvedValue('http://s3/test.webm');
       mockRepository.save.mockResolvedValue(undefined);
 
@@ -91,7 +93,9 @@ describe('HomeVideos Handlers', () => {
   describe('DeleteHomeVideoHandler', () => {
     it('should throw VideoNotFoundError if video does not exist', async () => {
       mockRepository.getById.mockResolvedValue(null);
-      await expect(deleteHandler.execute('uuid')).rejects.toThrow(VideoNotFoundError);
+      await expect(deleteHandler.execute('uuid')).rejects.toThrow(
+        VideoNotFoundError,
+      );
     });
 
     it('should delete from storage and repository if video exists', async () => {

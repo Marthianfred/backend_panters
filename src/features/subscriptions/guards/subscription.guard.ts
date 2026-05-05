@@ -19,22 +19,24 @@ export class SubscriptionGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
 
-    
     if (!request.user) {
-      throw new UnauthorizedException('Se requiere autenticación para acceder a este recurso.');
+      throw new UnauthorizedException(
+        'Se requiere autenticación para acceder a este recurso.',
+      );
     }
 
     if (request.user.role !== 'subscriber') {
       return true;
     }
 
-
-    
-    const activeSubscription = await this.userSubscriptionsRepository.findActiveByUserId(request.user.id);
+    const activeSubscription =
+      await this.userSubscriptionsRepository.findActiveByUserId(
+        request.user.id,
+      );
 
     if (!activeSubscription) {
       throw new ForbiddenException(
-        'Acceso denegado: Se requiere una suscripción activa para acceder a este contenido premium.'
+        'Acceso denegado: Se requiere una suscripción activa para acceder a este contenido premium.',
       );
     }
 

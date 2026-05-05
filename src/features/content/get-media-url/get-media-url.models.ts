@@ -10,7 +10,9 @@ export interface GetMediaUrlResponse {
 
 export class ContentAccessDeniedError extends Error {
   constructor() {
-    super('No tienes acceso a este contenido. Por favor, realiza la compra primero.');
+    super(
+      'No tienes acceso a este contenido. Por favor, realiza la compra primero.',
+    );
     this.name = 'ContentAccessDeniedError';
   }
 }

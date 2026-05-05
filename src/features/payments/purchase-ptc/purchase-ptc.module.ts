@@ -5,14 +5,9 @@ import { AuthModule } from '@/features/auth/auth.module';
 import { PtcPackageRepository } from './infrastructure/ptc-package.repository';
 
 @Module({
-  imports: [
-    AuthModule,
-  ],
+  imports: [AuthModule],
   controllers: [PurchasePtcController],
-  providers: [
-    PurchasePtcService,
-    PtcPackageRepository,
-  ],
+  providers: [PurchasePtcService, PtcPackageRepository],
   exports: [PurchasePtcService],
 })
 export class PurchasePtcModule {}

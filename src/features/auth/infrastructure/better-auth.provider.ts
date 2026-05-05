@@ -6,7 +6,10 @@ import { Pool } from 'pg';
 import { ConfigService } from '@nestjs/config';
 
 import { BETTER_AUTH_TOKEN } from './auth.constants';
-import { EMAIL_SERVICE_TOKEN, EmailService } from '@/core/domain/services/email-service.interface';
+import {
+  EMAIL_SERVICE_TOKEN,
+  EmailService,
+} from '@/core/domain/services/email-service.interface';
 import { NotifyUserUseCase } from '../../notifications/application/use-cases/notify-user.use-case';
 import { CheckUserActivityUseCase } from '../application/use-cases/check-user-activity.use-case';
 import { AUTH_POOL_TOKEN } from './auth.constants';
@@ -23,10 +26,18 @@ export const AuthPoolProvider: Provider = {
 
 export const BetterAuthProvider: Provider = {
   provide: BETTER_AUTH_TOKEN,
-  useFactory: (configService: ConfigService, emailService: EmailService, notifyUserUseCase: NotifyUserUseCase, checkUserActivityUseCase: CheckUserActivityUseCase, pool: Pool) => {
+  useFactory: (
+    configService: ConfigService,
+    emailService: EmailService,
+    notifyUserUseCase: NotifyUserUseCase,
+    checkUserActivityUseCase: CheckUserActivityUseCase,
+    pool: Pool,
+  ) => {
     const baseUrl = configService.getOrThrow<string>('BASE_URL');
     const secret = configService.getOrThrow<string>('BETTER_AUTH_SECRET');
-    const turnstileSecretKey = configService.getOrThrow<string>('TURNSTILE_SECRET_KEY');
+    const turnstileSecretKey = configService.getOrThrow<string>(
+      'TURNSTILE_SECRET_KEY',
+    );
 
     return betterAuth({
       database: pool,
@@ -36,38 +47,53 @@ export const BetterAuthProvider: Provider = {
 
           if (returned && typeof returned === 'object') {
             const error = returned as any;
-            const errorCode = error.code || (error.body && typeof error.body === 'object' ? error.body.code : null);
-            
+            const errorCode =
+              error.code ||
+              (error.body && typeof error.body === 'object'
+                ? error.body.code
+                : null);
+
             if (errorCode) {
               const errorMap: Record<string, string> = {
-                'USER_ALREADY_EXISTS': 'El correo electrónico ya está registrado.',
-                'EMAIL_ALREADY_EXISTS': 'El correo electrónico ya está registrado.',
-                'USERNAME_IS_ALREADY_TAKEN': 'El nombre de usuario ya está en uso. Por favor, elige otro.',
-                'INVALID_EMAIL_OR_PASSWORD': 'Correo electrónico o contraseña incorrectos.',
-                'USER_NOT_FOUND': 'Usuario no encontrado.',
-                'INVALID_PASSWORD': 'Contraseña incorrecta.',
-                'SESSION_EXPIRED': 'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.',
-                'EMAIL_NOT_VERIFIED': 'Debes verificar tu correo electrónico antes de iniciar sesión.',
+                USER_ALREADY_EXISTS:
+                  'El correo electrónico ya está registrado.',
+                EMAIL_ALREADY_EXISTS:
+                  'El correo electrónico ya está registrado.',
+                USERNAME_IS_ALREADY_TAKEN:
+                  'El nombre de usuario ya está en uso. Por favor, elige otro.',
+                INVALID_EMAIL_OR_PASSWORD:
+                  'Correo electrónico o contraseña incorrectos.',
+                USER_NOT_FOUND: 'Usuario no encontrado.',
+                INVALID_PASSWORD: 'Contraseña incorrecta.',
+                SESSION_EXPIRED:
+                  'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.',
+                EMAIL_NOT_VERIFIED:
+                  'Debes verificar tu correo electrónico antes de iniciar sesión.',
               };
 
               if (errorMap[errorCode]) {
-                return ctx.json({
-                  ...error,
-                  message: errorMap[errorCode],
-                }, { status: 400 });
+                return ctx.json(
+                  {
+                    ...error,
+                    message: errorMap[errorCode],
+                  },
+                  { status: 400 },
+                );
               }
             }
           }
 
           if (ctx.path === '/sign-in/email' && ctx.method === 'POST') {
-            const user = ctx.context.newSession?.user || (returned as any)?.user;
+            const user =
+              ctx.context.newSession?.user || (returned as any)?.user;
 
             if (user) {
               const isActive = await checkUserActivityUseCase.execute(user.id);
               if (!isActive) {
                 const { APIError } = await import('better-auth/api');
                 throw new APIError('UNAUTHORIZED', {
-                  message: 'Su usuario fue desactivado y debe contactar con el soporte',
+                  message:
+                    'Su usuario fue desactivado y debe contactar con el soporte',
                 });
               }
 
@@ -82,15 +108,17 @@ export const BetterAuthProvider: Provider = {
                   `;
                   const result = await pool.query(query, [user.id]);
                   const sub = result.rows[0];
-                  
+
                   let subscription: any = null;
                   if (sub) {
                     const now = new Date();
-                    const isExpired = sub.status === 'expired' || (sub.endsAt && new Date(sub.endsAt) < now);
+                    const isExpired =
+                      sub.status === 'expired' ||
+                      (sub.endsAt && new Date(sub.endsAt) < now);
                     subscription = {
                       status: isExpired ? 'expired' : sub.status,
                       expiresAt: sub.endsAt,
-                      isExpired
+                      isExpired,
                     };
                   } else {
                     subscription = { status: 'none', isExpired: false };
@@ -98,10 +126,13 @@ export const BetterAuthProvider: Provider = {
 
                   return ctx.json({
                     ...(typeof returned === 'object' ? returned : {}),
-                    subscription
+                    subscription,
                   });
                 } catch (error) {
-                  console.error('Error fetching subscription in login hook:', error);
+                  console.error(
+                    'Error fetching subscription in login hook:',
+                    error,
+                  );
                 }
               }
             }
@@ -109,11 +140,9 @@ export const BetterAuthProvider: Provider = {
         }),
       },
       user: {
-
-
         additionalFields: {
           roleId: {
-            type: 'string', 
+            type: 'string',
             required: false,
             defaultValue: 'd80b1a31-4521-4ec0-9329-30d4d1adc025',
           },
@@ -189,13 +218,16 @@ export const BetterAuthProvider: Provider = {
             `,
           });
 
-          
-          await notifyUserUseCase.execute(user.id, {
-            title: 'Verifica tu cuenta 📧',
-            body: 'Te hemos enviado un correo de verificación. Por favor, revísalo para activar todas las funciones.',
-            icon: '/icons/notification-icon.png',
-            data: { url },
-          }).catch(err => console.error('Error enviando push de verificación:', err));
+          await notifyUserUseCase
+            .execute(user.id, {
+              title: 'Verifica tu cuenta 📧',
+              body: 'Te hemos enviado un correo de verificación. Por favor, revísalo para activar todas las funciones.',
+              icon: '/icons/notification-icon.png',
+              data: { url },
+            })
+            .catch((err) =>
+              console.error('Error enviando push de verificación:', err),
+            );
         },
         sendOnSignUp: true,
       },
@@ -203,7 +235,6 @@ export const BetterAuthProvider: Provider = {
         user: {
           create: {
             after: async (user) => {
-              
               try {
                 const userData = user as any;
                 await pool.query(
@@ -234,6 +265,11 @@ export const BetterAuthProvider: Provider = {
       trustedOrigins: ['http://*', 'https://*', '*'],
     });
   },
-  inject: [ConfigService, EMAIL_SERVICE_TOKEN, NotifyUserUseCase, CheckUserActivityUseCase, AUTH_POOL_TOKEN],
+  inject: [
+    ConfigService,
+    EMAIL_SERVICE_TOKEN,
+    NotifyUserUseCase,
+    CheckUserActivityUseCase,
+    AUTH_POOL_TOKEN,
+  ],
 };
-

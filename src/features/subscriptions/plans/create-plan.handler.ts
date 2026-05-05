@@ -11,7 +11,6 @@ export class CreatePlanHandler {
   ) {}
 
   async execute(dto: CreatePlanDto): Promise<SubscriptionPlanDto> {
-    
     return await this.repository.create(dto);
   }
 }

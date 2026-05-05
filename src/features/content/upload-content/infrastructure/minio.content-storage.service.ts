@@ -54,7 +54,6 @@ export class MinioContentStorageService implements IContentStorageService {
 
     const command = new PutObjectCommand(params);
 
-    
     return await getSignedUrl(this.s3Client, command, { expiresIn: 3600 });
   }
 
@@ -62,9 +61,9 @@ export class MinioContentStorageService implements IContentStorageService {
     userId: string,
     contentId: string,
     extension: string = '.mp4',
-    folder: string = 'content'
+    folder: string = 'content',
   ): Promise<string> {
-    const key = `${userId}/${folder}/${contentId}${extension.startsWith('.') ? extension : '.' + extension}`; 
+    const key = `${userId}/${folder}/${contentId}${extension.startsWith('.') ? extension : '.' + extension}`;
 
     const command = new GetObjectCommand({
       Bucket: this.bucketName,
@@ -78,7 +77,7 @@ export class MinioContentStorageService implements IContentStorageService {
     userId: string,
     contentId: string,
     extension: string = '.mp4',
-    folder: string = 'content'
+    folder: string = 'content',
   ): Promise<void> {
     const key = `${userId}/${folder}/${contentId}${extension.startsWith('.') ? extension : '.' + extension}`;
     const command = new DeleteObjectCommand({
@@ -88,21 +87,24 @@ export class MinioContentStorageService implements IContentStorageService {
     try {
       await this.s3Client.send(command);
     } catch (error) {
-      
-      console.warn(`[StorageService] No se pudo borrar el archivo en S3 (quizás no existe): ${key}`, error.message);
+      console.warn(
+        `[StorageService] No se pudo borrar el archivo en S3 (quizás no existe): ${key}`,
+        error.message,
+      );
     }
   }
 
   private getExtension(mimeType?: string): string {
     if (!mimeType) return '.mp4';
     const mime = mimeType.toLowerCase();
-    if (mime.includes('image/jpeg') || mime.includes('image/jpg')) return '.jpg';
+    if (mime.includes('image/jpeg') || mime.includes('image/jpg'))
+      return '.jpg';
     if (mime.includes('image/png')) return '.png';
     if (mime.includes('image/gif')) return '.gif';
     if (mime.includes('image/webp')) return '.webp';
     if (mime.includes('video/mp4')) return '.mp4';
     if (mime.includes('video/quicktime')) return '.mov';
     if (mime.includes('video/webm')) return '.webm';
-    return '.mp4'; 
+    return '.mp4';
   }
 }

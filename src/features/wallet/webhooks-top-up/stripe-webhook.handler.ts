@@ -24,20 +24,22 @@ export class StripeWebhookHandler {
     payload: any,
     signature: string,
   ): Promise<WebhookResponse> {
-    
     if (signature !== 'VALIDATED_BY_DISPATCHER') {
-      const isValid = this.signatureValidator.validateSignature(payload, signature);
+      const isValid = this.signatureValidator.validateSignature(
+        payload,
+        signature,
+      );
       if (!isValid) {
         throw new InvalidSignatureError();
       }
     }
 
-    
-    const data: StripeWebhookPayload = Buffer.isBuffer(payload) 
-      ? JSON.parse(payload.toString('utf-8')) 
-      : (typeof payload === 'string' ? JSON.parse(payload) : payload);
+    const data: StripeWebhookPayload = Buffer.isBuffer(payload)
+      ? JSON.parse(payload.toString('utf-8'))
+      : typeof payload === 'string'
+        ? JSON.parse(payload)
+        : payload;
 
-    
     if (
       data.type === 'checkout.session.completed' &&
       data.data.object.status === 'complete'
@@ -48,11 +50,15 @@ export class StripeWebhookHandler {
       const transactionId = data.id;
 
       if (!userId || isNaN(amount)) {
-        this.logger.warn(`Evento ${data.id} no contiene metadata suficiente para recarga: userId=${userId}, amount=${amount}`);
+        this.logger.warn(
+          `Evento ${data.id} no contiene metadata suficiente para recarga: userId=${userId}, amount=${amount}`,
+        );
         return { success: false, message: 'Metadata insuficiente' };
       }
 
-      this.logger.log(`Acreditando ${amount} Panter Coins al usuario ${userId} [Evento: ${transactionId}]`);
+      this.logger.log(
+        `Acreditando ${amount} Panter Coins al usuario ${userId} [Evento: ${transactionId}]`,
+      );
 
       await this.walletRepository.creditCoinsToUser(
         userId,
@@ -61,6 +67,9 @@ export class StripeWebhookHandler {
       );
     }
 
-    return { success: true, message: 'Stripe Webhook (Wallet) procesado exitosamente' };
+    return {
+      success: true,
+      message: 'Stripe Webhook (Wallet) procesado exitosamente',
+    };
   }
 }

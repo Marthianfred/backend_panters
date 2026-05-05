@@ -1,10 +1,18 @@
-import { Injectable, Inject, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as userSubscriptionsRepositoryInterface from '@/features/subscriptions/interfaces/user.subscriptions.repository.interface';
 import * as subscriptionPlansRepositoryInterface from '@/features/subscriptions/interfaces/subscription.plans.repository.interface';
 import { StripeService } from '@/core/infrastructure/stripe/stripe.service';
 import { PostgresUsersManagementRepository } from '@/features/users/management/infrastructure/postgres.users-management.repository';
-import { UpgradeSubscriptionDto, UpgradeSessionResponse } from '../domain/upgrade-subscription.dto';
+import {
+  UpgradeSubscriptionDto,
+  UpgradeSessionResponse,
+} from '../domain/upgrade-subscription.dto';
 
 @Injectable()
 export class UpgradeSubscriptionUseCase {
@@ -18,41 +26,60 @@ export class UpgradeSubscriptionUseCase {
     private readonly usersRepository: PostgresUsersManagementRepository,
   ) {}
 
-  async execute(userId: string, dto: UpgradeSubscriptionDto): Promise<UpgradeSessionResponse> {
-    const subscription = await this.userSubscriptionsRepository.findActiveByUserId(userId);
+  async execute(
+    userId: string,
+    dto: UpgradeSubscriptionDto,
+  ): Promise<UpgradeSessionResponse> {
+    const subscription =
+      await this.userSubscriptionsRepository.findActiveByUserId(userId);
     if (!subscription) {
-      throw new NotFoundException('No tienes una suscripción activa para realizar un upgrade.');
+      throw new NotFoundException(
+        'No tienes una suscripción activa para realizar un upgrade.',
+      );
     }
 
-    const currentPlan = await this.plansRepository.findById(subscription.planId);
+    const currentPlan = await this.plansRepository.findById(
+      subscription.planId,
+    );
     if (!currentPlan) {
       throw new NotFoundException('Plan actual no encontrado.');
     }
     const targetPlan = await this.plansRepository.findById(dto.targetPlanId);
 
     if (!targetPlan || !targetPlan.isActive) {
-      throw new NotFoundException('El plan objetivo no existe o no está activo.');
+      throw new NotFoundException(
+        'El plan objetivo no existe o no está activo.',
+      );
     }
 
     const currentPrice = Number(currentPlan.priceUsd);
     const targetPrice = Number(targetPlan.priceUsd);
 
     if (targetPrice <= currentPrice) {
-      throw new BadRequestException('El plan seleccionado debe tener un valor superior al plan actual para considerarse un upgrade.');
+      throw new BadRequestException(
+        'El plan seleccionado debe tener un valor superior al plan actual para considerarse un upgrade.',
+      );
     }
 
     if (!targetPlan.stripePriceId) {
-      throw new BadRequestException('El plan objetivo no tiene una pasarela de pago configurada.');
+      throw new BadRequestException(
+        'El plan objetivo no tiene una pasarela de pago configurada.',
+      );
     }
 
     const user = await this.usersRepository.getUserDetails(userId);
     if (!user) {
       throw new NotFoundException('Usuario no encontrado.');
     }
-    const stripeCustomerId = await this.stripeService.getOrCreateCustomer(user.email, user.name);
-    
-    const successUrl = this.configService.getOrThrow<string>('STRIPE_SUCCESS_URL');
-    const cancelUrl = this.configService.getOrThrow<string>('STRIPE_CANCEL_URL');
+    const stripeCustomerId = await this.stripeService.getOrCreateCustomer(
+      user.email,
+      user.name,
+    );
+
+    const successUrl =
+      this.configService.getOrThrow<string>('STRIPE_SUCCESS_URL');
+    const cancelUrl =
+      this.configService.getOrThrow<string>('STRIPE_CANCEL_URL');
 
     try {
       const session = await this.stripeService.createCheckoutSession({
@@ -77,9 +104,10 @@ export class UpgradeSubscriptionUseCase {
         url: session.url,
         sessionId: session.id,
       };
-
     } catch (error) {
-      throw new BadRequestException(`Error al generar la sesión de upgrade: ${error.message}`);
+      throw new BadRequestException(
+        `Error al generar la sesión de upgrade: ${error.message}`,
+      );
     }
   }
 }

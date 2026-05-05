@@ -14,28 +14,35 @@ export class StripeSignatureValidator implements ISignatureValidator {
         apiVersion: '2025-01-27' as any,
       });
     } else {
-      console.warn('[StripeSignatureValidator] Stripe key missing or placeholder. Signature validation will be disabled.');
+      console.warn(
+        '[StripeSignatureValidator] Stripe key missing or placeholder. Signature validation will be disabled.',
+      );
     }
   }
 
   public validateSignature(payload: any, signature: string): boolean {
     const endpointSecret = this.config.get<string>('STRIPE_WEBHOOK_SECRET');
     if (!endpointSecret) {
-      console.warn('[StripeSignatureValidator] No endpoint secret configured, skipping validation (DANGEROUS)');
+      console.warn(
+        '[StripeSignatureValidator] No endpoint secret configured, skipping validation (DANGEROUS)',
+      );
       return true;
     }
 
     try {
       if (!this.stripe) {
-        console.error('[StripeSignatureValidator] Stripe was not initialized. Check your STRIPE_SECRET_KEY.');
+        console.error(
+          '[StripeSignatureValidator] Stripe was not initialized. Check your STRIPE_SECRET_KEY.',
+        );
         return false;
       }
-      
-      
+
       this.stripe.webhooks.constructEvent(payload, signature, endpointSecret);
       return true;
     } catch (err) {
-      console.error(`[Stripe] Error validando firma del webhook: ${err.message}`);
+      console.error(
+        `[Stripe] Error validando firma del webhook: ${err.message}`,
+      );
       return false;
     }
   }
@@ -50,21 +57,26 @@ export class BinanceSignatureValidator implements ISignatureValidator {
   public validateSignature(payload: any, signature: string): boolean {
     const binancePublicKey = this.config.get<string>('BINANCE_PAY_PUBLIC_KEY');
     if (!binancePublicKey) {
-      console.warn('[BinanceSignatureValidator] No public key configured, skipping validation (DANGEROUS)');
+      console.warn(
+        '[BinanceSignatureValidator] No public key configured, skipping validation (DANGEROUS)',
+      );
       return true;
     }
 
     try {
-      
-      const bodyString = Buffer.isBuffer(payload) ? payload.toString('utf-8') : payload;
-      
+      const bodyString = Buffer.isBuffer(payload)
+        ? payload.toString('utf-8')
+        : payload;
+
       const verifier = crypto.createVerify('SHA256');
       verifier.update(bodyString);
       verifier.end();
 
       return verifier.verify(binancePublicKey, signature, 'base64');
     } catch (err) {
-      console.error(`[Binance] Error validando firma del webhook: ${err.message}`);
+      console.error(
+        `[Binance] Error validando firma del webhook: ${err.message}`,
+      );
       return false;
     }
   }

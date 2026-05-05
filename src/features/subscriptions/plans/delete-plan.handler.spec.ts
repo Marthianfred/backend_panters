@@ -26,10 +26,10 @@ describe('DeletePlanHandler', () => {
   describe('execute', () => {
     it('debe desactivar el plan si existe correctamente', async () => {
       const planId = 'fa6662ae-6d48-490b-8074-fab0b2e1aa64';
-      const mockPlan = { 
-        id: planId, 
-        name: 'VIP SEMESTRAL', 
-        isActive: true 
+      const mockPlan = {
+        id: planId,
+        name: 'VIP SEMESTRAL',
+        isActive: true,
       };
 
       repository.findById.mockResolvedValue(mockPlan);

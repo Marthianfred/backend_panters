@@ -1,6 +1,9 @@
 import { Controller, Get } from '@nestjs/common';
 import { GetHomeVideosHandler } from './list-videos.handler';
-import { ListLoopVideosResponse, ListManagerVideosResponse } from './list-videos.models';
+import {
+  ListLoopVideosResponse,
+  ListManagerVideosResponse,
+} from './list-videos.models';
 
 @Controller('api/v1/panters/home-videos')
 export class ListHomeVideosController {
@@ -9,7 +12,7 @@ export class ListHomeVideosController {
   @Get('loop')
   public async getLoop(): Promise<ListLoopVideosResponse> {
     const videos = await this.handler.execute();
-    return videos.map(video => video.url);
+    return videos.map((video) => video.url);
   }
 
   @Get('manager')

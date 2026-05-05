@@ -20,7 +20,7 @@ import {
 } from './purchase-content.models';
 
 @Controller('api/v1/content')
-@UseGuards(AuthGuard, RolesGuard) 
+@UseGuards(AuthGuard, RolesGuard)
 export class PurchaseContentController {
   constructor(private readonly handler: PurchaseContentHandler) {}
 
@@ -32,7 +32,6 @@ export class PurchaseContentController {
     @Res() res: Response,
   ): Promise<void> {
     try {
-      
       const subscriberId = req.user.id;
 
       if (!subscriberId) {
