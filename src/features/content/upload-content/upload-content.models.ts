@@ -9,6 +9,14 @@ export interface UploadContentRequest {
   mimeType: string;
   thumbnailMimeType?: string; 
   accessType: string; 
+  clientId?: string;
+}
+
+export interface UploadProgressData {
+  status: 'starting' | 'saving_db' | 'uploading_s3' | 'completed' | 'error';
+  progress: number;
+  message: string;
+  data?: any;
 }
 
 export interface UploadContentResponse {

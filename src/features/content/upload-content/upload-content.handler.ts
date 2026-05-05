@@ -1,5 +1,6 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Injectable, Inject, MessageEvent } from '@nestjs/common';
 import * as crypto from 'crypto';
+import { Subject, Observable } from 'rxjs';
 import type { IContentRepository } from '../interfaces/content.repository.interface';
 import { CONTENT_REPOSITORY_TOKEN } from '../interfaces/content.repository.interface';
 import type { IContentStorageService } from './interfaces/content-storage.service.interface';
@@ -9,11 +10,14 @@ import type { IProfileRepository } from '@/features/profiles/get-profile/interfa
 import type {
   UploadContentRequest,
   UploadContentResponse,
+  UploadProgressData,
 } from './upload-content.models';
 import { InvalidPriceError, ProfileNotFoundError } from './upload-content.models';
 
 @Injectable()
 export class UploadContentHandler {
+  private readonly statusStreams = new Map<string, Subject<MessageEvent>>();
+
   constructor(
     @Inject(CONTENT_REPOSITORY_TOKEN)
     private readonly contentRepository: IContentRepository,
@@ -23,20 +27,58 @@ export class UploadContentHandler {
     private readonly profileRepository: IProfileRepository,
   ) {}
 
+  public getStatusStream(clientId: string): Observable<MessageEvent> {
+    let stream = this.statusStreams.get(clientId);
+    if (!stream) {
+      stream = new Subject<MessageEvent>();
+      this.statusStreams.set(clientId, stream);
+    }
+    return stream.asObservable();
+  }
+
+  private emitStatus(clientId: string, data: UploadProgressData) {
+    const stream = this.statusStreams.get(clientId);
+    if (stream) {
+      stream.next({ data } as MessageEvent);
+    }
+  }
+
   public async execute(
     request: UploadContentRequest,
   ): Promise<UploadContentResponse> {
+    if (request.clientId) {
+      this.emitStatus(request.clientId, { 
+        status: 'starting', 
+        progress: 10, 
+        message: 'Validando datos y preparando subida...' 
+      });
+    }
+
     if (request.priceInPanterCoins < 0) {
+      if (request.clientId) {
+        this.emitStatus(request.clientId, { status: 'error', progress: 0, message: 'Precio inválido' });
+      }
       throw new InvalidPriceError();
     }
 
-    
     const profile = await this.profileRepository.getProfileByUserId(request.creatorId);
     if (!profile) {
+      if (request.clientId) {
+        this.emitStatus(request.clientId, { status: 'error', progress: 0, message: 'Perfil no encontrado' });
+      }
       throw new ProfileNotFoundError();
     }
 
     const contentId = crypto.randomUUID();
+    const isVideo = !request.mimeType.startsWith('image/');
+
+    if (request.clientId && isVideo) {
+      this.emitStatus(request.clientId, { 
+        status: 'saving_db', 
+        progress: 30, 
+        message: 'Registrando metadatos en el sistema...' 
+      });
+    }
 
     const extension = this.getExtension(request.mimeType);
     const mediaKey = `${request.creatorId}/content/${contentId}${extension}`;
@@ -54,19 +96,14 @@ export class UploadContentHandler {
         request.thumbnailMimeType,
         'thumbnails'
       );
-      
-      
-      
-      
     }
 
-    
     await this.contentRepository.saveContent({
       id: contentId,
       creatorId: request.creatorId,
       title: request.title,
       description: request.description,
-      type: request.type || (request.mimeType.startsWith('image/') ? 'photo' : 'video'),
+      type: request.type || (isVideo ? 'video' : 'photo'),
       price: request.priceInPanterCoins,
       accessType: request.accessType,
       url: mediaKey,
@@ -74,12 +111,19 @@ export class UploadContentHandler {
       createdAt: new Date(),
     });
 
-    
     const presignedUploadUrl = await this.storageService.getPresignedUploadUrl(
       request.creatorId,
       contentId,
       request.mimeType,
     );
+
+    if (request.clientId && isVideo) {
+      this.emitStatus(request.clientId, { 
+        status: 'uploading_s3', 
+        progress: 60, 
+        message: 'URLs de subida generadas. Esperando transferencia de archivo...' 
+      });
+    }
 
     return {
       contentId,
@@ -89,6 +133,21 @@ export class UploadContentHandler {
       presignedUploadUrl,
       presignedThumbnailUploadUrl,
     };
+  }
+
+  public async confirmUpload(contentId: string, clientId: string): Promise<void> {
+    const stream = this.statusStreams.get(clientId);
+    if (!stream) return;
+
+    this.emitStatus(clientId, { 
+      status: 'completed', 
+      progress: 100, 
+      message: 'Subida confirmada y contenido disponible.',
+      data: { contentId }
+    });
+
+    stream.complete();
+    this.statusStreams.delete(clientId);
   }
 
   private getExtension(mimeType: string): string {

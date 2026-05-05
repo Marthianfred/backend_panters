@@ -1,13 +1,19 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   UseGuards,
   Req,
   HttpStatus,
   Res,
+  Sse,
+  Param,
+  MessageEvent,
+  Query,
 } from '@nestjs/common';
 import type { Response } from 'express';
+import { Observable } from 'rxjs';
 import { UploadContentHandler } from './upload-content.handler';
 import { Roles } from '../../../core/auth/decorators/roles.decorator';
 import { Role } from '../../../core/auth/roles.enum';
@@ -21,11 +27,32 @@ import { InvalidPriceError, ProfileNotFoundError } from './upload-content.models
 export class UploadContentController {
   constructor(private readonly handler: UploadContentHandler) {}
 
+  @Sse('upload-status/:clientId')
+  public uploadStatus(@Param('clientId') clientId: string): Observable<MessageEvent> {
+    return this.handler.getStatusStream(clientId);
+  }
+
+  @Post('confirm/:contentId')
+  @Roles(Role.MODEL, Role.ADMIN)
+  public async confirmUpload(
+    @Param('contentId') contentId: string,
+    @Query('clientId') clientId: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    if (!clientId) {
+      res.status(HttpStatus.BAD_REQUEST).json({ error: 'clientId es requerido para confirmar.' });
+      return;
+    }
+    await this.handler.confirmUpload(contentId, clientId);
+    res.status(HttpStatus.OK).json({ success: true });
+  }
+
   @Post('upload')
   @Roles(Role.MODEL, Role.ADMIN)
   public async upload(
     @Req() req: AuthenticatedRequest,
     @Body() body: { title: string; description: string; price: number, type?: string, mimeType: string, thumbnailMimeType?: string, accessType: string },
+    @Query('clientId') clientId: string,
     @Res() res: Response,
   ): Promise<void> {
     try {
@@ -47,6 +74,7 @@ export class UploadContentController {
         mimeType: body.mimeType,
         thumbnailMimeType: body.thumbnailMimeType,
         accessType: body.accessType,
+        clientId: clientId,
       });
 
       res.status(HttpStatus.CREATED).json(response);
