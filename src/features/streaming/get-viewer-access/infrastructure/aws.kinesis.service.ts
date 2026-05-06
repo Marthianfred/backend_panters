@@ -134,6 +134,7 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
   public async getIceServers(
     channelArn: string,
     credentials: WebRTCCredentials,
+    role: 'MASTER' | 'VIEWER',
   ): Promise<unknown[]> {
     const region = this.configService.get<string>(
       'KN_STREAMS_REGION',
@@ -144,7 +145,7 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
       ChannelARN: channelArn,
       SingleMasterChannelEndpointConfiguration: {
         Protocols: ['HTTPS'],
-        Role: 'VIEWER',
+        Role: role,
       },
     });
 

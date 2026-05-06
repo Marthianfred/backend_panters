@@ -78,6 +78,7 @@ export class JoinPrivateChatHandler {
       iceServers = await this.kinesisVideoService.getIceServers(
         session.channelArn,
         credentials,
+        role,
       );
     } catch (e) {
       this.logger.warn(

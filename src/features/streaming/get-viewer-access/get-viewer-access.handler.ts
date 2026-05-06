@@ -61,6 +61,7 @@ export class GetViewerAccessHandler {
       iceServers = await this.kinesisVideoService.getIceServers(
         streamMetadata.channelArn,
         credentials,
+        'VIEWER',
       );
     } catch (e) {
       const errorMessage = e instanceof Error ? e.message : 'Error desconocido';

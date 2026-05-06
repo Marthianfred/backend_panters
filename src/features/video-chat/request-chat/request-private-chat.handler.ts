@@ -101,6 +101,7 @@ export class RequestPrivateChatHandler {
       iceServers = await this.kinesisVideoService.getIceServers(
         channelArn,
         credentials,
+        'VIEWER',
       );
     } catch (error) {
       this.logger.warn(

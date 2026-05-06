@@ -18,6 +18,7 @@ export interface IKinesisVideoService {
   getIceServers(
     channelArn: string,
     credentials: WebRTCCredentials,
+    role: 'MASTER' | 'VIEWER',
   ): Promise<unknown[]>;
   createSignalingChannel(channelName: string): Promise<string>;
 }
