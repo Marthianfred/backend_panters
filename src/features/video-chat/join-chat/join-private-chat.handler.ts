@@ -76,6 +76,7 @@ export class JoinPrivateChatHandler {
     return {
       sessionId: session.id,
       role,
+      creatorId: session.creatorId,
       channelArn: session.channelArn,
       signalingEndpoint,
       credentials,
