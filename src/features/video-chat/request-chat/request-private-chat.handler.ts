@@ -12,9 +12,11 @@ import {
   RequestPrivateChatResponse,
 } from './request-private-chat.models';
 import { LiveChatGateway } from '../../live-chat/infrastructure/live-chat.gateway';
+import { Logger } from '@nestjs/common';
 
 @Injectable()
 export class RequestPrivateChatHandler {
+  private readonly logger = new Logger(RequestPrivateChatHandler.name);
   private readonly PRICE_PER_MINUTE = 50;
 
   constructor(
@@ -94,6 +96,19 @@ export class RequestPrivateChatHandler {
     const signalingEndpoint =
       await this.kinesisVideoService.getSignalingEndpoint(channelArn, 'VIEWER');
 
+    let iceServers: unknown[] = [];
+    try {
+      iceServers = await this.kinesisVideoService.getIceServers(
+        channelArn,
+        credentials,
+      );
+    } catch (error) {
+      this.logger.warn(
+        `No se pudieron obtener ICE servers para request de ${userId}:`,
+        error,
+      );
+    }
+
     this.liveChatGateway.notifyPrivateChatRequest(creatorId, {
       sessionId: session.id,
       userId,
@@ -108,6 +123,7 @@ export class RequestPrivateChatHandler {
       channelArn,
       signalingEndpoint,
       credentials: credentials as unknown as Record<string, unknown>,
+      iceServers,
     };
   }
 }

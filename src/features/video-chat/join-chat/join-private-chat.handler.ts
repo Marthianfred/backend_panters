@@ -73,6 +73,19 @@ export class JoinPrivateChatHandler {
         role,
       );
 
+    let iceServers: unknown[] = [];
+    try {
+      iceServers = await this.kinesisVideoService.getIceServers(
+        session.channelArn,
+        credentials,
+      );
+    } catch (e) {
+      this.logger.warn(
+        `No se pudieron obtener ICE servers de AWS para sesión ${sessionId}:`,
+        e,
+      );
+    }
+
     return {
       sessionId: session.id,
       role,
@@ -80,6 +93,7 @@ export class JoinPrivateChatHandler {
       channelArn: session.channelArn,
       signalingEndpoint,
       credentials,
+      iceServers,
       durationMinutes: session.durationMinutes,
       counterpart: {
         id: otherUserDetails?.id || otherUserId,

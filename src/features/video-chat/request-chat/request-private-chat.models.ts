@@ -9,4 +9,5 @@ export interface RequestPrivateChatResponse {
   channelArn: string;
   signalingEndpoint: string;
   credentials: Record<string, unknown>;
+  iceServers?: unknown[];
 }
