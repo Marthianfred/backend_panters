@@ -1,11 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreatePlanHandler } from './create-plan.handler';
-import { SUBSCRIPTION_PLAN_REPOSITORY } from '../../domain/subscription-plan.repository.interface';
+import {
+  ISubscriptionPlanRepository,
+  SUBSCRIPTION_PLAN_REPOSITORY,
+} from '../../domain/subscription-plan.repository.interface';
 import { SubscriptionPlanEntity } from '../../domain/subscription-plan.entity';
 
 describe('CreatePlanHandler', () => {
   let handler: CreatePlanHandler;
-  let repository: any;
+  let repository: jest.Mocked<ISubscriptionPlanRepository>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

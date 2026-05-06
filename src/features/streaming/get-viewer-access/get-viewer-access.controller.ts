@@ -26,6 +26,13 @@ export class GetViewerAccessController {
     @Res() res: Response,
   ): Promise<void> {
     try {
+      if (!req.user) {
+        res
+          .status(HttpStatus.UNAUTHORIZED)
+          .json({ error: 'Usuario no autenticado.' });
+        return;
+      }
+
       const userId = req.user.id;
 
       if (!streamId) {

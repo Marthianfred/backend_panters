@@ -4,7 +4,7 @@ export class SubscriptionPlanEntity {
   description: string | null;
   priceUsd: number;
   durationDays: number;
-  benefits: any[];
+  benefits: string[];
   stripePriceId: string | null;
   isActive: boolean;
   createdAt: Date;

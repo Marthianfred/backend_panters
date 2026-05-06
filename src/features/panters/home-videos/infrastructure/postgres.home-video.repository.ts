@@ -4,6 +4,15 @@ import { Pool } from 'pg';
 import { IHomeVideoRepository } from '../interfaces/home-video.repository.interface';
 import { HomeVideo } from '../home-video.entity';
 
+interface HomeVideoRow {
+  id: string;
+  key: string;
+  url: string;
+  originalName: string;
+  mimeType: string;
+  createdAt: string | number | Date;
+}
+
 @Injectable()
 export class PostgresHomeVideoRepository implements IHomeVideoRepository {
   private pool: Pool;
@@ -26,7 +35,7 @@ export class PostgresHomeVideoRepository implements IHomeVideoRepository {
       FROM public.home_loop_videos
       ORDER BY created_at DESC;
     `;
-    const result = await this.pool.query(query);
+    const result = await this.pool.query<HomeVideoRow>(query);
     return result.rows.map((row) => ({
       ...row,
       createdAt: new Date(row.createdAt),
@@ -45,7 +54,7 @@ export class PostgresHomeVideoRepository implements IHomeVideoRepository {
       FROM public.home_loop_videos
       WHERE id = $1;
     `;
-    const result = await this.pool.query(query, [id]);
+    const result = await this.pool.query<HomeVideoRow>(query, [id]);
     if (result.rows.length === 0) return null;
     const row = result.rows[0];
     return {

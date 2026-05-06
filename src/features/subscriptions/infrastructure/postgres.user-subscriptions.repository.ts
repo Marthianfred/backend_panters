@@ -5,6 +5,7 @@ import { IUserSubscriptionsRepository } from '../interfaces/user.subscriptions.r
 import {
   UserSubscriptionDto,
   CreateUserSubscriptionDto,
+  UserSubscriptionWithPlanDto,
 } from '../subscriptions.models';
 
 @Injectable()
@@ -47,7 +48,7 @@ export class PostgresUserSubscriptionsRepository implements IUserSubscriptionsRe
       data.endsAt,
     ];
 
-    const result = await this.pool.query(query, values);
+    const result = await this.pool.query<UserSubscriptionDto>(query, values);
     return result.rows[0];
   }
 
@@ -62,7 +63,7 @@ export class PostgresUserSubscriptionsRepository implements IUserSubscriptionsRe
       WHERE user_id = $1
       ORDER BY created_at DESC;
     `;
-    const result = await this.pool.query(query, [userId]);
+    const result = await this.pool.query<UserSubscriptionDto>(query, [userId]);
     return result.rows;
   }
 
@@ -79,7 +80,7 @@ export class PostgresUserSubscriptionsRepository implements IUserSubscriptionsRe
       WHERE user_id = $1 AND status = 'active' AND (ends_at IS NULL OR ends_at > NOW())
       LIMIT 1;
     `;
-    const result = await this.pool.query(query, [userId]);
+    const result = await this.pool.query<UserSubscriptionDto>(query, [userId]);
     return result.rows[0] || null;
   }
 
@@ -98,7 +99,11 @@ export class PostgresUserSubscriptionsRepository implements IUserSubscriptionsRe
         cancel_at_period_end as "cancelAtPeriodEnd",
         starts_at as "startsAt", ends_at as "endsAt", created_at as "createdAt", updated_at as "updatedAt";
     `;
-    const result = await this.pool.query(query, [id, status, externalId]);
+    const result = await this.pool.query<UserSubscriptionDto>(query, [
+      id,
+      status,
+      externalId,
+    ]);
     return result.rows[0];
   }
 
@@ -112,7 +117,7 @@ export class PostgresUserSubscriptionsRepository implements IUserSubscriptionsRe
       FROM user_subscriptions
       WHERE id = $1;
     `;
-    const result = await this.pool.query(query, [id]);
+    const result = await this.pool.query<UserSubscriptionDto>(query, [id]);
     return result.rows[0] || null;
   }
 
@@ -129,7 +134,9 @@ export class PostgresUserSubscriptionsRepository implements IUserSubscriptionsRe
       WHERE external_subscription_id = $1
       LIMIT 1;
     `;
-    const result = await this.pool.query(query, [externalId]);
+    const result = await this.pool.query<UserSubscriptionDto>(query, [
+      externalId,
+    ]);
     return result.rows[0] || null;
   }
 
@@ -148,11 +155,17 @@ export class PostgresUserSubscriptionsRepository implements IUserSubscriptionsRe
         cancel_at_period_end as "cancelAtPeriodEnd",
         starts_at as "startsAt", ends_at as "endsAt", created_at as "createdAt", updated_at as "updatedAt";
     `;
-    const result = await this.pool.query(query, [id, startsAt, endsAt]);
+    const result = await this.pool.query<UserSubscriptionDto>(query, [
+      id,
+      startsAt,
+      endsAt,
+    ]);
     return result.rows[0];
   }
 
-  async findActiveWithPlanByUserId(userId: string): Promise<any | null> {
+  async findActiveWithPlanByUserId(
+    userId: string,
+  ): Promise<UserSubscriptionWithPlanDto | null> {
     const query = `
       SELECT 
         s.id, 
@@ -166,7 +179,9 @@ export class PostgresUserSubscriptionsRepository implements IUserSubscriptionsRe
       ORDER BY s.created_at DESC
       LIMIT 1;
     `;
-    const result = await this.pool.query(query, [userId]);
+    const result = await this.pool.query<UserSubscriptionWithPlanDto>(query, [
+      userId,
+    ]);
     return result.rows[0] || null;
   }
 
@@ -186,7 +201,12 @@ export class PostgresUserSubscriptionsRepository implements IUserSubscriptionsRe
         cancel_at_period_end as "cancelAtPeriodEnd",
         starts_at as "startsAt", ends_at as "endsAt", created_at as "createdAt", updated_at as "updatedAt";
     `;
-    const result = await this.pool.query(query, [id, planId, startsAt, endsAt]);
+    const result = await this.pool.query<UserSubscriptionDto>(query, [
+      id,
+      planId,
+      startsAt,
+      endsAt,
+    ]);
     return result.rows[0];
   }
 

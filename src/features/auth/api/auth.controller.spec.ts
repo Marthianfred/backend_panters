@@ -8,6 +8,7 @@ import { AuthController } from '@/features/auth/api/auth.controller';
 import { AuthService } from '@/features/auth/application/auth.service';
 import { Request, Response } from 'express';
 import { AuthenticatedRequest } from '../types/auth.types';
+import { RegisterModelUseCase } from '../application/use-cases/register-model/register-model.use-case';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -21,6 +22,12 @@ describe('AuthController', () => {
           provide: AuthService,
           useValue: {
             handleAuthRequest: jest.fn().mockResolvedValue(true),
+          },
+        },
+        {
+          provide: RegisterModelUseCase,
+          useValue: {
+            execute: jest.fn(),
           },
         },
       ],

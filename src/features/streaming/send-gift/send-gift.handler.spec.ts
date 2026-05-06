@@ -1,31 +1,41 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SendGiftHandler } from './send-gift.handler';
-import { SEND_GIFT_REPOSITORY } from './interfaces/send-gift.repository.interface';
+import {
+  ISendGiftRepository,
+  SEND_GIFT_REPOSITORY,
+  GiftDefinition,
+} from './interfaces/send-gift.repository.interface';
 import { LiveChatGateway } from '../../live-chat/infrastructure/live-chat.gateway';
 import {
   GiftNotFoundError,
   InsufficientBalanceError,
 } from './send-gift.models';
+import { KinesisDataPublisherService } from '@/core/infrastructure/kinesis-data/kinesis-data-publisher.service';
 
 describe('SendGiftHandler', () => {
   let handler: SendGiftHandler;
-  let mockRepository: any;
-  let mockGateway: any;
+  let mockRepository: jest.Mocked<ISendGiftRepository>;
+  let mockGateway: jest.Mocked<LiveChatGateway>;
 
   beforeEach(async () => {
     mockRepository = {
       getGiftById: jest.fn(),
       processGiftTransaction: jest.fn(),
-    };
+      userExists: jest.fn().mockResolvedValue(true),
+    } as unknown as jest.Mocked<ISendGiftRepository>;
     mockGateway = {
       broadcastGift: jest.fn(),
-    };
+    } as unknown as jest.Mocked<LiveChatGateway>;
+    const mockKinesis = {
+      publish: jest.fn().mockResolvedValue(undefined),
+    } as unknown as jest.Mocked<KinesisDataPublisherService>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SendGiftHandler,
         { provide: SEND_GIFT_REPOSITORY, useValue: mockRepository },
         { provide: LiveChatGateway, useValue: mockGateway },
+        { provide: KinesisDataPublisherService, useValue: mockKinesis },
       ],
     }).compile();
 
@@ -33,16 +43,21 @@ describe('SendGiftHandler', () => {
   });
 
   it('debe lanzar GiftNotFoundError si el regalo no existe', async () => {
-    mockRepository.getGiftById.mockResolvedValue(null);
+    (mockRepository.getGiftById as jest.Mock).mockResolvedValue(null);
     await expect(
       handler.execute({ userId: 'u1', creatorId: 'c1', giftId: 'g1' }),
     ).rejects.toThrow(GiftNotFoundError);
   });
 
   it('debe procesar el regalo y emitir evento vía socket exitosamente', async () => {
-    const mockGift = { id: 'g1', name: 'Rosa', priceCoins: 5, iconUrl: 'rose' };
-    mockRepository.getGiftById.mockResolvedValue(mockGift);
-    mockRepository.processGiftTransaction.mockResolvedValue({
+    const mockGift: GiftDefinition = {
+      id: 'g1',
+      name: 'Rosa',
+      priceCoins: 5,
+      iconUrl: 'rose',
+    };
+    (mockRepository.getGiftById as jest.Mock).mockResolvedValue(mockGift);
+    (mockRepository.processGiftTransaction as jest.Mock).mockResolvedValue({
       transactionId: 't1',
       remainingBalance: 95,
     });
@@ -69,8 +84,15 @@ describe('SendGiftHandler', () => {
   });
 
   it('debe lanzar InsufficientBalanceError si la transacción falla en DB por saldo', async () => {
-    mockRepository.getGiftById.mockResolvedValue({ id: 'g1', priceCoins: 100 });
-    mockRepository.processGiftTransaction.mockResolvedValue(null);
+    (mockRepository.getGiftById as jest.Mock).mockResolvedValue({
+      id: 'g1',
+      name: 'Regalo',
+      priceCoins: 100,
+      iconUrl: 'url',
+    } as GiftDefinition);
+    (mockRepository.processGiftTransaction as jest.Mock).mockResolvedValue(
+      null,
+    );
 
     await expect(
       handler.execute({ userId: 'u1', creatorId: 'c1', giftId: 'g1' }),

@@ -61,14 +61,21 @@ export class NotifyUserUseCase {
           pushSubscription,
           JSON.stringify(payload),
         );
-      } catch (error) {
+      } catch (error: unknown) {
         this.logger.error(
           `Error enviando notificación push a usuario ${userId}:`,
           error,
         );
 
-        if (error.statusCode === 410 || error.statusCode === 404) {
-          await this.pushRepository.deleteByEndpoint(sub.endpoint);
+        interface WebPushError {
+          statusCode: number;
+        }
+
+        if (error && typeof error === 'object' && 'statusCode' in error) {
+          const statusCode = (error as WebPushError).statusCode;
+          if (statusCode === 410 || statusCode === 404) {
+            await this.pushRepository.deleteByEndpoint(sub.endpoint);
+          }
         }
       }
     });

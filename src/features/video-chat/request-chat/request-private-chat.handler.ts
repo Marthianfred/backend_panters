@@ -53,7 +53,7 @@ export class RequestPrivateChatHandler {
 
     const streamId = randomUUID();
     const channelName = `Private-${creatorId}-${userId}-${Date.now()}`;
-    
+
     const channelArn =
       await this.kinesisVideoService.createSignalingChannel(channelName);
     const region = this.configService.get<string>(
@@ -83,7 +83,7 @@ export class RequestPrivateChatHandler {
       streamId,
     });
 
-    await this.repository.updateSessionStream(session.id, streamId, channelArn);
+    await this.repository.updateSessionStream(session.id, streamId);
 
     const credentials =
       await this.kinesisVideoService.generateViewerCredentials(
@@ -107,7 +107,7 @@ export class RequestPrivateChatHandler {
       streamId,
       channelArn,
       signalingEndpoint,
-      credentials,
+      credentials: credentials as unknown as Record<string, unknown>,
     };
   }
 }

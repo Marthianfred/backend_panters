@@ -11,7 +11,7 @@ export interface NotificationPayload {
   title: string;
   body: string;
   icon?: string;
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 @Injectable()
@@ -69,15 +69,22 @@ export class NotifySubscribersUseCase {
           JSON.stringify(payload),
         );
         successCount++;
-      } catch (error) {
+      } catch (error: unknown) {
         failedCount++;
         this.logger.error(
           `Error enviando notificación a endpoint: ${sub.endpoint}`,
           error,
         );
 
-        if (error.statusCode === 410 || error.statusCode === 404) {
-          await this.pushRepository.deleteByEndpoint(sub.endpoint);
+        interface WebPushError {
+          statusCode: number;
+        }
+
+        if (error && typeof error === 'object' && 'statusCode' in error) {
+          const statusCode = (error as WebPushError).statusCode;
+          if (statusCode === 410 || statusCode === 404) {
+            await this.pushRepository.deleteByEndpoint(sub.endpoint);
+          }
         }
       }
     });

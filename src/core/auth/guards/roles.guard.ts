@@ -28,7 +28,7 @@ export class RolesGuard implements CanActivate {
     const userRole = (user.role as Role) || Role.SUBSCRIBER;
 
     console.log(
-      `[RolesGuard] Debug: userRole=${userRole}, requiredRoles=${requiredRoles}`,
+      `[RolesGuard] Debug: userRole=${userRole}, requiredRoles=${requiredRoles.join(', ')}`,
     );
 
     if (userRole === Role.ADMIN) {
@@ -39,7 +39,7 @@ export class RolesGuard implements CanActivate {
     const hasRole = requiredRoles.includes(userRole);
     if (!hasRole) {
       console.warn(
-        `[RolesGuard] Access denied for user ${user.id} with role ${userRole}. Required: ${requiredRoles}`,
+        `[RolesGuard] Access denied for user ${user.id} with role ${userRole}. Required: ${requiredRoles.join(', ')}`,
       );
     }
 

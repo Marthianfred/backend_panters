@@ -1,6 +1,7 @@
 import {
   UserSubscriptionDto,
   CreateUserSubscriptionDto,
+  UserSubscriptionWithPlanDto,
 } from '@/features/subscriptions/subscriptions.models';
 
 export const USER_SUBSCRIPTIONS_REPOSITORY = Symbol(
@@ -23,7 +24,9 @@ export interface IUserSubscriptionsRepository {
     startsAt: Date,
     endsAt: Date,
   ): Promise<UserSubscriptionDto>;
-  findActiveWithPlanByUserId(userId: string): Promise<any | null>;
+  findActiveWithPlanByUserId(
+    userId: string,
+  ): Promise<UserSubscriptionWithPlanDto | null>;
   changePlan(
     id: string,
     planId: string,

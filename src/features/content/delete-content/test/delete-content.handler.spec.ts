@@ -54,6 +54,8 @@ describe('DeleteContentHandler', () => {
     expect(mockStorage.deleteContent).toHaveBeenCalledWith(
       creatorId,
       contentId,
+      's3://path',
+      'content',
     );
     expect(mockRepository.deleteContent).toHaveBeenCalledWith(contentId);
   });

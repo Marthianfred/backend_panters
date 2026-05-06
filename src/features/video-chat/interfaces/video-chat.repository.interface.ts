@@ -1,5 +1,3 @@
-import { CreateStreamResponse } from '../../streaming/create-stream/create-stream.models';
-
 export interface VideoCallSession {
   id: string;
   creatorId: string;
@@ -20,11 +18,7 @@ export interface IVideoChatRepository {
     id: string,
     status: VideoCallSession['status'],
   ): Promise<void>;
-  updateSessionStream(
-    id: string,
-    streamId: string,
-    channelArn: string,
-  ): Promise<void>;
+  updateSessionStream(id: string, streamId: string): Promise<void>;
   processPayment(
     userId: string,
     creatorId: string,

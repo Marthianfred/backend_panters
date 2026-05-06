@@ -1,15 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GetEarningsHistoryHandler } from './get-earnings-history.handler';
-import { EARNINGS_REPOSITORY_TOKEN } from '../interfaces/earnings.repository.interface';
+import {
+  EARNINGS_REPOSITORY_TOKEN,
+  IEarningsRepository,
+} from '../interfaces/earnings.repository.interface';
 
 describe('GetEarningsHistoryHandler', () => {
   let handler: GetEarningsHistoryHandler;
-  let mockRepository: any;
+  let mockRepository: jest.Mocked<IEarningsRepository>;
 
   beforeEach(async () => {
     mockRepository = {
       getCreatorEarningsHistory: jest.fn(),
-    };
+      getCreatorEarningsSummary: jest.fn(),
+    } as unknown as jest.Mocked<IEarningsRepository>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

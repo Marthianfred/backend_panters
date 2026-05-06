@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsUUID,
   IsNotEmpty,
   IsString,
   IsNumber,

@@ -1,4 +1,11 @@
-import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Req,
+  BadRequestException,
+} from '@nestjs/common';
 import { SendGiftHandler } from './send-gift.handler';
 import { SendGiftResponse } from './send-gift.models';
 import { AuthGuard } from '../../auth/guards/auth.guard';
@@ -18,6 +25,7 @@ export class SendGiftController {
     @Req() req: AuthenticatedRequest,
     @Body() body: { creatorId: string; giftId: string },
   ): Promise<SendGiftResponse> {
+    if (!req.user) throw new BadRequestException('Usuario no autenticado');
     const request = {
       userId: req.user.id,
       creatorId: body.creatorId,

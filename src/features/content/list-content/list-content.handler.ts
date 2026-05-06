@@ -48,7 +48,6 @@ export class ListContentHandler {
     const contentsDTO: ContentItemDTO[] = await Promise.all(
       rawContents.map(async (content) => {
         const isBought = purchasedIds.includes(content.id);
-        const isCreator = request.subscriberId === content.creatorId;
 
         let thumbnailUrl: string = '';
 
@@ -118,6 +117,10 @@ export class ListContentHandler {
   }
 }
 
-function rowHasReacted(content: any): boolean {
+interface ContentRow {
+  hasReacted?: boolean;
+}
+
+function rowHasReacted(content: ContentRow): boolean {
   return content.hasReacted === true;
 }

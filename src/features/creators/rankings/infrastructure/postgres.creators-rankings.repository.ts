@@ -48,7 +48,15 @@ export class PostgresCreatorsRankingsRepository implements ICreatorsRankingsRepo
       LIMIT $1;
     `;
 
-    const result = await this.pool.query(query, [limit]);
+    interface RankingRow {
+      userId: string;
+      username: string;
+      fullName: string;
+      avatarUrl: string | null;
+      totalReactions: number;
+    }
+
+    const result = await this.pool.query<RankingRow>(query, [limit]);
     return result.rows.map((row) => ({
       userId: row.userId,
       username: row.username,

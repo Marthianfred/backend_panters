@@ -1,22 +1,35 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ListContentHandler } from './list-content.handler';
-import { CONTENT_REPOSITORY_TOKEN } from '../interfaces/content.repository.interface';
-import { CONTENT_STORAGE_SERVICE } from '../upload-content/interfaces/content-storage.service.interface';
+import {
+  IContentRepository,
+  CONTENT_REPOSITORY_TOKEN,
+} from '../interfaces/content.repository.interface';
+import {
+  IContentStorageService,
+  CONTENT_STORAGE_SERVICE,
+} from '../upload-content/interfaces/content-storage.service.interface';
 
 describe('ListContentHandler', () => {
   let handler: ListContentHandler;
-  let repository: any;
-  let storage: any;
+  let repository: jest.Mocked<IContentRepository>;
+  let storage: jest.Mocked<IContentStorageService>;
 
   beforeEach(async () => {
     repository = {
       listContents: jest.fn(),
       countContents: jest.fn(),
       getPurchasedContentIds: jest.fn(),
-    };
+      saveContent: jest.fn(),
+      getContentById: jest.fn(),
+      updateContent: jest.fn(),
+      deleteContent: jest.fn(),
+    } as unknown as jest.Mocked<IContentRepository>;
+
     storage = {
+      getPresignedUploadUrl: jest.fn(),
       getPresignedDownloadUrl: jest.fn(),
-    };
+      deleteContent: jest.fn(),
+    } as unknown as jest.Mocked<IContentStorageService>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

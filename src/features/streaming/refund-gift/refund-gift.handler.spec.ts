@@ -1,16 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { RefundGiftHandler } from './refund-gift.handler';
-import { REFUND_GIFT_REPOSITORY } from './interfaces/refund-gift.repository.interface';
+import {
+  IRefundGiftRepository,
+  REFUND_GIFT_REPOSITORY,
+} from './interfaces/refund-gift.repository.interface';
 import { TransactionNotFoundError } from './refund-gift.models';
 
 describe('RefundGiftHandler', () => {
   let handler: RefundGiftHandler;
-  let mockRepository: any;
+  let mockRepository: jest.Mocked<IRefundGiftRepository>;
 
   beforeEach(async () => {
     mockRepository = {
       processRefundTransaction: jest.fn(),
-    };
+    } as unknown as jest.Mocked<IRefundGiftRepository>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -23,7 +26,9 @@ describe('RefundGiftHandler', () => {
   });
 
   it('debe lanzar TransactionNotFoundError si la transacción no existe', async () => {
-    mockRepository.processRefundTransaction.mockResolvedValue(null);
+    (mockRepository.processRefundTransaction as jest.Mock).mockResolvedValue(
+      null,
+    );
     await expect(
       handler.execute({ transactionId: 'invalid-id' }),
     ).rejects.toThrow(TransactionNotFoundError);
@@ -34,7 +39,9 @@ describe('RefundGiftHandler', () => {
       refundTransactionId: 'ref-123',
       newBalance: 150,
     };
-    mockRepository.processRefundTransaction.mockResolvedValue(mockResult);
+    (mockRepository.processRefundTransaction as jest.Mock).mockResolvedValue(
+      mockResult,
+    );
 
     const result = await handler.execute({
       transactionId: 'trans-123',

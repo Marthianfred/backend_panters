@@ -10,7 +10,6 @@ import {
   CreatorNotFoundError,
   UserNotFoundError,
   InsufficientBalanceError,
-  SendGiftFailedError,
 } from './send-gift.models';
 
 @Injectable()
@@ -49,7 +48,7 @@ export class SendGiftHandler {
     }
 
     try {
-      this.liveChatGateway.broadcastGift(
+      await this.liveChatGateway.broadcastGift(
         request.creatorId,
         'Usuario',
         gift.name,

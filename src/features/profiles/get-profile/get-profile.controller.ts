@@ -23,15 +23,15 @@ export class GetProfileController {
     @Res() res: Response,
   ): Promise<void> {
     try {
-      const userId = req.user.id;
-      const role = req.user.role;
-
-      if (!userId) {
+      if (!req.user) {
         res
           .status(HttpStatus.UNAUTHORIZED)
           .json({ error: 'Usuario no autenticado.' });
         return;
       }
+
+      const userId = req.user.id;
+      const role = req.user.role;
 
       const response = await this.handler.execute({ userId });
 

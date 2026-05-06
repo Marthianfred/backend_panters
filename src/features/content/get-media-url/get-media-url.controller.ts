@@ -6,6 +6,7 @@ import {
   Req,
   HttpStatus,
   Res,
+  BadRequestException,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { GetMediaUrlHandler } from './get-media-url.handler';
@@ -28,6 +29,7 @@ export class GetMediaUrlController {
     @Res() res: Response,
   ): Promise<void> {
     try {
+      if (!req.user) throw new BadRequestException('Usuario no autenticado');
       const subscriberId = req.user.id;
 
       const response = await this.handler.execute({

@@ -16,7 +16,7 @@ import {
 export class RegisterClientService {
   constructor(
     @Inject(BETTER_AUTH_TOKEN)
-    private readonly authInstance: any,
+    private readonly authInstance: BetterAuthInstance,
   ) {}
 
   async register(data: RegisterClientRequest): Promise<RegisterClientResponse> {
@@ -46,7 +46,7 @@ export class RegisterClientService {
           name: result.user.name,
         },
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('[AUTH_REGISTER_ERROR]', error);
 
       if (
@@ -56,45 +56,60 @@ export class RegisterClientService {
         throw error;
       }
 
-      let errorBody = error.body;
-      if (typeof errorBody === 'string') {
-        try {
-          errorBody = JSON.parse(errorBody);
-        } catch (e) {}
+      interface BetterAuthError {
+        body?: string | { code?: string; message?: string };
+        code?: string;
+        message?: string;
+        status?: number;
+        statusCode?: number;
       }
 
-      const errorCode =
-        (errorBody && typeof errorBody === 'object' ? errorBody.code : null) ||
-        error.code ||
-        (typeof error.message === 'string' ? error.message : '');
+      const err = error as BetterAuthError;
+      let errorBody: { code?: string; message?: string } | null = null;
+
+      if (err.body) {
+        if (typeof err.body === 'string') {
+          try {
+            errorBody = JSON.parse(err.body) as {
+              code?: string;
+              message?: string;
+            };
+          } catch {
+            // Error parsing body
+          }
+        } else {
+          errorBody = err.body;
+        }
+      }
+
+      const errorCode = errorBody?.code || err.code || err.message || '';
+      const errorCodeStr = String(errorCode);
 
       if (
-        errorCode.toString().includes('USER_ALREADY_EXISTS') ||
-        errorCode.toString().includes('EMAIL_ALREADY_EXISTS')
+        errorCodeStr.includes('USER_ALREADY_EXISTS') ||
+        errorCodeStr.includes('EMAIL_ALREADY_EXISTS')
       ) {
         throw new BadRequestException(
           'El correo electrónico ya está registrado.',
         );
       }
 
-      if (errorCode.toString().includes('USERNAME_IS_ALREADY_TAKEN')) {
+      if (errorCodeStr.includes('USERNAME_IS_ALREADY_TAKEN')) {
         throw new BadRequestException(
           'El nombre de usuario ya está en uso. Por favor, elige otro.',
         );
       }
 
-      if (error.status === 400 || error.statusCode === 400) {
+      if (err.status === 400 || err.statusCode === 400) {
         const message =
-          (errorBody && typeof errorBody === 'object'
-            ? errorBody.message
-            : null) ||
-          error.message ||
+          errorBody?.message ||
+          err.message ||
           'Los datos de registro son inválidos.';
         throw new BadRequestException(message);
       }
 
       throw new InternalServerErrorException(
-        `Error interno al procesar el registro. Detalle: ${error.message || 'Error desconocido'}`,
+        `Error interno al procesar el registro. Detalle: ${err.message || 'Error desconocido'}`,
       );
     }
   }
@@ -119,8 +134,13 @@ export class RegisterClientService {
         success: true,
         message: 'Correo electrónico verificado con éxito.',
       };
-    } catch (error: any) {
-      const errorCode = error.body?.code || error.code;
+    } catch (error: unknown) {
+      interface BetterAuthError {
+        body?: { code?: string };
+        code?: string;
+      }
+      const err = error as BetterAuthError;
+      const errorCode = err.body?.code || err.code;
       if (errorCode === 'INVALID_TOKEN' || errorCode === 'EXPIRED_TOKEN') {
         throw new BadRequestException(
           'El enlace de verificación es inválido o ha expirado.',

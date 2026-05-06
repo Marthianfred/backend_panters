@@ -2,16 +2,22 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { PreRegistrationUseCase } from './pre-registration.use-case';
 import { RegisterClientService } from '@/features/auth/application/register-client.service';
-import { SUBSCRIPTION_PLANS_REPOSITORY } from '@/features/subscriptions/interfaces/subscription.plans.repository.interface';
-import { USER_SUBSCRIPTIONS_REPOSITORY } from '@/features/subscriptions/interfaces/user.subscriptions.repository.interface';
+import {
+  ISubscriptionPlansRepository,
+  SUBSCRIPTION_PLANS_REPOSITORY,
+} from '@/features/subscriptions/interfaces/subscription.plans.repository.interface';
+import {
+  IUserSubscriptionsRepository,
+  USER_SUBSCRIPTIONS_REPOSITORY,
+} from '@/features/subscriptions/interfaces/user.subscriptions.repository.interface';
 import { CreateCheckoutSessionUseCase } from '@/features/subscriptions/checkout/application/create-checkout-session.use-case';
 import { PreRegistrationRequestDto } from '../domain/pre-registration.dto';
 
 describe('PreRegistrationUseCase', () => {
   let useCase: PreRegistrationUseCase;
   let registerClientService: jest.Mocked<RegisterClientService>;
-  let plansRepository: any;
-  let userSubscriptionsRepository: any;
+  let plansRepository: jest.Mocked<ISubscriptionPlansRepository>;
+  let userSubscriptionsRepository: jest.Mocked<IUserSubscriptionsRepository>;
   let createCheckoutSessionUseCase: jest.Mocked<CreateCheckoutSessionUseCase>;
 
   beforeEach(async () => {
@@ -51,7 +57,7 @@ describe('PreRegistrationUseCase', () => {
     userSubscriptionsRepository = module.get(USER_SUBSCRIPTIONS_REPOSITORY);
     createCheckoutSessionUseCase = module.get(CreateCheckoutSessionUseCase);
 
-    createCheckoutSessionUseCase.execute.mockResolvedValue({
+    (createCheckoutSessionUseCase.execute as jest.Mock).mockResolvedValue({
       url: 'https://stripe.com/checkout',
       sessionId: 'sess_123',
     });
@@ -82,7 +88,16 @@ describe('PreRegistrationUseCase', () => {
     registerClientService.register.mockResolvedValue({
       success: false,
       message: 'Error',
-      user: null as any,
+      user: null as unknown as {
+        id: string;
+        email: string;
+        name: string;
+        username: string;
+        image?: string | null;
+        emailVerified: boolean;
+        createdAt: Date;
+        updatedAt: Date;
+      },
     });
 
     await expect(useCase.execute(mockDto)).rejects.toThrow(BadRequestException);

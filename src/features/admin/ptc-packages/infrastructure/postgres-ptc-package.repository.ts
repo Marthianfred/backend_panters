@@ -25,7 +25,7 @@ export class PostgresPtcPackageRepository implements IPtcPackageRepository {
     `;
 
     try {
-      const result = await this.pool.query(query, [
+      const result = await this.pool.query<PtcPackageEntity>(query, [
         data.name,
         data.ptcAmount,
         data.priceUsd,
@@ -33,8 +33,9 @@ export class PostgresPtcPackageRepository implements IPtcPackageRepository {
         data.isActive ?? true,
       ]);
       return result.rows[0];
-    } catch (error) {
-      this.logger.error(`Error al crear paquete de PTC: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error al crear paquete de PTC: ${message}`);
       throw error;
     }
   }
@@ -68,12 +69,14 @@ export class PostgresPtcPackageRepository implements IPtcPackageRepository {
     `;
 
     try {
-      const result = await this.pool.query(query, [id, ...Object.values(data)]);
+      const result = await this.pool.query<PtcPackageEntity>(query, [
+        id,
+        ...Object.values(data),
+      ]);
       return result.rows[0];
-    } catch (error) {
-      this.logger.error(
-        `Error al actualizar paquete de PTC ${id}: ${error.message}`,
-      );
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error al actualizar paquete de PTC ${id}: ${message}`);
       throw error;
     }
   }
@@ -87,10 +90,9 @@ export class PostgresPtcPackageRepository implements IPtcPackageRepository {
 
     try {
       await this.pool.query(query, [id]);
-    } catch (error) {
-      this.logger.error(
-        `Error al desactivar paquete de PTC ${id}: ${error.message}`,
-      );
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error al desactivar paquete de PTC ${id}: ${message}`);
       throw error;
     }
   }
@@ -104,10 +106,9 @@ export class PostgresPtcPackageRepository implements IPtcPackageRepository {
 
     try {
       await this.pool.query(query, [id]);
-    } catch (error) {
-      this.logger.error(
-        `Error al activar paquete de PTC ${id}: ${error.message}`,
-      );
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error al activar paquete de PTC ${id}: ${message}`);
       throw error;
     }
   }
@@ -120,12 +121,11 @@ export class PostgresPtcPackageRepository implements IPtcPackageRepository {
     `;
 
     try {
-      const result = await this.pool.query(query, [id]);
+      const result = await this.pool.query<PtcPackageEntity>(query, [id]);
       return result.rows.length > 0 ? result.rows[0] : null;
-    } catch (error) {
-      this.logger.error(
-        `Error al buscar paquete de PTC ${id}: ${error.message}`,
-      );
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error al buscar paquete de PTC ${id}: ${message}`);
       throw error;
     }
   }
@@ -138,10 +138,11 @@ export class PostgresPtcPackageRepository implements IPtcPackageRepository {
     `;
 
     try {
-      const result = await this.pool.query(query);
+      const result = await this.pool.query<PtcPackageEntity>(query);
       return result.rows;
-    } catch (error) {
-      this.logger.error(`Error al listar paquetes de PTC: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error al listar paquetes de PTC: ${message}`);
       throw error;
     }
   }

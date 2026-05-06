@@ -15,5 +15,5 @@ export class SendNotificationDto {
 
   @IsObject()
   @IsOptional()
-  data?: any;
+  data?: Record<string, unknown>;
 }

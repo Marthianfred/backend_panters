@@ -52,8 +52,9 @@ export class PurchasePtcService {
         url: session.url,
         sessionId: session.id,
       };
-    } catch (error) {
-      this.logger.error(`Error al crear sesión de Stripe: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error al crear sesión de Stripe: ${message}`);
       throw error;
     }
   }

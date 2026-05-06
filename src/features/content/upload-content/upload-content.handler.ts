@@ -150,10 +150,7 @@ export class UploadContentHandler {
     };
   }
 
-  public async confirmUpload(
-    contentId: string,
-    clientId: string,
-  ): Promise<void> {
+  public confirmUpload(contentId: string, clientId: string): void {
     const stream = this.statusStreams.get(clientId);
     if (!stream) return;
 

@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { USER_SUBSCRIPTIONS_REPOSITORY } from '../../interfaces/user.subscriptions.repository.interface';
 import type { IUserSubscriptionsRepository } from '../../interfaces/user.subscriptions.repository.interface';
 import { MySubscriptionResponseDto } from '../domain/my-subscription.dto';
@@ -10,14 +10,12 @@ export class GetMySubscriptionUseCase {
     private readonly subscriptionsRepository: IUserSubscriptionsRepository,
   ) {}
 
-  async execute(userId: string): Promise<MySubscriptionResponseDto> {
+  async execute(userId: string): Promise<MySubscriptionResponseDto | null> {
     const subscription =
       await this.subscriptionsRepository.findActiveWithPlanByUserId(userId);
 
     if (!subscription) {
-      throw new NotFoundException(
-        'No se encontró una suscripción activa para este usuario.',
-      );
+      return null;
     }
 
     return {

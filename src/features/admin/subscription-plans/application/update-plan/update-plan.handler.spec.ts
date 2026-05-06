@@ -1,12 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdatePlanHandler } from './update-plan.handler';
-import { SUBSCRIPTION_PLAN_REPOSITORY } from '../../domain/subscription-plan.repository.interface';
+import {
+  ISubscriptionPlanRepository,
+  SUBSCRIPTION_PLAN_REPOSITORY,
+} from '../../domain/subscription-plan.repository.interface';
 import { SubscriptionPlanEntity } from '../../domain/subscription-plan.entity';
 import { NotFoundException } from '@nestjs/common';
 
 describe('UpdatePlanHandler', () => {
   let handler: UpdatePlanHandler;
-  let repository: any;
+  let repository: jest.Mocked<ISubscriptionPlanRepository>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

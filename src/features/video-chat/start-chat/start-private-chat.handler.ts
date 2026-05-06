@@ -95,6 +95,7 @@ export class StartPrivateChatHandler {
           try {
             this.schedulerRegistry.deleteInterval(intervalName);
           } catch {
+            // Ignorar error si el intervalo no existe
           }
         }
       }, 1000);
@@ -120,6 +121,7 @@ export class StartPrivateChatHandler {
             try {
               this.schedulerRegistry.deleteTimeout(timerName);
             } catch {
+              // Ignorar error si el timeout no existe
             }
           });
       }, durationMs);

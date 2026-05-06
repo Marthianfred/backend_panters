@@ -134,7 +134,7 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
   public async getIceServers(
     channelArn: string,
     credentials: WebRTCCredentials,
-  ): Promise<any[]> {
+  ): Promise<unknown[]> {
     const region = this.configService.get<string>(
       'KN_STREAMS_REGION',
       'us-east-2',
@@ -161,12 +161,9 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
       region,
       endpoint: httpsEndpoint,
       credentials: {
-        accessKeyId: this.configService.getOrThrow<string>(
-          'KN_STREAMS_ACCESS_KEY_ID',
-        ),
-        secretAccessKey: this.configService.getOrThrow<string>(
-          'KN_STREAMS_SECRET_ACCESS_KEY',
-        ),
+        accessKeyId: credentials.accessKeyId,
+        secretAccessKey: credentials.secretAccessKey,
+        sessionToken: credentials.sessionToken,
       },
     });
 
@@ -193,8 +190,13 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
       });
       const response = await this.kvsClient.send(command);
       return response.ChannelARN as string;
-    } catch (error) {
-      if (error.name === 'ResourceInUseException') {
+    } catch (error: unknown) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'name' in error &&
+        (error as { name: string }).name === 'ResourceInUseException'
+      ) {
         const describe = await this.kvsClient.send(
           new DescribeSignalingChannelCommand({ ChannelName: channelName }),
         );

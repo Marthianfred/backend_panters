@@ -1,17 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { AwsKinesisVideoService } from './aws.kinesis.service';
-import { KinesisVideoClient } from '@aws-sdk/client-kinesis-video';
 
 jest.mock('@aws-sdk/client-kinesis-video');
 
 describe('AwsKinesisVideoService', () => {
   let service: AwsKinesisVideoService;
-  let mockConfigService: any;
+  let mockConfigService: jest.Mocked<Partial<ConfigService>>;
 
   beforeEach(async () => {
     mockConfigService = {
-      get: jest.fn((key: string, defaultValue?: any) => {
+      get: jest.fn((key: string, defaultValue?: unknown) => {
         if (key === 'KN_STREAMS_REGION') return 'us-east-2';
         if (key === 'KN_STREAMS_ACCESS_KEY_ID') return 'fake-access-key';
         if (key === 'KN_STREAMS_SECRET_ACCESS_KEY') return 'fake-secret-key';
@@ -22,7 +21,7 @@ describe('AwsKinesisVideoService', () => {
         if (key === 'KN_STREAMS_SECRET_ACCESS_KEY') return 'fake-secret-key';
         return '';
       }),
-    };
+    } as unknown as jest.Mocked<Partial<ConfigService>>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -54,7 +53,12 @@ describe('AwsKinesisVideoService', () => {
     const mockSend = jest
       .fn()
       .mockResolvedValue({ ChannelARN: 'arn:from-aws' });
-    (service as any).kvsClient.send = mockSend;
+
+    (
+      service as unknown as {
+        kvsClient: { send: jest.Mock };
+      }
+    ).kvsClient.send = mockSend;
 
     const arn = await service.createSignalingChannel('MiCanal');
 

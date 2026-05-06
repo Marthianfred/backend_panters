@@ -5,8 +5,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { RegisterClientService } from '@/features/auth/application/register-client.service';
-import * as subscriptionPlansInterface from '@/features/subscriptions/interfaces/subscription.plans.repository.interface';
-import * as userSubscriptionsInterface from '@/features/subscriptions/interfaces/user.subscriptions.repository.interface';
+import type { ISubscriptionPlansRepository } from '@/features/subscriptions/interfaces/subscription.plans.repository.interface';
+import { SUBSCRIPTION_PLANS_REPOSITORY } from '@/features/subscriptions/interfaces/subscription.plans.repository.interface';
+import type { IUserSubscriptionsRepository } from '@/features/subscriptions/interfaces/user.subscriptions.repository.interface';
+import { USER_SUBSCRIPTIONS_REPOSITORY } from '@/features/subscriptions/interfaces/user.subscriptions.repository.interface';
 import {
   PreRegistrationRequestDto,
   PreRegistrationResponseDto,
@@ -17,10 +19,10 @@ import { CreateCheckoutSessionUseCase } from '@/features/subscriptions/checkout/
 export class PreRegistrationUseCase {
   constructor(
     private readonly registerClientService: RegisterClientService,
-    @Inject(subscriptionPlansInterface.SUBSCRIPTION_PLANS_REPOSITORY)
-    private readonly plansRepository: subscriptionPlansInterface.ISubscriptionPlansRepository,
-    @Inject(userSubscriptionsInterface.USER_SUBSCRIPTIONS_REPOSITORY)
-    private readonly userSubscriptionsRepository: userSubscriptionsInterface.IUserSubscriptionsRepository,
+    @Inject(SUBSCRIPTION_PLANS_REPOSITORY)
+    private readonly plansRepository: ISubscriptionPlansRepository,
+    @Inject(USER_SUBSCRIPTIONS_REPOSITORY)
+    private readonly userSubscriptionsRepository: IUserSubscriptionsRepository,
     private readonly createCheckoutSessionUseCase: CreateCheckoutSessionUseCase,
   ) {}
 

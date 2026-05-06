@@ -12,6 +12,9 @@ describe('GetViewerAccessHandler', () => {
   };
   const mockKinesisVideoService = {
     generateViewerCredentials: jest.fn(),
+    getSignalingEndpoint: jest
+      .fn()
+      .mockResolvedValue('https://signaling.endpoint'),
   };
   const mockS3Service = {
     getPresignedThumbnailUrl: jest.fn(),
@@ -81,6 +84,8 @@ describe('GetViewerAccessHandler', () => {
       region: fakeMetadata.region,
       thumbnailUrl: fakeUrl,
       credentials: fakeCredentials,
+      iceServers: [],
+      signalingEndpoint: 'https://signaling.endpoint',
     });
     expect(mockS3Service.getPresignedThumbnailUrl).toHaveBeenCalledWith(
       'bucket-name',

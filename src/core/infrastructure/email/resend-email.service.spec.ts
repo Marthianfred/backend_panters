@@ -7,7 +7,6 @@ jest.mock('resend');
 
 describe('ResendEmailService', () => {
   let service: ResendEmailService;
-  let configService: ConfigService;
   let resendMock: jest.Mocked<Resend>;
 
   beforeEach(async () => {
@@ -27,14 +26,14 @@ describe('ResendEmailService', () => {
     }).compile();
 
     service = module.get<ResendEmailService>(ResendEmailService);
-    configService = module.get<ConfigService>(ConfigService);
 
     resendMock = {
       emails: {
         send: jest.fn(),
       },
-    } as any;
-    (service as any).resend = resendMock;
+    } as unknown as jest.Mocked<Resend>;
+
+    (service as unknown as { resend: unknown }).resend = resendMock;
   });
 
   it('should be defined', () => {

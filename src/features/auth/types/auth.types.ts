@@ -26,8 +26,8 @@ export interface Session {
 }
 
 export interface AuthenticatedRequest extends Request {
-  user: AuthenticatedUser;
-  session: Session;
+  user: AuthenticatedUser | null;
+  session: Session | null;
 }
 
 export interface BetterAuthInstance {
@@ -36,7 +36,11 @@ export interface BetterAuthInstance {
       user: AuthenticatedUser;
       session: Session;
     } | null>;
-    signUpEmail: (options: Record<string, unknown>) => Promise<unknown>;
+    signUpEmail: (options: Record<string, unknown>) => Promise<{
+      user: AuthenticatedUser;
+      session: Session;
+    } | null>;
+    verifyEmail: (options: Record<string, unknown>) => Promise<boolean>;
   };
   handler: (request: Request) => Promise<Response>;
   database?: unknown;

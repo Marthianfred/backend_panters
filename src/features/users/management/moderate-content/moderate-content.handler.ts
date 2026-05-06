@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PostgresUsersManagementRepository } from '../infrastructure/postgres.users-management.repository';
 import { ModerateContentRequest } from './moderate-content.models';
 

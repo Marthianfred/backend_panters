@@ -66,7 +66,9 @@ export class LiveChatService {
   ): Promise<string> {
     try {
       const sessionResponse = await this.authService.instance.api.getSession({
-        headers: fromNodeHeaders(client.handshake.headers as any),
+        headers: fromNodeHeaders(
+          client.handshake.headers as unknown as Record<string, string>,
+        ),
       });
 
       if (sessionResponse?.user) {
@@ -92,10 +94,12 @@ export class LiveChatService {
           return userDetails.name || providedUsername || 'Usuario';
         }
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
       console.warn(
         '[LiveChatService] Error al recuperar identidad del usuario:',
-        error.message,
+        message,
       );
     }
 

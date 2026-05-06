@@ -22,15 +22,15 @@ export class GetTransactionHistoryController {
     @Res() res: Response,
   ): Promise<void> {
     try {
-      const userId = req.user.id;
-      const page = parseInt(req.query.page as string, 10) || 1;
-
-      if (!userId) {
+      if (!req.user) {
         res
           .status(HttpStatus.UNAUTHORIZED)
           .json({ error: 'Usuario no autenticado.' });
         return;
       }
+
+      const userId = req.user.id;
+      const page = parseInt(req.query.page as string, 10) || 1;
 
       const response = await this.handler.execute({ userId, page });
 

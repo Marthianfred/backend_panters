@@ -1,16 +1,19 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GetProfileHandler } from './get-profile.handler';
-import { PROFILE_REPOSITORY } from './interfaces/profile.repository.interface';
+import {
+  IProfileRepository,
+  PROFILE_REPOSITORY,
+} from './interfaces/profile.repository.interface';
 import { ProfileNotFoundError } from './get-profile.models';
 
 describe('GetProfileHandler', () => {
   let handler: GetProfileHandler;
-  let mockRepository: any;
+  let mockRepository: jest.Mocked<IProfileRepository>;
 
   beforeEach(async () => {
     mockRepository = {
       getProfileByUserId: jest.fn(),
-    };
+    } as unknown as jest.Mocked<IProfileRepository>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -30,9 +33,12 @@ describe('GetProfileHandler', () => {
       fullName: 'Panter User',
       avatarUrl: 'https://avatar.com/123',
       bio: 'Bio text',
+      username: 'panteruser',
     };
 
-    mockRepository.getProfileByUserId.mockResolvedValue(mockProfileData);
+    (mockRepository.getProfileByUserId as jest.Mock).mockResolvedValue(
+      mockProfileData,
+    );
 
     const result = await handler.execute({ userId });
 
@@ -48,7 +54,7 @@ describe('GetProfileHandler', () => {
 
   it('debe lanzar ProfileNotFoundError si el perfil no existe', async () => {
     const userId = 'user-456';
-    mockRepository.getProfileByUserId.mockResolvedValue(null);
+    (mockRepository.getProfileByUserId as jest.Mock).mockResolvedValue(null);
 
     await expect(handler.execute({ userId })).rejects.toThrow(
       ProfileNotFoundError,

@@ -4,7 +4,7 @@ export class Notification {
     public readonly userId: string,
     public readonly title: string,
     public readonly body: string,
-    public readonly data: any | undefined,
+    public readonly data: Record<string, unknown> | undefined,
     public readonly isRead: boolean,
     public readonly createdAt?: Date,
   ) {}
@@ -13,7 +13,7 @@ export class Notification {
     userId: string;
     title: string;
     body: string;
-    data?: any;
+    data?: Record<string, unknown>;
   }): Notification {
     return new Notification(
       undefined,

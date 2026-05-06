@@ -1,4 +1,10 @@
-import { Controller, Get, Request, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Request,
+  UseGuards,
+  BadRequestException,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -8,6 +14,7 @@ import {
 import { GetMySubscriptionUseCase } from '../application/get-my-subscription.use-case';
 import { MySubscriptionResponseDto } from '../domain/my-subscription.dto';
 import { AuthGuard } from '@/features/auth/guards/auth.guard';
+import type { AuthenticatedRequest } from '@/features/auth/types/auth.types';
 
 @ApiTags('Subscriptions')
 @ApiBearerAuth()
@@ -32,8 +39,11 @@ export class GetMySubscriptionController {
     description: 'No se encontró suscripción activa',
   })
   async getMySubscription(
-    @Request() req: any,
-  ): Promise<MySubscriptionResponseDto> {
+    @Request() req: AuthenticatedRequest,
+  ): Promise<MySubscriptionResponseDto | null> {
+    if (!req.user) {
+      throw new BadRequestException('Usuario no autenticado');
+    }
     const userId = req.user.id;
     return this.getMySubscriptionUseCase.execute(userId);
   }

@@ -52,11 +52,9 @@ export class AwsKinesisWallReactionPublisher implements IPostReactionEventPublis
       });
 
       await this.kinesisClient.send(command);
-    } catch (error) {
-      console.error(
-        '[Kinesis/Wall] Fallo la publicación de pantera:',
-        error.message,
-      );
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('[Kinesis/Wall] Fallo la publicación de pantera:', message);
     }
   }
 }

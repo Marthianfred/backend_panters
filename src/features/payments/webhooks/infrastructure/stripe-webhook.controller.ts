@@ -47,12 +47,13 @@ export class StripeWebhookController {
       await this.handleWebhookUseCase.execute(event);
 
       return { received: true, eventId: event.id };
-    } catch (err) {
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
       this.logger.error(
-        `Fallo crítico en el procesamiento del webhook: ${err.message}`,
+        `Fallo crítico en el procesamiento del webhook: ${message}`,
       );
 
-      throw new BadRequestException(`Webhook Error: ${err.message}`);
+      throw new BadRequestException(`Webhook Error: ${message}`);
     }
   }
 }

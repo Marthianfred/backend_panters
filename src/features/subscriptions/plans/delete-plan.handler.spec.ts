@@ -1,17 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { DeletePlanHandler } from './delete-plan.handler';
-import { SUBSCRIPTION_PLANS_REPOSITORY } from '../interfaces/subscription.plans.repository.interface';
+import {
+  ISubscriptionPlansRepository,
+  SUBSCRIPTION_PLANS_REPOSITORY,
+} from '../interfaces/subscription.plans.repository.interface';
 import { NotFoundException } from '@nestjs/common';
+import { SubscriptionPlanDto } from '../plans.models';
 
 describe('DeletePlanHandler', () => {
   let handler: DeletePlanHandler;
-  let repository: any;
+  let repository: jest.Mocked<ISubscriptionPlansRepository>;
 
   beforeEach(async () => {
     repository = {
       findById: jest.fn(),
       delete: jest.fn(),
-    };
+    } as unknown as jest.Mocked<ISubscriptionPlansRepository>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -26,14 +30,20 @@ describe('DeletePlanHandler', () => {
   describe('execute', () => {
     it('debe desactivar el plan si existe correctamente', async () => {
       const planId = 'fa6662ae-6d48-490b-8074-fab0b2e1aa64';
-      const mockPlan = {
+      const mockPlan: SubscriptionPlanDto = {
         id: planId,
         name: 'VIP SEMESTRAL',
         isActive: true,
+        priceUsd: 100,
+        durationDays: 180,
+        stripePriceId: 'price_123',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        benefits: [],
       };
 
-      repository.findById.mockResolvedValue(mockPlan);
-      repository.delete.mockResolvedValue(undefined);
+      (repository.findById as jest.Mock).mockResolvedValue(mockPlan);
+      (repository.delete as jest.Mock).mockResolvedValue(undefined);
 
       await handler.execute(planId);
 
@@ -43,7 +53,7 @@ describe('DeletePlanHandler', () => {
 
     it('debe lanzar NotFoundException si el plan no existe', async () => {
       const planId = 'non-existent-id';
-      repository.findById.mockResolvedValue(null);
+      (repository.findById as jest.Mock).mockResolvedValue(null);
 
       await expect(handler.execute(planId)).rejects.toThrow(NotFoundException);
       expect(repository.delete).not.toHaveBeenCalled();

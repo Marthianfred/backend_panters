@@ -26,6 +26,8 @@ import { ReportsModule } from '@/features/reports/reports.module';
 
 import { ScheduleModule } from '@nestjs/schedule';
 
+import { ModelVerificationModule } from '@/features/admin/model-verification/model-verification.module';
+
 @Module({
   imports: [
     ScheduleModule.forRoot(),
@@ -57,6 +59,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     NotificationsModule,
     PtcPackagesManagementModule,
     SubscriptionPlansManagementModule,
+    ModelVerificationModule,
     ReportsModule,
   ],
 })

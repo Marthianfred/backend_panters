@@ -83,7 +83,8 @@
     "moduleFileExtensions": [
       "js",
       "json",
-      "ts"
+      "ts",
+      "mjs"
     ],
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
@@ -91,7 +92,7 @@
       "^.+\\.(t|j)s$": "ts-jest"
     },
     "transformIgnorePatterns": [
-      "/node_modules/(?!(\\.pnpm/)?(better-auth|better-call))"
+      "/node_modules/(?!(\\.pnpm/)?(better-auth|better-call|better-call/node))"
     ],
     "collectCoverageFrom": [
       "**/*.(t|j)s"
@@ -99,7 +100,8 @@
     "coverageDirectory": "../coverage",
     "testEnvironment": "node",
     "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/$1"
+      "^@/(.*)$": "<rootDir>/$1",
+      "^better-auth/node$": "<rootDir>/__mocks__/better-auth-node.ts"
     }
   },
   "lint-staged": {

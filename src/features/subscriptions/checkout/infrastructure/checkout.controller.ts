@@ -1,5 +1,5 @@
-import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, Post, Body } from '@nestjs/common';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import * as createCheckoutSessionUseCase_1 from '../application/create-checkout-session.use-case';
 
 @ApiTags('Subscriptions Checkout')

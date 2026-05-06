@@ -33,7 +33,7 @@ export class PostgresPanterRatingRepository implements IPanterRatingRepository {
       RETURNING id, creator_id as "creatorId", subscriber_id as "subscriberId", rating, comment, created_at as "createdAt";
     `;
 
-    const result = await this.pool.query(query, [
+    const result = await this.pool.query<RatePanterResponse>(query, [
       data.creatorId,
       subscriberId,
       data.rating,
@@ -55,7 +55,10 @@ export class PostgresPanterRatingRepository implements IPanterRatingRepository {
       GROUP BY creator_id;
     `;
 
-    const result = await this.pool.query(query, [creatorId]);
+    const result = await this.pool.query<GetPanterRatingSummaryResponse>(
+      query,
+      [creatorId],
+    );
 
     if (result.rows.length === 0) {
       return {

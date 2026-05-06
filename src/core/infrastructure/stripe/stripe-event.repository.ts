@@ -6,7 +6,7 @@ export interface StripeEventRecord {
   id: string;
   type: string;
   status: 'processing' | 'completed' | 'failed';
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -28,14 +28,14 @@ export class StripeEventRepository {
       FROM stripe_processed_events
       WHERE id = $1;
     `;
-    const result = await this.pool.query(query, [id]);
+    const result = await this.pool.query<StripeEventRecord>(query, [id]);
     return result.rows[0] || null;
   }
 
   async recordProcessing(
     id: string,
     type: string,
-    metadata?: any,
+    metadata?: Record<string, unknown>,
   ): Promise<void> {
     const query = `
       INSERT INTO stripe_processed_events (id, type, status, metadata)

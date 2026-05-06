@@ -10,6 +10,7 @@ import {
   ContentNotFoundError,
   InsufficientCoinsError,
 } from '../purchase-content.models';
+import { CONTENT_STORAGE_SERVICE } from '../../upload-content/interfaces/content-storage.service.interface';
 
 describe('PurchaseContent (Integration)', () => {
   let handler: PurchaseContentHandler;
@@ -33,6 +34,14 @@ describe('PurchaseContent (Integration)', () => {
           provide: P2P_TRANSACTION_SERVICE_TOKEN,
           useClass: PostgresP2PTransactionService,
         },
+        {
+          provide: CONTENT_STORAGE_SERVICE,
+          useValue: {
+            getPresignedDownloadUrl: jest
+              .fn()
+              .mockResolvedValue('http://signed.url'),
+          },
+        },
       ],
     }).compile();
 
@@ -43,7 +52,9 @@ describe('PurchaseContent (Integration)', () => {
       connectionString: configService.getOrThrow<string>('DATABASE_URL'),
     });
 
-    await cleanup();
+    if (pool) {
+      await cleanup();
+    }
   });
 
   afterAll(async () => {
@@ -52,6 +63,7 @@ describe('PurchaseContent (Integration)', () => {
   });
 
   async function cleanup() {
+    if (!pool) return;
     await pool.query(
       'DELETE FROM content_purchases WHERE user_id = $1 OR user_id = $2',
       [TEST_SUBSCRIBER_ID, TEST_CREATOR_ID],

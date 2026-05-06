@@ -20,10 +20,15 @@ export class ResendEmailService implements EmailService {
       'Panters <noreply@pantersdigital.com>';
   }
 
-  async send(options: SendEmailOptions): Promise<{ data: any; error: any }> {
+  async send(
+    options: SendEmailOptions,
+  ): Promise<{ data: unknown; error: unknown }> {
     try {
+      const recipient = Array.isArray(options.to)
+        ? options.to.join(', ')
+        : options.to;
       this.logger.log(
-        `Enviando correo a: ${options.to} - Asunto: ${options.subject}`,
+        `Enviando correo a: ${recipient} - Asunto: ${options.subject}`,
       );
 
       const { data, error } = await this.resend.emails.send({
@@ -39,7 +44,7 @@ export class ResendEmailService implements EmailService {
       }
 
       return { data, error };
-    } catch (err) {
+    } catch (err: unknown) {
       this.logger.error('Error inesperado al enviar correo:', err);
       return { data: null, error: err };
     }

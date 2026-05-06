@@ -8,9 +8,16 @@ import type {
 } from '../types/auth.types';
 import { AuthGuard } from '../guards/auth.guard';
 
+import { RegisterModelUseCase } from '../application/use-cases/register-model/register-model.use-case';
+import { RegisterModelRequest } from '../application/use-cases/register-model/register-model.dto';
+import { Post, Body } from '@nestjs/common';
+
 @Controller('api/auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly registerModelUseCase: RegisterModelUseCase,
+  ) {}
 
   @Get('me')
   @UseGuards(AuthGuard)
@@ -19,6 +26,11 @@ export class AuthController {
       authenticated: true,
       user,
     };
+  }
+
+  @Post('register-model')
+  async registerModel(@Body() data: RegisterModelRequest) {
+    return this.registerModelUseCase.execute(data);
   }
 
   @All('*path')

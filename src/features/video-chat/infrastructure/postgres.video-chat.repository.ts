@@ -25,7 +25,7 @@ export class PostgresVideoChatRepository implements IVideoChatRepository {
       RETURNING id, creator_id as "creatorId", user_id as "userId", schedule_time as "scheduleTime",
                 duration_minutes as "durationMinutes", price_coins as "priceCoins", status, stream_id as "streamId";
     `;
-    const result = await this.pool.query(query, [
+    const result = await this.pool.query<VideoCallSession>(query, [
       session.creatorId,
       session.userId,
       session.scheduleTime || new Date(),
@@ -45,7 +45,7 @@ export class PostgresVideoChatRepository implements IVideoChatRepository {
       LEFT JOIN antigravity_streams s ON v.stream_id = s.id
       WHERE v.id = $1;
     `;
-    const result = await this.pool.query(query, [id]);
+    const result = await this.pool.query<VideoCallSession>(query, [id]);
     return result.rows[0] || null;
   }
 
@@ -57,7 +57,7 @@ export class PostgresVideoChatRepository implements IVideoChatRepository {
       WHERE user_id = $1 OR creator_id = $1
       ORDER BY schedule_time DESC;
     `;
-    const result = await this.pool.query(query, [userId]);
+    const result = await this.pool.query<VideoCallSession>(query, [userId]);
     return result.rows;
   }
 
@@ -70,11 +70,7 @@ export class PostgresVideoChatRepository implements IVideoChatRepository {
     await this.pool.query(query, [status, id]);
   }
 
-  async updateSessionStream(
-    id: string,
-    streamId: string,
-    channelArn: string,
-  ): Promise<void> {
+  async updateSessionStream(id: string, streamId: string): Promise<void> {
     const query =
       'UPDATE video_call_sessions SET stream_id = $1, updated_at = NOW() WHERE id = $2;';
     await this.pool.query(query, [streamId, id]);
@@ -104,7 +100,10 @@ export class PostgresVideoChatRepository implements IVideoChatRepository {
         WHERE user_id = $2 AND panter_coin_balance >= $1
         RETURNING id as wallet_id, panter_coin_balance;
       `;
-      const walletRes = await client.query(walletQuery, [amount, userId]);
+      const walletRes = await client.query<{
+        wallet_id: string;
+        panter_coin_balance: string;
+      }>(walletQuery, [amount, userId]);
 
       if (walletRes.rowCount === 0) {
         await client.query('ROLLBACK');
@@ -139,12 +138,10 @@ export class PostgresVideoChatRepository implements IVideoChatRepository {
         VALUES ($1, 'debit', $2, $3, $4, CURRENT_TIMESTAMP)
         RETURNING id as transaction_id;
       `;
-      const transRes = await client.query(transQuery, [
-        walletId,
-        amount,
-        description,
-        `vc_${Date.now()}`,
-      ]);
+      const transRes = await client.query<{ transaction_id: string }>(
+        transQuery,
+        [walletId, amount, description, `vc_${Date.now()}`],
+      );
 
       await client.query('COMMIT');
 

@@ -8,8 +8,12 @@ import type { IHomeVideoStorageService } from '../interfaces/home-video-storage.
 import {
   UnsupportedMimeTypeError,
   UploadProgressData,
+  RegisterUploadDto,
 } from './upload-video.models';
-import type { HomeVideoUploadResponse } from './upload-video.models';
+import type {
+  HomeVideoUploadResponse,
+  HomeVideoUploadUrlResponse,
+} from './upload-video.models';
 import type { HomeVideo } from '../home-video.entity';
 
 @Injectable()
@@ -42,7 +46,7 @@ export class UploadHomeVideoHandler {
   public async generateUploadUrl(
     clientId: string,
     mimeType: string,
-  ): Promise<any> {
+  ): Promise<HomeVideoUploadUrlResponse> {
     const id = crypto.randomUUID();
     const extension = mimeType === 'video/webm' ? '.webm' : '.mp4';
     const key = `VideosLoopHome/${id}${extension}`;
@@ -62,7 +66,7 @@ export class UploadHomeVideoHandler {
   }
 
   public async registerUpload(
-    dto: any,
+    dto: RegisterUploadDto,
     clientId: string,
   ): Promise<HomeVideoUploadResponse> {
     this.emitStatus(clientId, {
@@ -72,7 +76,9 @@ export class UploadHomeVideoHandler {
     });
 
     try {
-      const id = dto.key.split('/').pop().split('.')[0];
+      const parts = dto.key.split('/');
+      const filename = parts[parts.length - 1];
+      const id = filename.split('.')[0];
 
       const baseUrl =
         process.env.AWS_URL ||
@@ -103,11 +109,12 @@ export class UploadHomeVideoHandler {
       this.statusStreams.delete(clientId);
 
       return response;
-    } catch (error) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
       this.emitStatus(clientId, {
         status: 'error',
         progress: 0,
-        message: `Error al registrar: ${error.message}`,
+        message: `Error al registrar: ${message}`,
       });
       this.statusStreams.get(clientId)?.complete();
       this.statusStreams.delete(clientId);
@@ -188,12 +195,13 @@ export class UploadHomeVideoHandler {
       }
 
       return response;
-    } catch (error) {
+    } catch (error: unknown) {
       if (clientId) {
+        const message = error instanceof Error ? error.message : String(error);
         this.emitStatus(clientId, {
           status: 'error',
           progress: 0,
-          message: `Error en la subida: ${error.message}`,
+          message: `Error en la subida: ${message}`,
         });
         this.statusStreams.get(clientId)?.complete();
         this.statusStreams.delete(clientId);

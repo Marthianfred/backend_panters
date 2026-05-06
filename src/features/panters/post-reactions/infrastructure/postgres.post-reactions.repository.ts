@@ -3,6 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 import { IPostReactionRepository } from '../interfaces/post-reactions.repository.interface';
 
+interface OwnerRow {
+  creator_id: string;
+}
+
+interface CountRow {
+  total: number;
+}
+
 @Injectable()
 export class PostgresPostReactionRepository implements IPostReactionRepository {
   private readonly pool: Pool;
@@ -21,7 +29,7 @@ export class PostgresPostReactionRepository implements IPostReactionRepository {
 
   async getPostOwnerId(postId: string): Promise<string | null> {
     const query = `SELECT creator_id FROM public.content_items WHERE id = $1;`;
-    const result = await this.pool.query(query, [postId]);
+    const result = await this.pool.query<OwnerRow>(query, [postId]);
     return result.rows[0]?.creator_id || null;
   }
 
@@ -38,7 +46,7 @@ export class PostgresPostReactionRepository implements IPostReactionRepository {
       FROM public.post_reactions 
       WHERE post_id = $1;
     `;
-    const result = await this.pool.query(countQuery, [postId]);
-    return result.rows[0].total;
+    const result = await this.pool.query<CountRow>(countQuery, [postId]);
+    return result.rows[0]?.total ?? 0;
   }
 }

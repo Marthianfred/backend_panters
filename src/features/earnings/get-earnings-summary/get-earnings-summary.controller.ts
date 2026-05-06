@@ -5,6 +5,7 @@ import {
   Req,
   HttpStatus,
   Res,
+  BadRequestException,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { GetEarningsSummaryHandler } from './get-earnings-summary.handler';
@@ -26,10 +27,11 @@ export class GetEarningsSummaryController {
     @Res() res: Response,
   ): Promise<void> {
     try {
+      if (!req.user) throw new BadRequestException('Usuario no autenticado');
       const creatorId = req.user.id;
       const response = await this.handler.execute(creatorId);
       res.status(HttpStatus.OK).json(response);
-    } catch (error) {
+    } catch {
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
         error: 'Error consultando el resumen de ingresos.',
       });

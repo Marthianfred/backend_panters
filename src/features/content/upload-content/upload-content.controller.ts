@@ -1,7 +1,6 @@
 import {
   Controller,
   Post,
-  Get,
   Body,
   UseGuards,
   Req,
@@ -39,18 +38,18 @@ export class UploadContentController {
 
   @Post('confirm/:contentId')
   @Roles(Role.MODEL, Role.ADMIN)
-  public async confirmUpload(
+  public confirmUpload(
     @Param('contentId') contentId: string,
     @Query('clientId') clientId: string,
     @Res() res: Response,
-  ): Promise<void> {
+  ): void {
     if (!clientId) {
       res
         .status(HttpStatus.BAD_REQUEST)
         .json({ error: 'clientId es requerido para confirmar.' });
       return;
     }
-    await this.handler.confirmUpload(contentId, clientId);
+    this.handler.confirmUpload(contentId, clientId);
     res.status(HttpStatus.OK).json({ success: true });
   }
 
@@ -72,14 +71,14 @@ export class UploadContentController {
     @Res() res: Response,
   ): Promise<void> {
     try {
-      const creatorId = req.user.id;
-
-      if (!creatorId) {
+      if (!req.user) {
         res
           .status(HttpStatus.UNAUTHORIZED)
           .json({ error: 'Usuario no autenticado.' });
         return;
       }
+
+      const creatorId = req.user.id;
 
       const response = await this.handler.execute({
         creatorId: creatorId,
@@ -94,7 +93,7 @@ export class UploadContentController {
       });
 
       res.status(HttpStatus.CREATED).json(response);
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof InvalidPriceError) {
         res.status(HttpStatus.BAD_REQUEST).json({ error: error.message });
         return;
@@ -104,8 +103,12 @@ export class UploadContentController {
         return;
       }
       console.error('[UploadContentController] Error:', error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Ocurrió un error subiendo metadatos';
       res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        error: error.message || 'Ocurrió un error subiendo metadatos',
+        error: message,
       });
     }
   }

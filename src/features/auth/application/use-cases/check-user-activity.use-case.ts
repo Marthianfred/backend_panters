@@ -11,7 +11,9 @@ export class CheckUserActivityUseCase {
 
   async execute(userId: string): Promise<boolean> {
     const query = 'SELECT is_active FROM "user" WHERE id = $1';
-    const result = await this.pool.query(query, [userId]);
+    const result = await this.pool.query<{ is_active: boolean }>(query, [
+      userId,
+    ]);
 
     if (result.rows.length === 0) {
       return false;

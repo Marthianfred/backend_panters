@@ -51,7 +51,8 @@ export class JoinPrivateChatHandler {
     }
 
     const otherUserId = isCreator ? session.userId : session.creatorId;
-    const otherUserDetails = await this.usersRepository.getUserDetails(otherUserId);
+    const otherUserDetails =
+      await this.usersRepository.getUserDetails(otherUserId);
 
     const role = isCreator ? 'MASTER' : 'VIEWER';
 
@@ -81,9 +82,12 @@ export class JoinPrivateChatHandler {
       durationMinutes: session.durationMinutes,
       counterpart: {
         id: otherUserDetails?.id || otherUserId,
-        name: otherUserDetails?.displayUsername || otherUserDetails?.name || 'Usuario',
+        name:
+          otherUserDetails?.displayUsername ||
+          otherUserDetails?.name ||
+          'Usuario',
         avatarUrl: otherUserDetails?.profile?.avatarUrl || null,
-      }
+      },
     };
   }
 }

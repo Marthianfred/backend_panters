@@ -86,10 +86,11 @@ export class MinioContentStorageService implements IContentStorageService {
     });
     try {
       await this.s3Client.send(command);
-    } catch (error) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
       console.warn(
         `[StorageService] No se pudo borrar el archivo en S3 (quizás no existe): ${key}`,
-        error.message,
+        message,
       );
     }
   }

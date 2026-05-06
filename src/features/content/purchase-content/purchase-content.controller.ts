@@ -32,14 +32,14 @@ export class PurchaseContentController {
     @Res() res: Response,
   ): Promise<void> {
     try {
-      const subscriberId = req.user.id;
-
-      if (!subscriberId) {
+      if (!req.user) {
         res
           .status(HttpStatus.UNAUTHORIZED)
           .json({ error: 'Usuario no autenticado.' });
         return;
       }
+
+      const subscriberId = req.user.id;
 
       const response = await this.handler.execute({
         subscriberId: subscriberId,

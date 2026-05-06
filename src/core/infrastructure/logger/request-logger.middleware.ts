@@ -9,7 +9,7 @@ export class RequestLoggerMiddleware implements NestMiddleware {
     if (process.env.NODE_ENV === 'development') {
       const { method, originalUrl, headers } = req;
 
-      const body = req.body;
+      const body = req.body as Record<string, unknown>;
       const userAgent = (headers['user-agent'] as string) || '';
       const startTime = Date.now();
 
@@ -25,10 +25,9 @@ export class RequestLoggerMiddleware implements NestMiddleware {
       const originalSend = res.send;
       let responseBody: unknown;
 
-      res.send = function (...args: [unknown]): Response {
-        responseBody = args[0];
-
-        return originalSend.apply(this, args as any);
+      res.send = function (chunk: unknown): Response {
+        responseBody = chunk;
+        return originalSend.apply(this, [chunk]) as Response;
       };
 
       res.on('finish', () => {
@@ -43,17 +42,14 @@ export class RequestLoggerMiddleware implements NestMiddleware {
           try {
             const bodyToFormat =
               typeof responseBody === 'string'
-                ? JSON.parse(responseBody)
+                ? (JSON.parse(responseBody) as Record<string, unknown>)
                 : responseBody;
 
             this.logger.debug(
               `[Response Payload] ${JSON.stringify(bodyToFormat, null, 2)}`,
             );
           } catch {
-            const rawOutput =
-              typeof responseBody === 'object' && responseBody !== null
-                ? JSON.stringify(responseBody)
-                : String(responseBody);
+            const rawOutput = JSON.stringify(responseBody);
 
             this.logger.debug(`[Response Payload (Raw)] ${rawOutput}`);
           }

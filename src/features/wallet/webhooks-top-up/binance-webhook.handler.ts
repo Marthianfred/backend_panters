@@ -19,7 +19,7 @@ export class BinanceWebhookHandler {
   ) {}
 
   public async execute(
-    payload: Buffer | string | Record<string, any>,
+    payload: Buffer | string | Record<string, unknown>,
     signature: string,
   ): Promise<WebhookResponse> {
     const isValid = this.signatureValidator.validateSignature(
@@ -37,9 +37,11 @@ export class BinanceWebhookHandler {
         ? (JSON.parse(payload.toString('utf-8')) as BinanceWebhookPayload)
         : typeof payload === 'string'
           ? (JSON.parse(payload) as BinanceWebhookPayload)
-          : (payload as BinanceWebhookPayload);
-    } catch (e) {
-      throw new Error('Invalid JSON payload');
+          : (payload as unknown as BinanceWebhookPayload);
+    } catch (error: unknown) {
+      throw new Error(
+        `Invalid JSON payload: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
 
     if (data.bizStatus === 'PAY_SUCCESS' && data.metadata) {

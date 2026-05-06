@@ -80,9 +80,11 @@ export class HandleStripeWebhookUseCase {
         externalId,
       );
       this.logger.log(`Suscripción ${subscriptionId} activada con éxito.`);
-    } catch (error) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
       this.logger.error(
-        `Error activando suscripción ${subscriptionId}: ${error.message}`,
+        `Error activando suscripción ${subscriptionId}: ${message}`,
       );
       throw new BadRequestException(
         'Error al procesar la activación de la suscripción.',
@@ -132,9 +134,11 @@ export class HandleStripeWebhookUseCase {
       this.logger.log(
         `Suscripción ${subscriptionId} renovada exitosamente hasta ${newEndsAt.toISOString()}`,
       );
-    } catch (error) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
       this.logger.error(
-        `Error al actualizar el periodo de renovación para ${subscriptionId}: ${error.message}`,
+        `Error al actualizar el periodo de renovación para ${subscriptionId}: ${message}`,
       );
       throw new BadRequestException(
         'Error al procesar la renovación en la base de datos.',
@@ -178,9 +182,11 @@ export class HandleStripeWebhookUseCase {
       this.logger.log(
         `Suscripción ${subscriptionId} mejorada con éxito al plan ${plan.name} hasta ${newEndsAt.toISOString()}`,
       );
-    } catch (error) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
       this.logger.error(
-        `Error al procesar el upgrade para ${subscriptionId}: ${error.message}`,
+        `Error al procesar el upgrade para ${subscriptionId}: ${message}`,
       );
       throw new BadRequestException(
         'Error al actualizar el plan en la base de datos.',
@@ -189,7 +195,9 @@ export class HandleStripeWebhookUseCase {
   }
 
   private async handleInvoicePaid(invoice: Stripe.Invoice): Promise<void> {
-    const externalSubscriptionId = (invoice as any).subscription as string;
+    const externalSubscriptionId = (
+      invoice as unknown as { subscription: string }
+    ).subscription;
 
     if (!externalSubscriptionId) {
       this.logger.warn(
@@ -224,9 +232,11 @@ export class HandleStripeWebhookUseCase {
         periodEnd,
       );
       this.logger.log(`Suscripción ${subscription.id} renovada con éxito.`);
-    } catch (error) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
       this.logger.error(
-        `Error renovando suscripción ${subscription.id}: ${error.message}`,
+        `Error renovando suscripción ${subscription.id}: ${message}`,
       );
       throw new BadRequestException(
         'Error al procesar la renovación de la suscripción.',
@@ -259,9 +269,11 @@ export class HandleStripeWebhookUseCase {
         'cancelled',
       );
       this.logger.log(`Suscripción ${subscription.id} marcada como cancelada.`);
-    } catch (error) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
       this.logger.error(
-        `Error cancelando suscripción ${subscription.id}: ${error.message}`,
+        `Error cancelando suscripción ${subscription.id}: ${message}`,
       );
     }
   }

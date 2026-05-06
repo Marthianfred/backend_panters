@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import type { NotificationRepository } from '../../domain/notification.repository';
 import { Notification } from '../../domain/notification.entity';
 import { NotificationOrmEntity } from './notification.orm-entity';
@@ -17,7 +17,7 @@ export class TypeOrmNotificationRepository implements NotificationRepository {
       userId: notification.userId,
       title: notification.title,
       body: notification.body,
-      data: notification.data,
+      data: notification.data ?? null,
       isRead: notification.isRead,
     });
     await this.repository.save(ormEntity);
@@ -29,7 +29,7 @@ export class TypeOrmNotificationRepository implements NotificationRepository {
         userId: n.userId,
         title: n.title,
         body: n.body,
-        data: n.data,
+        data: n.data ?? null,
         isRead: n.isRead,
       }),
     );
@@ -40,7 +40,7 @@ export class TypeOrmNotificationRepository implements NotificationRepository {
     userId: string,
     onlyUnread: boolean,
   ): Promise<Notification[]> {
-    const where: any = { userId };
+    const where: FindOptionsWhere<NotificationOrmEntity> = { userId };
     if (onlyUnread) {
       where.isRead = false;
     }
@@ -57,7 +57,7 @@ export class TypeOrmNotificationRepository implements NotificationRepository {
           entity.userId,
           entity.title,
           entity.body,
-          entity.data,
+          (entity.data as Record<string, unknown>) ?? undefined,
           entity.isRead,
           entity.createdAt,
         ),

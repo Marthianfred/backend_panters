@@ -12,7 +12,7 @@ jest.mock('pg', () => {
 
 describe('PostgresCreatorsRankingsRepository', () => {
   let repository: PostgresCreatorsRankingsRepository;
-  let pool: any;
+  let pool: jest.Mocked<Pool>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({

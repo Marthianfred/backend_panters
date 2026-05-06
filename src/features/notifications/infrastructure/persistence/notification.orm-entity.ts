@@ -20,7 +20,7 @@ export class NotificationOrmEntity {
   body: string;
 
   @Column({ type: 'jsonb', nullable: true })
-  data: any;
+  data: Record<string, unknown> | null;
 
   @Column({ name: 'is_read', default: false })
   isRead: boolean;

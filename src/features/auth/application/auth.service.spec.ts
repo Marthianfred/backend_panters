@@ -1,18 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from '@/features/auth/application/auth.service';
 import { Request, Response } from 'express';
-import { BETTER_AUTH_TOKEN } from '../infrastructure/better-auth.provider';
+import { BETTER_AUTH_TOKEN } from '../infrastructure/auth.constants';
 import { toNodeHandler } from 'better-auth/node';
 
-jest.mock('better-auth/node', () => ({
-  toNodeHandler: jest
-    .fn()
-    .mockImplementation(() => jest.fn().mockResolvedValue(true)),
-}));
+// El mock de better-auth/node se maneja globalmente en src/__mocks__/better-auth-node.ts vía package.json moduleNameMapper
+import { mockHandler } from 'better-auth/node';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let mockAuthInstance: unknown;
+  let mockAuthInstance: Record<string, unknown>;
 
   beforeEach(async () => {
     mockAuthInstance = {};
@@ -36,10 +33,6 @@ describe('AuthService', () => {
 
   describe('handleAuthRequest', () => {
     it('debe llamar al handler de nodo con la instancia de auth', async () => {
-      const mockHandler = (
-        toNodeHandler as unknown as jest.Mock<jest.Mock<Promise<boolean>>>
-      )();
-
       const req = { url: '/api/auth/login' } as Request;
       const res = { send: jest.fn() } as unknown as Response;
 

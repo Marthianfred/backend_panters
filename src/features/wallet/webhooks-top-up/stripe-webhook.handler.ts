@@ -21,7 +21,7 @@ export class StripeWebhookHandler {
   ) {}
 
   public async execute(
-    payload: any,
+    payload: Buffer | string | Record<string, unknown>,
     signature: string,
   ): Promise<WebhookResponse> {
     if (signature !== 'VALIDATED_BY_DISPATCHER') {
@@ -34,11 +34,18 @@ export class StripeWebhookHandler {
       }
     }
 
-    const data: StripeWebhookPayload = Buffer.isBuffer(payload)
-      ? JSON.parse(payload.toString('utf-8'))
-      : typeof payload === 'string'
-        ? JSON.parse(payload)
-        : payload;
+    let data: StripeWebhookPayload;
+    try {
+      data = Buffer.isBuffer(payload)
+        ? (JSON.parse(payload.toString('utf-8')) as StripeWebhookPayload)
+        : typeof payload === 'string'
+          ? (JSON.parse(payload) as StripeWebhookPayload)
+          : (payload as unknown as StripeWebhookPayload);
+    } catch (error: unknown) {
+      throw new Error(
+        `Invalid JSON payload: ${error instanceof Error ? error.message : String(error)}`,
+      );
+    }
 
     if (
       data.type === 'checkout.session.completed' &&

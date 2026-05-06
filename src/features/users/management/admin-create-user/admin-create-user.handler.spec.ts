@@ -1,10 +1,15 @@
 import { AdminCreateUserHandler } from './admin-create-user.handler';
 import { UserRoleFlag } from './admin-create-user.models';
 import { PostgresUsersManagementRepository } from '../infrastructure/postgres.users-management.repository';
+import { BetterAuthInstance } from '../../../auth/types/auth.types';
 
 describe('AdminCreateUserHandler', () => {
   let handler: AdminCreateUserHandler;
-  let mockAuthInstance: any;
+  let mockAuthInstance: {
+    api: {
+      signUpEmail: jest.Mock;
+    };
+  };
   let mockRepository: jest.Mocked<PostgresUsersManagementRepository>;
 
   beforeEach(() => {
@@ -16,9 +21,12 @@ describe('AdminCreateUserHandler', () => {
     mockRepository = {
       updateUserRole: jest.fn(),
       setMustChangePassword: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<PostgresUsersManagementRepository>;
 
-    handler = new AdminCreateUserHandler(mockAuthInstance, mockRepository);
+    handler = new AdminCreateUserHandler(
+      mockAuthInstance as unknown as BetterAuthInstance,
+      mockRepository,
+    );
   });
 
   it('debe crear un usuario y marcar forzar cambio de contraseña', async () => {

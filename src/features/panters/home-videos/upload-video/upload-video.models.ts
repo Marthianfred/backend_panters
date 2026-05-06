@@ -20,7 +20,7 @@ export interface UploadProgressData {
   status: 'starting' | 'uploading_s3' | 'saving_db' | 'completed' | 'error';
   progress: number;
   message?: string;
-  data?: any;
+  data?: unknown;
 }
 
 export class UnsupportedMimeTypeError extends Error {

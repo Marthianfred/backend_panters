@@ -5,6 +5,7 @@ import { Response } from 'express';
 import { StreamNotFoundError } from './get-viewer-access.models';
 import { AuthenticatedRequest } from '../../auth/types/auth.types';
 import { AuthGuard } from '../../auth/guards/auth.guard';
+import { SubscriptionGuard } from '../../subscriptions/guards/subscription.guard';
 
 describe('GetViewerAccessController', () => {
   let controller: GetViewerAccessController;
@@ -18,6 +19,8 @@ describe('GetViewerAccessController', () => {
       providers: [{ provide: GetViewerAccessHandler, useValue: mockHandler }],
     })
       .overrideGuard(AuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(SubscriptionGuard)
       .useValue({ canActivate: () => true })
       .compile();
 

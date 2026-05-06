@@ -36,6 +36,32 @@ export interface UserManagementDetails {
   };
 }
 
+interface RawRoleRecord {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
+interface RawUserRecord {
+  id: string;
+  email: string;
+  name: string;
+  username: string | null;
+  displayUsername: string | null;
+  roleId: string | null;
+  roleName: string | null;
+  isActive: boolean;
+  mustChangePassword: boolean;
+  createdAt: Date;
+  fullName: string | null;
+  avatarUrl: string | null;
+  bio: string | null;
+  walletBalance: string | null;
+  totalEarned?: string | null;
+  netBalance?: string | null;
+  contentCount?: string | null;
+}
+
 @Injectable()
 export class PostgresUsersManagementRepository {
   private readonly pool: Pool;
@@ -47,7 +73,7 @@ export class PostgresUsersManagementRepository {
   }
 
   async listRoles(): Promise<RoleRecord[]> {
-    const result = await this.pool.query(
+    const result = await this.pool.query<RawRoleRecord>(
       'SELECT id, name, description FROM public.roles ORDER BY name ASC',
     );
     return result.rows.map((row) => ({
@@ -70,7 +96,7 @@ export class PostgresUsersManagementRepository {
   }
 
   async updateUserRole(userId: string, roleId: string): Promise<void> {
-    const roleRes = await this.pool.query(
+    const roleRes = await this.pool.query<Pick<RawRoleRecord, 'name'>>(
       'SELECT name FROM public.roles WHERE id = $1',
       [roleId],
     );
@@ -99,7 +125,7 @@ export class PostgresUsersManagementRepository {
       WHERE u.id = $1;
     `;
 
-    const result = await this.pool.query(userQuery, [userId]);
+    const result = await this.pool.query<RawUserRecord>(userQuery, [userId]);
     if (result.rows.length === 0) return null;
 
     const row = result.rows[0];
@@ -185,7 +211,7 @@ export class PostgresUsersManagementRepository {
   ): Promise<{ users: UserManagementDetails[]; total: number }> {
     const offset = (page - 1) * limit;
     let whereClause = '';
-    const params: any[] = [limit, offset];
+    const params: (string | number)[] = [limit, offset];
 
     if (search) {
       whereClause = 'WHERE u.email ILIKE $3 OR u.name ILIKE $3';
@@ -210,8 +236,11 @@ export class PostgresUsersManagementRepository {
     const countQuery = `SELECT COUNT(*) FROM public."user" u ${whereClause};`;
 
     const [usersRes, countRes] = await Promise.all([
-      this.pool.query(query, params),
-      this.pool.query(countQuery, search ? [`%${search}%`] : []),
+      this.pool.query<RawUserRecord>(query, params),
+      this.pool.query<{ count: string }>(
+        countQuery,
+        search ? [`%${search}%`] : [],
+      ),
     ]);
 
     const users = usersRes.rows.map((row) => ({

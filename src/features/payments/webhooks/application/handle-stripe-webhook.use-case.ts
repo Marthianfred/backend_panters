@@ -1,4 +1,4 @@
-import { Injectable, Logger, Inject } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import Stripe from 'stripe';
 import { StripeEventRepository } from '@/core/infrastructure/stripe/stripe-event.repository';
 import { HandleStripeWebhookUseCase as SubscriptionWebhookUseCase } from '@/features/subscriptions/webhooks/stripe/application/handle-stripe-webhook.use-case';
@@ -35,7 +35,8 @@ export class HandleUnifiedStripeWebhookUseCase {
     await this.stripeEventRepository.recordProcessing(
       eventId,
       event.type,
-      event.data.object['metadata'],
+      (event.data.object as { metadata?: Record<string, string> }).metadata ||
+        {},
     );
 
     try {
@@ -62,8 +63,9 @@ export class HandleUnifiedStripeWebhookUseCase {
 
       await this.stripeEventRepository.markAsCompleted(eventId);
       this.logger.log(`Evento ${eventId} procesado y marcado como completado.`);
-    } catch (error) {
-      this.logger.error(`Error procesando evento ${eventId}: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error procesando evento ${eventId}: ${message}`);
       await this.stripeEventRepository.markAsFailed(eventId);
       throw error;
     }
@@ -82,19 +84,34 @@ export class HandleUnifiedStripeWebhookUseCase {
       metadata.coinsAmount
     ) {
       this.logger.log('Delegando checkout a la vertical de Wallet...');
-      const event: any = {
+      const event: Stripe.Event = {
         id: originalEventId,
         type: 'checkout.session.completed',
         data: { object: session },
-      };
-      await this.walletWebhookHandler.execute(event, 'VALIDATED_BY_DISPATCHER');
+        api_version: null,
+        created: Math.floor(Date.now() / 1000),
+        livemode: false,
+        pending_webhooks: 0,
+        request: null,
+        object: 'event',
+      } as Stripe.Event;
+      await this.walletWebhookHandler.execute(
+        event as unknown as Record<string, unknown>,
+        'VALIDATED_BY_DISPATCHER',
+      );
     } else if (type === 'subscription' || metadata.subscriptionId) {
       this.logger.log('Delegando checkout a la vertical de Suscripciones...');
-      const event: any = {
+      const event: Stripe.Event = {
         id: originalEventId,
         type: 'checkout.session.completed',
         data: { object: session },
-      };
+        api_version: null,
+        created: Math.floor(Date.now() / 1000),
+        livemode: false,
+        pending_webhooks: 0,
+        request: null,
+        object: 'event',
+      } as Stripe.Event;
       await this.subscriptionWebhookUseCase.execute(event);
     } else {
       this.logger.warn(

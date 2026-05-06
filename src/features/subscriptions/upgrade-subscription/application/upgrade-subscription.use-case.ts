@@ -5,8 +5,10 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as userSubscriptionsRepositoryInterface from '@/features/subscriptions/interfaces/user.subscriptions.repository.interface';
-import * as subscriptionPlansRepositoryInterface from '@/features/subscriptions/interfaces/subscription.plans.repository.interface';
+import type { IUserSubscriptionsRepository } from '@/features/subscriptions/interfaces/user.subscriptions.repository.interface';
+import { USER_SUBSCRIPTIONS_REPOSITORY } from '@/features/subscriptions/interfaces/user.subscriptions.repository.interface';
+import type { ISubscriptionPlansRepository } from '@/features/subscriptions/interfaces/subscription.plans.repository.interface';
+import { SUBSCRIPTION_PLANS_REPOSITORY } from '@/features/subscriptions/interfaces/subscription.plans.repository.interface';
 import { StripeService } from '@/core/infrastructure/stripe/stripe.service';
 import { PostgresUsersManagementRepository } from '@/features/users/management/infrastructure/postgres.users-management.repository';
 import {
@@ -17,10 +19,10 @@ import {
 @Injectable()
 export class UpgradeSubscriptionUseCase {
   constructor(
-    @Inject(userSubscriptionsRepositoryInterface.USER_SUBSCRIPTIONS_REPOSITORY)
-    private readonly userSubscriptionsRepository: userSubscriptionsRepositoryInterface.IUserSubscriptionsRepository,
-    @Inject(subscriptionPlansRepositoryInterface.SUBSCRIPTION_PLANS_REPOSITORY)
-    private readonly plansRepository: subscriptionPlansRepositoryInterface.ISubscriptionPlansRepository,
+    @Inject(USER_SUBSCRIPTIONS_REPOSITORY)
+    private readonly userSubscriptionsRepository: IUserSubscriptionsRepository,
+    @Inject(SUBSCRIPTION_PLANS_REPOSITORY)
+    private readonly plansRepository: ISubscriptionPlansRepository,
     private readonly stripeService: StripeService,
     private readonly configService: ConfigService,
     private readonly usersRepository: PostgresUsersManagementRepository,
@@ -104,9 +106,11 @@ export class UpgradeSubscriptionUseCase {
         url: session.url,
         sessionId: session.id,
       };
-    } catch (error) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
       throw new BadRequestException(
-        `Error al generar la sesión de upgrade: ${error.message}`,
+        `Error al generar la sesión de upgrade: ${message}`,
       );
     }
   }

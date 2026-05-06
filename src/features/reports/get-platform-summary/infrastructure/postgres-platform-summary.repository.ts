@@ -3,6 +3,16 @@ import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
 import type { IPlatformSummaryRepository } from '../interfaces/platform-summary-repository.interface';
 
+interface CountRow {
+  count: string | number;
+}
+
+interface ModelRevenueRow {
+  creatorId: string;
+  creatorName: string;
+  totalEarnedPtc: string | number;
+}
+
 @Injectable()
 export class PostgresPlatformSummaryRepository implements IPlatformSummaryRepository {
   constructor(
@@ -16,13 +26,18 @@ export class PostgresPlatformSummaryRepository implements IPlatformSummaryReposi
       FROM user_subscriptions 
       WHERE status = 'active'
     `;
-    const result = await this.entityManager.query(query);
-    return parseInt(result[0].count);
+    const result = (await this.entityManager.query(
+      query,
+    )) as unknown as CountRow[];
+    const countValue = result[0].count;
+    return typeof countValue === 'string'
+      ? parseInt(countValue, 10)
+      : countValue;
   }
 
   async getNewUsersCount(startDate?: Date, endDate?: Date): Promise<number> {
     let query = `SELECT COUNT(*) as count FROM "user" WHERE 1=1`;
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (startDate) {
       query += ` AND "createdAt" >= $${params.length + 1}`;
@@ -33,8 +48,14 @@ export class PostgresPlatformSummaryRepository implements IPlatformSummaryReposi
       params.push(endDate);
     }
 
-    const result = await this.entityManager.query(query, params);
-    return parseInt(result[0].count);
+    const result = (await this.entityManager.query(
+      query,
+      params,
+    )) as unknown as CountRow[];
+    const countValue = result[0].count;
+    return typeof countValue === 'string'
+      ? parseInt(countValue, 10)
+      : countValue;
   }
 
   async getFinancialStatsPerModel(
@@ -47,7 +68,7 @@ export class PostgresPlatformSummaryRepository implements IPlatformSummaryReposi
       totalEarnedPtc: number;
     }>
   > {
-    const params: any[] = [];
+    const params: unknown[] = [];
     let dateFilter = '';
 
     if (startDate) {
@@ -61,7 +82,6 @@ export class PostgresPlatformSummaryRepository implements IPlatformSummaryReposi
 
     const query = `
       WITH model_revenue AS (
-        -- Regalos
         SELECT creator_id, SUM(coins_spent) as amount
         FROM gift_transactions
         WHERE 1=1 ${dateFilter}
@@ -69,7 +89,6 @@ export class PostgresPlatformSummaryRepository implements IPlatformSummaryReposi
         
         UNION ALL
         
-        -- Ventas de contenido
         SELECT ci.creator_id, SUM(cp.price_paid) as amount
         FROM content_purchases cp
         JOIN content_items ci ON cp.content_item_id = ci.id
@@ -78,7 +97,6 @@ export class PostgresPlatformSummaryRepository implements IPlatformSummaryReposi
 
         UNION ALL
 
-        -- Videollamadas
         SELECT creator_id, SUM(price_coins) as amount
         FROM video_call_sessions
         WHERE status = 'completed' ${dateFilter}
@@ -95,11 +113,17 @@ export class PostgresPlatformSummaryRepository implements IPlatformSummaryReposi
       LIMIT 10
     `;
 
-    const result = await this.entityManager.query(query, params);
+    const result = (await this.entityManager.query(
+      query,
+      params,
+    )) as unknown as ModelRevenueRow[];
     return result.map((row) => ({
       creatorId: row.creatorId,
       creatorName: row.creatorName,
-      totalEarnedPtc: parseFloat(row.totalEarnedPtc),
+      totalEarnedPtc:
+        typeof row.totalEarnedPtc === 'string'
+          ? parseFloat(row.totalEarnedPtc)
+          : row.totalEarnedPtc,
     }));
   }
 }

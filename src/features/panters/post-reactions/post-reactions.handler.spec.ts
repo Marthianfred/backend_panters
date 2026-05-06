@@ -1,24 +1,30 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { ReactToPostHandler } from './post-reactions.handler';
-import { POST_REACTION_REPOSITORY_TOKEN } from './interfaces/post-reactions.repository.interface';
-import { POST_REACTION_EVENT_PUBLISHER_TOKEN } from './interfaces/post-reactions-event-publisher.interface';
+import {
+  IPostReactionRepository,
+  POST_REACTION_REPOSITORY_TOKEN,
+} from './interfaces/post-reactions.repository.interface';
+import {
+  IPostReactionEventPublisher,
+  POST_REACTION_EVENT_PUBLISHER_TOKEN,
+} from './interfaces/post-reactions-event-publisher.interface';
 
 describe('ReactToPostHandler', () => {
   let handler: ReactToPostHandler;
-  let repository: any;
-  let publisher: any;
+  let repository: jest.Mocked<IPostReactionRepository>;
+  let publisher: jest.Mocked<IPostReactionEventPublisher>;
 
   beforeEach(async () => {
     repository = {
       postExists: jest.fn(),
       getPostOwnerId: jest.fn(),
       upsertReaction: jest.fn(),
-    };
+    } as unknown as jest.Mocked<IPostReactionRepository>;
 
     publisher = {
       publish: jest.fn().mockResolvedValue(undefined),
-    };
+    } as unknown as jest.Mocked<IPostReactionEventPublisher>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

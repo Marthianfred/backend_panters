@@ -39,6 +39,13 @@ export class UploadAvatarController {
     file: Express.Multer.File,
   ): Promise<void> {
     try {
+      if (!req.user) {
+        res
+          .status(HttpStatus.UNAUTHORIZED)
+          .json({ error: 'Usuario no autenticado.' });
+        return;
+      }
+
       if (!file) {
         res
           .status(HttpStatus.BAD_REQUEST)

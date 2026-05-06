@@ -6,6 +6,26 @@ import {
   GiftDefinition,
 } from '../interfaces/send-gift.repository.interface';
 
+interface GiftRow {
+  id: string;
+  name: string;
+  priceCoins: number;
+  iconUrl: string;
+}
+
+interface WalletRow {
+  wallet_id: string;
+  panter_coin_balance: string | number;
+}
+
+interface IdRow {
+  id: string;
+}
+
+interface TransactionIdRow {
+  transaction_id: string;
+}
+
 @Injectable()
 export class PostgresSendGiftRepository implements ISendGiftRepository {
   private pool: Pool;
@@ -22,7 +42,7 @@ export class PostgresSendGiftRepository implements ISendGiftRepository {
       FROM virtual_gifts
       WHERE gift_id = $1 AND is_active = true;
     `;
-    const result = await this.pool.query(query, [giftId]);
+    const result = await this.pool.query<GiftRow>(query, [giftId]);
     return result.rows[0] || null;
   }
 
@@ -49,7 +69,7 @@ export class PostgresSendGiftRepository implements ISendGiftRepository {
         WHERE user_id = $2 AND panter_coin_balance >= $1
         RETURNING id as wallet_id, panter_coin_balance;
       `;
-      const walletRes = await client.query(walletQuery, [
+      const walletRes = await client.query<WalletRow>(walletQuery, [
         gift.priceCoins,
         userId,
       ]);
@@ -60,9 +80,11 @@ export class PostgresSendGiftRepository implements ISendGiftRepository {
       }
 
       const walletId = walletRes.rows[0].wallet_id;
-      const remainingBalance = parseFloat(
-        walletRes.rows[0].panter_coin_balance,
-      );
+      const balanceValue = walletRes.rows[0].panter_coin_balance;
+      const remainingBalance =
+        typeof balanceValue === 'string'
+          ? parseFloat(balanceValue)
+          : balanceValue;
 
       const netAmount = gift.priceCoins * 0.7;
       const platformCommission = gift.priceCoins * 0.3;
@@ -87,7 +109,7 @@ export class PostgresSendGiftRepository implements ISendGiftRepository {
         VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
         RETURNING id;
       `;
-      const giftTransRes = await client.query(giftTransQuery, [
+      const giftTransRes = await client.query<IdRow>(giftTransQuery, [
         userId,
         creatorId,
         gift.id,
@@ -100,7 +122,7 @@ export class PostgresSendGiftRepository implements ISendGiftRepository {
         VALUES ($1, 'debit', $2, $3, $4, CURRENT_TIMESTAMP)
         RETURNING id as transaction_id;
       `;
-      const transRes = await client.query(transQuery, [
+      const transRes = await client.query<TransactionIdRow>(transQuery, [
         walletId,
         gift.priceCoins,
         `Envío de regalo: ${gift.name}`,

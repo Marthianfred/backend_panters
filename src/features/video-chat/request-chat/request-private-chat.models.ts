@@ -8,5 +8,5 @@ export interface RequestPrivateChatResponse {
   streamId: string;
   channelArn: string;
   signalingEndpoint: string;
-  credentials: any;
+  credentials: Record<string, unknown>;
 }

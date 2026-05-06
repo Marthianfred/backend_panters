@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { AuthModule } from '@/features/auth/auth.module';
 import { NotificationsController } from './api/notifications.controller';
 import { RegisterSubscriptionUseCase } from './application/use-cases/register-subscription.use-case';
 import { NotifySubscribersUseCase } from './application/use-cases/notify-subscribers.use-case';
@@ -14,6 +13,8 @@ import { NotificationOrmEntity } from './infrastructure/persistence/notification
 import { TypeOrmNotificationRepository } from './infrastructure/persistence/typeorm-notification.repository';
 import { PUSH_SUBSCRIPTION_REPOSITORY_TOKEN } from './domain/push-subscription.repository';
 import { NOTIFICATION_REPOSITORY_TOKEN } from './domain/notification.repository';
+
+import { NotifyAdminsUseCase } from './application/use-cases/notify-admins.use-case';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { NOTIFICATION_REPOSITORY_TOKEN } from './domain/notification.repository'
     RegisterSubscriptionUseCase,
     NotifySubscribersUseCase,
     NotifyUserUseCase,
+    NotifyAdminsUseCase,
     GetNotificationsUseCase,
     MarkNotificationAsReadUseCase,
     {
@@ -42,6 +44,7 @@ import { NOTIFICATION_REPOSITORY_TOKEN } from './domain/notification.repository'
   exports: [
     NotifySubscribersUseCase,
     NotifyUserUseCase,
+    NotifyAdminsUseCase,
     GetNotificationsUseCase,
   ],
 })

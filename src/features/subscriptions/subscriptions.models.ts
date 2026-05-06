@@ -48,3 +48,7 @@ export class CreateUserSubscriptionDto {
   startsAt?: Date;
   endsAt?: Date;
 }
+export class UserSubscriptionWithPlanDto extends UserSubscriptionDto {
+  planName: string;
+  currentPeriodEnd?: Date;
+}

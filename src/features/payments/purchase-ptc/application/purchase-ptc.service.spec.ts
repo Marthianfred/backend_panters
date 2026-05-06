@@ -50,10 +50,15 @@ describe('PurchasePtcService', () => {
       stripePriceId: priceId,
       isActive: true,
     };
-    const mockSession = { id: 'sess_123', url: 'http://stripe.com/checkout' };
+    const mockSession = {
+      id: 'sess_123',
+      url: 'http://stripe.com/checkout',
+    };
 
     ptcPackageRepository.findByPriceId.mockResolvedValue(mockPackage);
-    stripeService.createCheckoutSession.mockResolvedValue(mockSession as any);
+    (stripeService.createCheckoutSession as jest.Mock).mockResolvedValue(
+      mockSession,
+    );
 
     const result = await service.createSession(userId, priceId);
 
@@ -62,15 +67,16 @@ describe('PurchasePtcService', () => {
       sessionId: mockSession.id,
     });
     expect(ptcPackageRepository.findByPriceId).toHaveBeenCalledWith(priceId);
-    expect(stripeService.createCheckoutSession).toHaveBeenCalledWith(
-      expect.objectContaining({
-        priceId,
-        metadata: expect.objectContaining({
-          userId,
-          coinsAmount: '100',
-        }),
-      }),
-    );
+    expect(stripeService.createCheckoutSession).toHaveBeenCalledWith({
+      priceId,
+      successUrl: 'http://success.com?session_id={CHECKOUT_SESSION_ID}',
+      cancelUrl: 'http://cancel.com',
+      metadata: {
+        userId,
+        coinsAmount: '100',
+        type: 'ptc_purchase',
+      },
+    });
   });
 
   it('should throw BadRequestException if priceId is not in DB', async () => {

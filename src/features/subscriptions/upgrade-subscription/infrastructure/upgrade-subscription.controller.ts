@@ -1,4 +1,11 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  BadRequestException,
+} from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -11,6 +18,7 @@ import {
   UpgradeSessionResponse,
 } from '../domain/upgrade-subscription.dto';
 import { AuthGuard } from '@/features/auth/guards/auth.guard';
+import type { AuthenticatedRequest } from '@/features/auth/types/auth.types';
 
 @ApiTags('Subscriptions')
 @ApiBearerAuth()
@@ -35,9 +43,12 @@ export class UpgradeSubscriptionController {
     description: 'El plan seleccionado no es superior o no es válido',
   })
   async upgrade(
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
     @Body() dto: UpgradeSubscriptionDto,
   ): Promise<UpgradeSessionResponse> {
+    if (!req.user) {
+      throw new BadRequestException('Usuario no autenticado');
+    }
     const userId = req.user.id;
     return this.upgradeSubscriptionUseCase.execute(userId, dto);
   }

@@ -16,7 +16,7 @@ export interface GetViewerAccessResponse {
   signalingEndpoint: string;
   thumbnailUrl: string;
   credentials: WebRTCCredentials;
-  iceServers: any[];
+  iceServers: unknown[];
 }
 
 export class StreamNotFoundError extends Error {

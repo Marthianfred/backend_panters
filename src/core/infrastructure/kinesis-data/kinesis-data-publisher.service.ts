@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { KinesisClient, PutRecordCommand } from '@aws-sdk/client-kinesis';
 
@@ -6,6 +6,7 @@ import { KinesisClient, PutRecordCommand } from '@aws-sdk/client-kinesis';
 export class KinesisDataPublisherService implements OnModuleInit {
   private client: KinesisClient;
   private streamName: string;
+  private readonly logger = new Logger(KinesisDataPublisherService.name);
 
   constructor(private configService: ConfigService) {}
 
@@ -23,7 +24,11 @@ export class KinesisDataPublisherService implements OnModuleInit {
     this.streamName = this.configService.get<string>('KN_STREAMS_NAME') || '';
   }
 
-  async publish(type: string, data: any, partitionKey: string): Promise<void> {
+  async publish(
+    type: string,
+    data: Record<string, unknown>,
+    partitionKey: string,
+  ): Promise<void> {
     const payload = {
       type,
       data,
@@ -38,6 +43,9 @@ export class KinesisDataPublisherService implements OnModuleInit {
 
     try {
       await this.client.send(command);
-    } catch (error) {}
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error al publicar evento en Kinesis: ${message}`);
+    }
   }
 }

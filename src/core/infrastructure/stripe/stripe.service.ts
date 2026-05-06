@@ -11,7 +11,7 @@ export class StripeService {
     const secretKey =
       this.configService.getOrThrow<string>('STRIPE_SECRET_KEY');
     this.stripe = new Stripe(secretKey, {
-      apiVersion: '2025-01-27.acacia' as any,
+      apiVersion: '2025-01-27.acacia' as Stripe.LatestApiVersion,
     });
   }
 
@@ -25,8 +25,9 @@ export class StripeService {
         signature,
         webhookSecret,
       );
-    } catch (err) {
-      this.logger.error(`Error verificando firma de Stripe: ${err.message}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.logger.error(`Error verificando firma de Stripe: ${message}`);
       throw err;
     }
   }

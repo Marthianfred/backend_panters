@@ -29,27 +29,39 @@ describe('LiveChatGateway', () => {
       handshake: {
         headers: {},
       },
-    } as any;
+    } as unknown as Socket;
 
     mockLiveChatService = {
-      createMessagePayload: jest.fn().mockImplementation((_, data) => ({
-        id: data.id || 'test-id',
-        username: data.username,
-        text: data.text,
-        time: new Date().toISOString(),
-        isGift: false,
-      })),
+      createMessagePayload: jest
+        .fn()
+        .mockImplementation(
+          (_, data: { id?: string; username: string; text: string }) => ({
+            id: data.id || 'test-id',
+            username: data.username,
+            text: data.text,
+            time: new Date().toISOString(),
+            isGift: false,
+          }),
+        ),
       createGiftPayload: jest
         .fn()
-        .mockImplementation((_, username, giftName, iconUrl, giftId) => ({
-          id: 'test-gift-id',
-          username,
-          text: `¡Envió un ${giftName}!`,
-          time: '12:00',
-          isGift: true,
-          giftType: giftId || giftName,
-          iconUrl,
-        })),
+        .mockImplementation(
+          (
+            _,
+            username: string,
+            giftName: string,
+            iconUrl: string,
+            giftId?: string,
+          ) => ({
+            id: 'test-gift-id',
+            username,
+            text: `¡Envió un ${giftName}!`,
+            time: '12:00',
+            isGift: true,
+            giftType: giftId || giftName,
+            iconUrl,
+          }),
+        ),
     };
 
     const module: TestingModule = await Test.createTestingModule({

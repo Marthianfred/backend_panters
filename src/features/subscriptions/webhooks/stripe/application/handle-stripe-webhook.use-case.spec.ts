@@ -1,12 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HandleStripeWebhookUseCase } from './handle-stripe-webhook.use-case';
-import { USER_SUBSCRIPTIONS_REPOSITORY } from '@/features/subscriptions/interfaces/user.subscriptions.repository.interface';
+import {
+  IUserSubscriptionsRepository,
+  USER_SUBSCRIPTIONS_REPOSITORY,
+} from '@/features/subscriptions/interfaces/user.subscriptions.repository.interface';
+import { SUBSCRIPTION_PLANS_REPOSITORY } from '@/features/subscriptions/interfaces/subscription.plans.repository.interface';
 import { BadRequestException } from '@nestjs/common';
 import Stripe from 'stripe';
 
 describe('HandleStripeWebhookUseCase', () => {
   let useCase: HandleStripeWebhookUseCase;
-  let userSubscriptionsRepository: any;
+  let userSubscriptionsRepository: jest.Mocked<IUserSubscriptionsRepository>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -16,6 +20,16 @@ describe('HandleStripeWebhookUseCase', () => {
           provide: USER_SUBSCRIPTIONS_REPOSITORY,
           useValue: {
             updateStatus: jest.fn(),
+            findById: jest.fn(),
+            updatePeriod: jest.fn(),
+            changePlan: jest.fn(),
+            findByExternalId: jest.fn(),
+          },
+        },
+        {
+          provide: SUBSCRIPTION_PLANS_REPOSITORY,
+          useValue: {
+            findById: jest.fn(),
           },
         },
       ],
@@ -31,13 +45,13 @@ describe('HandleStripeWebhookUseCase', () => {
     const mockSession = {
       metadata: { subscriptionId: 'sub-123' },
       subscription: 'stripe-sub-id',
-    } as any;
+    } as unknown as Stripe.Checkout.Session;
 
     const mockEvent = {
       type: 'checkout.session.completed',
       id: 'evt_123',
       data: { object: mockSession },
-    } as any;
+    } as unknown as Stripe.Event;
 
     await useCase.execute(mockEvent);
 
@@ -51,12 +65,12 @@ describe('HandleStripeWebhookUseCase', () => {
   it('debe registrar un error si no hay subscriptionId en la metadata', async () => {
     const mockSession = {
       metadata: {},
-    } as any;
+    } as unknown as Stripe.Checkout.Session;
 
     const mockEvent = {
       type: 'checkout.session.completed',
       data: { object: mockSession },
-    } as any;
+    } as unknown as Stripe.Event;
 
     await useCase.execute(mockEvent);
 
@@ -67,14 +81,14 @@ describe('HandleStripeWebhookUseCase', () => {
     const mockSession = {
       metadata: { subscriptionId: 'sub-123' },
       subscription: 'stripe-sub-id',
-    } as any;
+    } as unknown as Stripe.Checkout.Session;
 
     const mockEvent = {
       type: 'checkout.session.completed',
       data: { object: mockSession },
-    } as any;
+    } as unknown as Stripe.Event;
 
-    userSubscriptionsRepository.updateStatus.mockRejectedValue(
+    (userSubscriptionsRepository.updateStatus as jest.Mock).mockRejectedValue(
       new Error('DB Error'),
     );
 

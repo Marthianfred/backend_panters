@@ -8,7 +8,6 @@ import {
   Req,
 } from '@nestjs/common';
 import type { Request } from 'express';
-import { StripeWebhookHandler } from './stripe-webhook.handler';
 import { BinanceWebhookHandler } from './binance-webhook.handler';
 import {
   WebhookResponse,
@@ -21,17 +20,11 @@ interface RequestWithRawBody extends Request {
 
 @Controller('api/v1/wallet/webhooks')
 export class WebhooksTopUpController {
-  constructor(
-    private readonly stripeHandler: StripeWebhookHandler,
-    private readonly binanceHandler: BinanceWebhookHandler,
-  ) {}
+  constructor(private readonly binanceHandler: BinanceWebhookHandler) {}
 
   @Post('stripe')
   @HttpCode(HttpStatus.OK)
-  public handleStripe(
-    @Req() _req: RequestWithRawBody,
-    @Headers('stripe-signature') _signature: string,
-  ): Promise<WebhookResponse> {
+  public handleStripe(): Promise<WebhookResponse> {
     throw new HttpException(
       'Este endpoint está deprecado. Use el dispatcher unificado en api/v1/payments/webhooks/stripe',
       HttpStatus.GONE,

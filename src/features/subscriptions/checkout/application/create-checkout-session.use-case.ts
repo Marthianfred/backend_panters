@@ -87,9 +87,11 @@ export class CreateCheckoutSessionUseCase {
         url: session.url,
         sessionId: session.id,
       };
-    } catch (error) {
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : 'Error desconocido';
       throw new BadRequestException(
-        `Error al generar la sesión de pago: ${error.message}`,
+        `Error al generar la sesión de pago: ${message}`,
       );
     }
   }

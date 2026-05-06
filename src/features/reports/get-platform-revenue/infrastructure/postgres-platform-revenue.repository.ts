@@ -3,6 +3,13 @@ import { InjectEntityManager } from '@nestjs/typeorm';
 import { EntityManager } from 'typeorm';
 import type { IPlatformRevenueRepository } from '../interfaces/platform-revenue-repository.interface';
 
+interface RevenueRow {
+  total_gross: string | number;
+  platform_fee: string | number;
+  creator_share: string | number;
+  total_subscriptions: string | number;
+}
+
 @Injectable()
 export class PostgresPlatformRevenueRepository implements IPlatformRevenueRepository {
   constructor(
@@ -19,7 +26,7 @@ export class PostgresPlatformRevenueRepository implements IPlatformRevenueReposi
     totalCreatorPtc: number;
     totalSubscriptionUsd: number;
   }> {
-    const params: any[] = [];
+    const params: unknown[] = [];
     let dateFilter = '';
     let subDateFilter = '';
 
@@ -47,14 +54,29 @@ export class PostgresPlatformRevenueRepository implements IPlatformRevenueReposi
         ) as total_subscriptions
     `;
 
-    const result = await this.entityManager.query(query, params);
+    const result = (await this.entityManager.query(
+      query,
+      params,
+    )) as unknown as RevenueRow[];
     const row = result[0];
 
     return {
-      totalGrossPtc: parseFloat(row.total_gross),
-      totalPlatformPtc: parseFloat(row.platform_fee),
-      totalCreatorPtc: parseFloat(row.creator_share),
-      totalSubscriptionUsd: parseFloat(row.total_subscriptions),
+      totalGrossPtc:
+        typeof row.total_gross === 'string'
+          ? parseFloat(row.total_gross)
+          : row.total_gross,
+      totalPlatformPtc:
+        typeof row.platform_fee === 'string'
+          ? parseFloat(row.platform_fee)
+          : row.platform_fee,
+      totalCreatorPtc:
+        typeof row.creator_share === 'string'
+          ? parseFloat(row.creator_share)
+          : row.creator_share,
+      totalSubscriptionUsd:
+        typeof row.total_subscriptions === 'string'
+          ? parseFloat(row.total_subscriptions)
+          : row.total_subscriptions,
     };
   }
 }

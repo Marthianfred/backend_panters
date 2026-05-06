@@ -46,10 +46,9 @@ export class ReactToPostHandler {
         type: 'pantera',
         timestamp: new Date(),
       })
-      .catch((err) => {
-        console.error(
-          `[PostReactions] Fallo el envío de evento: ${err.message}`,
-        );
+      .catch((err: unknown) => {
+        const message = err instanceof Error ? err.message : String(err);
+        console.error(`[PostReactions] Fallo el envío de evento: ${message}`);
       });
 
     return {

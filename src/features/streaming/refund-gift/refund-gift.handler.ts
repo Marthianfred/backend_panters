@@ -5,7 +5,6 @@ import {
   RefundGiftRequest,
   RefundGiftResponse,
   TransactionNotFoundError,
-  RefundFailedError,
 } from './refund-gift.models';
 
 @Injectable()

@@ -14,6 +14,8 @@ import { DatabaseModule } from '@/core/database/database.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { CheckUserActivityUseCase } from './application/use-cases/check-user-activity.use-case';
 
+import { RegisterModelUseCase } from './application/use-cases/register-model/register-model.use-case';
+
 @Global()
 @Module({
   imports: [DatabaseModule, NotificationsModule],
@@ -21,6 +23,7 @@ import { CheckUserActivityUseCase } from './application/use-cases/check-user-act
   providers: [
     AuthService,
     RegisterClientService,
+    RegisterModelUseCase,
     AuthPoolProvider,
     BetterAuthProvider,
     AuthGuard,
@@ -35,6 +38,7 @@ import { CheckUserActivityUseCase } from './application/use-cases/check-user-act
     AuthGuard,
     RolesGuard,
     BetterAuthProvider,
+    AuthPoolProvider,
     RegisterClientService,
   ],
 })

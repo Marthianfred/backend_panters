@@ -30,7 +30,10 @@ export class AdminCreateUserHandler {
           password: request.password,
           name: request.name,
         },
-      })) as { user: { id: string } | null; session: any } | null;
+      })) as {
+        user: { id: string } | null;
+        session: Record<string, unknown>;
+      } | null;
 
       if (!authResult?.user) {
         throw new InternalServerErrorException(
@@ -49,14 +52,17 @@ export class AdminCreateUserHandler {
         role: request.role,
         mustChangePassword: true,
       };
-    } catch (error: any) {
-      if (
-        error.code === 'P2002' ||
-        (error.message && error.message.includes('already exists'))
-      ) {
-        throw new ConflictException(
-          'El correo electrónico ya está registrado.',
-        );
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        const err = error as Error & { code?: string };
+        if (
+          err.code === 'P2002' ||
+          (err.message && err.message.includes('already exists'))
+        ) {
+          throw new ConflictException(
+            'El correo electrónico ya está registrado.',
+          );
+        }
       }
       throw error;
     }

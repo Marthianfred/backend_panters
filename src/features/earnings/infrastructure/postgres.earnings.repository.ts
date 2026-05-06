@@ -25,7 +25,13 @@ export class PostgresEarningsRepository implements IEarningsRepository {
   public async getCreatorEarningsSummary(
     creatorId: string,
   ): Promise<EarningsSummaryResponse> {
-    const walletRes = await this.pool.query(
+    interface WalletRow {
+      total_earned: string;
+      platform_commission: string;
+      net_balance: string;
+    }
+
+    const walletRes = await this.pool.query<WalletRow>(
       'SELECT total_earned, platform_commission, net_balance FROM creator_wallets WHERE creator_id = $1',
       [creatorId],
     );
@@ -36,7 +42,11 @@ export class PostgresEarningsRepository implements IEarningsRepository {
       net_balance: '0',
     };
 
-    const salesCountRes = await this.pool.query(
+    interface SalesCountRow {
+      total: string;
+    }
+
+    const salesCountRes = await this.pool.query<SalesCountRow>(
       `SELECT (
         (SELECT COUNT(*) FROM content_purchases cp JOIN content_items ci ON cp.content_item_id = ci.id WHERE ci.creator_id = $1) +
         (SELECT COUNT(*) FROM gift_transactions WHERE creator_id = $1) +
@@ -45,7 +55,15 @@ export class PostgresEarningsRepository implements IEarningsRepository {
       [creatorId],
     );
 
-    const recentSalesRes = await this.pool.query(
+    interface RecentSaleRow {
+      id: string;
+      content_title: string;
+      buyer_name: string;
+      amount: string;
+      date: Date;
+    }
+
+    const recentSalesRes = await this.pool.query<RecentSaleRow>(
       `SELECT 
         cp.id,
         ci.title as content_title,
@@ -75,7 +93,7 @@ export class PostgresEarningsRepository implements IEarningsRepository {
       totalEarned: parseFloat(wallet.total_earned),
       platformCommission: parseFloat(wallet.platform_commission),
       netBalance: parseFloat(wallet.net_balance),
-      totalSalesCount: parseInt(salesCountRes.rows[0].total, 10),
+      totalSalesCount: parseInt(salesCountRes.rows[0]?.total || '0', 10),
       recentSales,
     };
   }
@@ -104,7 +122,7 @@ export class PostgresEarningsRepository implements IEarningsRepository {
         WHERE ci.creator_id = $1
         
         UNION ALL
-
+ 
         -- Regalos (Gifts)
         SELECT 
           gt.id,
@@ -119,9 +137,9 @@ export class PostgresEarningsRepository implements IEarningsRepository {
         JOIN virtual_gifts vg ON gt.gift_id = vg.gift_id
         JOIN "user" u ON gt.user_id = u.id
         WHERE gt.creator_id = $1
-
+ 
         UNION ALL
-
+ 
         -- Videollamadas (Video Calls)
         SELECT 
           vcs.id,
@@ -158,14 +176,35 @@ export class PostgresEarningsRepository implements IEarningsRepository {
       ) as total;
     `;
 
+    interface HistoryRow {
+      id: string;
+      type: 'CONTENT_SALE' | 'GIFT' | 'VIDEO_CALL';
+      description: string;
+      gross_amount: string;
+      net_amount: string;
+      platform_fee: string;
+      date: Date;
+      buyer_name: string;
+    }
+
+    interface CountRow {
+      count: string;
+    }
+
     const [results, totalRes] = await Promise.all([
-      this.pool.query(query, [creatorId, startDate, endDate, limit, offset]),
-      this.pool.query(countQuery, [creatorId]),
+      this.pool.query<HistoryRow>(query, [
+        creatorId,
+        startDate,
+        endDate,
+        limit,
+        offset,
+      ]),
+      this.pool.query<CountRow>(countQuery, [creatorId]),
     ]);
 
     const transactions: EarningTransactionDTO[] = results.rows.map((row) => ({
       id: row.id,
-      type: row.type as 'CONTENT_SALE' | 'GIFT' | 'VIDEO_CALL',
+      type: row.type,
       description: row.description,
       grossAmount: parseFloat(row.gross_amount),
       netAmount: parseFloat(row.net_amount),
@@ -174,7 +213,7 @@ export class PostgresEarningsRepository implements IEarningsRepository {
       buyerName: row.buyer_name,
     }));
 
-    const totalCount = parseInt(totalRes.rows[0].count, 10);
+    const totalCount = parseInt(totalRes.rows[0]?.count || '0', 10);
 
     return {
       transactions,

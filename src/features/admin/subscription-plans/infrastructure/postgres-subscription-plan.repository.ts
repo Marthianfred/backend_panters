@@ -44,10 +44,14 @@ export class PostgresSubscriptionPlanRepository implements ISubscriptionPlanRepo
     ];
 
     try {
-      const result = await this.pool.query(query, values);
+      const result = await this.pool.query<SubscriptionPlanEntity>(
+        query,
+        values,
+      );
       return new SubscriptionPlanEntity(result.rows[0]);
-    } catch (error) {
-      this.logger.error(`Error al crear plan de suscripción: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error al crear plan de suscripción: ${message}`);
       throw error;
     }
   }
@@ -57,7 +61,7 @@ export class PostgresSubscriptionPlanRepository implements ISubscriptionPlanRepo
     plan: Partial<SubscriptionPlanEntity>,
   ): Promise<SubscriptionPlanEntity> {
     const fields: string[] = [];
-    const values: any[] = [];
+    const values: unknown[] = [];
     let idx = 1;
 
     if (plan.name) {
@@ -108,11 +112,15 @@ export class PostgresSubscriptionPlanRepository implements ISubscriptionPlanRepo
     `;
 
     try {
-      const result = await this.pool.query(query, values);
+      const result = await this.pool.query<SubscriptionPlanEntity>(
+        query,
+        values,
+      );
       return new SubscriptionPlanEntity(result.rows[0]);
-    } catch (error) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
       this.logger.error(
-        `Error al actualizar plan de suscripción ${id}: ${error.message}`,
+        `Error al actualizar plan de suscripción ${id}: ${message}`,
       );
       throw error;
     }
@@ -134,13 +142,14 @@ export class PostgresSubscriptionPlanRepository implements ISubscriptionPlanRepo
     `;
 
     try {
-      const result = await this.pool.query(query, [id]);
+      const result = await this.pool.query<SubscriptionPlanEntity>(query, [id]);
       return result.rows.length > 0
         ? new SubscriptionPlanEntity(result.rows[0])
         : null;
-    } catch (error) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
       this.logger.error(
-        `Error al buscar plan de suscripción ${id}: ${error.message}`,
+        `Error al buscar plan de suscripción ${id}: ${message}`,
       );
       throw error;
     }
@@ -162,12 +171,11 @@ export class PostgresSubscriptionPlanRepository implements ISubscriptionPlanRepo
     `;
 
     try {
-      const result = await this.pool.query(query);
+      const result = await this.pool.query<SubscriptionPlanEntity>(query);
       return result.rows.map((row) => new SubscriptionPlanEntity(row));
-    } catch (error) {
-      this.logger.error(
-        `Error al listar planes de suscripción: ${error.message}`,
-      );
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error al listar planes de suscripción: ${message}`);
       throw error;
     }
   }
@@ -176,10 +184,9 @@ export class PostgresSubscriptionPlanRepository implements ISubscriptionPlanRepo
     const query = `UPDATE subscription_plans SET is_active = $1, updated_at = NOW() WHERE id = $2;`;
     try {
       await this.pool.query(query, [isActive, id]);
-    } catch (error) {
-      this.logger.error(
-        `Error al cambiar estado del plan ${id}: ${error.message}`,
-      );
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error al cambiar estado del plan ${id}: ${message}`);
       throw error;
     }
   }

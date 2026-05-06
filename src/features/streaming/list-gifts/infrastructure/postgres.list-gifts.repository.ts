@@ -4,6 +4,14 @@ import { Pool } from 'pg';
 import { IListGiftsRepository } from '../interfaces/list-gifts.repository.interface';
 import { GiftDTO } from '../list-gifts.models';
 
+interface GiftRow {
+  id: string;
+  name: string;
+  priceCoins: string | number;
+  icon: string;
+  animationUrl: string;
+}
+
 @Injectable()
 export class PostgresListGiftsRepository implements IListGiftsRepository {
   private pool: Pool;
@@ -26,12 +34,15 @@ export class PostgresListGiftsRepository implements IListGiftsRepository {
       WHERE is_active = true
       ORDER BY price_coins ASC;
     `;
-    const result = await this.pool.query(query);
+    const result = await this.pool.query<GiftRow>(query);
 
     return result.rows.map((row) => ({
       id: row.id,
       name: row.name,
-      priceCoins: parseFloat(row.priceCoins),
+      priceCoins:
+        typeof row.priceCoins === 'string'
+          ? parseFloat(row.priceCoins)
+          : row.priceCoins,
       icon: row.icon,
       animationUrl: row.animationUrl,
     }));

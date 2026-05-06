@@ -7,7 +7,7 @@ export interface SendEmailOptions {
 }
 
 export interface EmailService {
-  send(options: SendEmailOptions): Promise<{ data: any; error: any }>;
+  send(options: SendEmailOptions): Promise<{ data: unknown; error: unknown }>;
 }
 
 export const EMAIL_SERVICE_TOKEN = Symbol('EmailService');

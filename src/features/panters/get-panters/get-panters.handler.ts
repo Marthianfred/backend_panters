@@ -1,10 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 import type { IPantersRepository } from './interfaces/panters.repository.interface';
 import { PANTERS_REPOSITORY } from './interfaces/panters.repository.interface';
-import type {
-  GetPantersRequest,
-  GetPantersResponse,
-} from './get-panters.models';
+import type { GetPantersResponse } from './get-panters.models';
 
 @Injectable()
 export class GetPantersHandler {
@@ -13,9 +10,7 @@ export class GetPantersHandler {
     private readonly pantersRepository: IPantersRepository,
   ) {}
 
-  public async execute(
-    request: GetPantersRequest,
-  ): Promise<GetPantersResponse> {
+  public async execute(): Promise<GetPantersResponse> {
     const rawPanters = await this.pantersRepository.getAllPanters();
 
     const panters = rawPanters.map((panter) => {

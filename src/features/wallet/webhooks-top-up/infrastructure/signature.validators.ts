@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import * as crypto from 'crypto';
 import { ISignatureValidator } from '../interfaces/signature.validator.interface';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
@@ -10,9 +11,7 @@ export class StripeSignatureValidator implements ISignatureValidator {
   constructor(private readonly config: ConfigService) {
     const secretKey = this.config.get<string>('STRIPE_SECRET_KEY');
     if (secretKey && secretKey !== 'sk_test_...') {
-      this.stripe = new Stripe(secretKey, {
-        apiVersion: '2025-01-27' as any,
-      });
+      this.stripe = new Stripe(secretKey);
     } else {
       console.warn(
         '[StripeSignatureValidator] Stripe key missing or placeholder. Signature validation will be disabled.',
@@ -20,7 +19,10 @@ export class StripeSignatureValidator implements ISignatureValidator {
     }
   }
 
-  public validateSignature(payload: any, signature: string): boolean {
+  public validateSignature(
+    payload: Buffer | string | Record<string, unknown>,
+    signature: string,
+  ): boolean {
     const endpointSecret = this.config.get<string>('STRIPE_WEBHOOK_SECRET');
     if (!endpointSecret) {
       console.warn(
@@ -37,24 +39,28 @@ export class StripeSignatureValidator implements ISignatureValidator {
         return false;
       }
 
-      this.stripe.webhooks.constructEvent(payload, signature, endpointSecret);
-      return true;
-    } catch (err) {
-      console.error(
-        `[Stripe] Error validando firma del webhook: ${err.message}`,
+      this.stripe.webhooks.constructEvent(
+        payload as string | Buffer,
+        signature,
+        endpointSecret,
       );
+      return true;
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      console.error(`[Stripe] Error validando firma del webhook: ${message}`);
       return false;
     }
   }
 }
 
-import * as crypto from 'crypto';
-
 @Injectable()
 export class BinanceSignatureValidator implements ISignatureValidator {
   constructor(private readonly config: ConfigService) {}
 
-  public validateSignature(payload: any, signature: string): boolean {
+  public validateSignature(
+    payload: Buffer | string | Record<string, unknown>,
+    signature: string,
+  ): boolean {
     const binancePublicKey = this.config.get<string>('BINANCE_PAY_PUBLIC_KEY');
     if (!binancePublicKey) {
       console.warn(
@@ -66,17 +72,16 @@ export class BinanceSignatureValidator implements ISignatureValidator {
     try {
       const bodyString = Buffer.isBuffer(payload)
         ? payload.toString('utf-8')
-        : payload;
+        : (payload as string);
 
       const verifier = crypto.createVerify('SHA256');
       verifier.update(bodyString);
       verifier.end();
 
       return verifier.verify(binancePublicKey, signature, 'base64');
-    } catch (err) {
-      console.error(
-        `[Binance] Error validando firma del webhook: ${err.message}`,
-      );
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      console.error(`[Binance] Error validando firma del webhook: ${message}`);
       return false;
     }
   }

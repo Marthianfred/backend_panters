@@ -56,9 +56,10 @@ export class S3HomeVideoStorageService implements IHomeVideoStorageService {
       }
 
       return `https://${this.bucketName}.s3.${process.env.AWS_REGION}.amazonaws.com/${key}`;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error al subir video a S3:', error);
-      throw new Error(`No se pudo subir el video a S3: ${error.message}`);
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`No se pudo subir el video a S3: ${message}`);
     }
   }
 

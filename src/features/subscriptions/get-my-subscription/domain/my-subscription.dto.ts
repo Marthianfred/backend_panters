@@ -10,8 +10,8 @@ export class MySubscriptionResponseDto {
   @ApiProperty({ example: 'VIP MENSUAL' })
   planName: string;
 
-  @ApiProperty({ example: '2026-05-28T23:59:59Z' })
-  currentPeriodEnd: string;
+  @ApiProperty({ example: '2026-05-28T23:59:59Z', nullable: true })
+  currentPeriodEnd: string | null;
 
   @ApiProperty({ example: false })
   cancelAtPeriodEnd: boolean;

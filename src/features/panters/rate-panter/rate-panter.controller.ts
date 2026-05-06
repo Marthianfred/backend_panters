@@ -6,6 +6,7 @@ import {
   Post,
   UseGuards,
   Request,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthGuard } from '../../auth/guards/auth.guard';
 import type { AuthenticatedRequest } from '../../auth/types/auth.types';
@@ -26,6 +27,7 @@ export class RatePanterController {
     @Request() req: AuthenticatedRequest,
     @Body() body: RatePanterRequest,
   ): Promise<RatePanterResponse> {
+    if (!req.user) throw new BadRequestException('Usuario no autenticado');
     const subscriberId = req.user.id;
     return await this.handler.execute(subscriberId, body);
   }

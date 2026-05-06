@@ -6,6 +6,7 @@ import {
   Req,
   HttpStatus,
   Res,
+  BadRequestException,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { CreateStreamHandler } from './create-stream.handler';
@@ -28,6 +29,7 @@ export class CreateStreamController {
     @Res() res: Response,
   ): Promise<void> {
     try {
+      if (!req.user) throw new BadRequestException('Usuario no autenticado');
       const creatorId = req.user.id;
 
       const response = await this.handler.execute({

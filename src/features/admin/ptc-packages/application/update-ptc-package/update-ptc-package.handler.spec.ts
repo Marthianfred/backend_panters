@@ -1,18 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UpdatePtcPackageHandler } from './update-ptc-package.handler';
-import { PTC_PACKAGE_REPOSITORY } from '../../domain/ptc-package.repository.interface';
+import {
+  IPtcPackageRepository,
+  PTC_PACKAGE_REPOSITORY,
+} from '../../domain/ptc-package.repository.interface';
 import { UpdatePtcPackageDto } from '../../dto/update-ptc-package.dto';
 import { NotFoundException } from '@nestjs/common';
 
 describe('UpdatePtcPackageHandler', () => {
   let handler: UpdatePtcPackageHandler;
-  let repository: any;
+  let repository: jest.Mocked<IPtcPackageRepository>;
 
   beforeEach(async () => {
     repository = {
       findById: jest.fn(),
       update: jest.fn(),
-    };
+    } as unknown as jest.Mocked<IPtcPackageRepository>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

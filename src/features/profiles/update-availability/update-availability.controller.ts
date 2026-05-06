@@ -8,6 +8,7 @@ import {
   Param,
   HttpStatus,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { UpdateAvailabilityHandler } from './update-availability.handler';
@@ -33,12 +34,15 @@ export class UpdateAvailabilityController {
     @Res() res: Response,
   ): Promise<void> {
     try {
+      if (!req.user) throw new BadRequestException('Usuario no autenticado');
       const userId = req.user.id;
       const response = await this.handler.get(userId);
       res.status(HttpStatus.OK).json({ data: response });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      res.status(HttpStatus.OK).json({ data: { userId: req.user.id, isOnline: false } });
+    } catch {
+      const fallbackId = req.user?.id || 'unknown';
+      res
+        .status(HttpStatus.OK)
+        .json({ data: { userId: fallbackId, isOnline: false } });
     }
   }
 
@@ -65,6 +69,7 @@ export class UpdateAvailabilityController {
     @Res() res: Response,
   ): Promise<void> {
     try {
+      if (!req.user) throw new BadRequestException('Usuario no autenticado');
       const userId = req.user.id;
       const response = await this.handler.execute(userId, body.isOnline);
       res.status(HttpStatus.OK).json({ data: response });

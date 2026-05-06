@@ -89,7 +89,7 @@ export class PostgresContentRepository implements IContentRepository {
       LEFT JOIN antigravity_profiles p ON c.creator_id = p.user_id
       WHERE 1=1
     `;
-    const values: any[] = [params?.subscriberId || null];
+    const values: unknown[] = [params?.subscriberId || null];
 
     if (params?.creatorId) {
       values.push(params.creatorId);
@@ -125,7 +125,7 @@ export class PostgresContentRepository implements IContentRepository {
     type?: string;
   }): Promise<number> {
     let query = `SELECT COUNT(*)::INT FROM content_items c WHERE 1=1`;
-    const values: any[] = [];
+    const values: unknown[] = [];
 
     if (params?.creatorId) {
       values.push(params.creatorId);
@@ -141,8 +141,12 @@ export class PostgresContentRepository implements IContentRepository {
       query += ` AND c.status = 'published'`;
     }
 
-    const result = await this.pool.query(query, values);
-    return result.rows[0].count;
+    interface CountRow {
+      count: number;
+    }
+
+    const result = await this.pool.query<CountRow>(query, values);
+    return result.rows[0]?.count || 0;
   }
 
   public async getContentById(id: string): Promise<Content | null> {

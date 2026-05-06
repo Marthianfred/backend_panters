@@ -31,9 +31,11 @@ export class CheckExpiredSubscriptionsTask {
           'No se encontraron suscripciones por expirar en este ciclo.',
         );
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : 'Error desconocido';
       this.logger.error(
-        `Error durante la verificación de suscripciones: ${error.message}`,
+        `Error durante la verificación de suscripciones: ${errorMessage}`,
       );
     }
   }

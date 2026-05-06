@@ -37,8 +37,9 @@ export class PtcPackageRepository {
     try {
       const result = await this.pool.query<PtcPackage>(query);
       return result.rows;
-    } catch (error) {
-      this.logger.error(`Error al obtener paquetes de PTC: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error al obtener paquetes de PTC: ${message}`);
       throw error;
     }
   }
@@ -58,9 +59,10 @@ export class PtcPackageRepository {
     try {
       const result = await this.pool.query<PtcPackage>(query, [priceId]);
       return result.rows.length > 0 ? result.rows[0] : null;
-    } catch (error) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
       this.logger.error(
-        `Error al buscar paquete de PTC por priceId ${priceId}: ${error.message}`,
+        `Error al buscar paquete de PTC por priceId ${priceId}: ${message}`,
       );
       throw error;
     }

@@ -4,7 +4,6 @@ import {
   Headers,
   Req,
   BadRequestException,
-  RawBodyRequest,
   Logger,
 } from '@nestjs/common';
 import { Request } from 'express';
@@ -41,9 +40,10 @@ export class StripeWebhookController {
       await this.handleStripeWebhookUseCase.execute(event);
 
       return { received: true };
-    } catch (err) {
-      this.logger.error(`Error procesando webhook de Stripe: ${err.message}`);
-      throw new BadRequestException(`Webhook Error: ${err.message}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Error desconocido';
+      this.logger.error(`Error procesando webhook de Stripe: ${message}`);
+      throw new BadRequestException(`Webhook Error: ${message}`);
     }
   }
 }

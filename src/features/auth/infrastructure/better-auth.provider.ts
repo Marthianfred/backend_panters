@@ -46,14 +46,14 @@ export const BetterAuthProvider: Provider = {
           const returned = ctx.context.returned;
 
           if (returned && typeof returned === 'object') {
-            const error = returned as any;
+            const error = returned as Record<string, unknown>;
             const errorCode =
-              error.code ||
+              (error.code as string) ||
               (error.body && typeof error.body === 'object'
-                ? error.body.code
+                ? (error.body as Record<string, unknown>).code
                 : null);
 
-            if (errorCode) {
+            if (errorCode && typeof errorCode === 'string') {
               const errorMap: Record<string, string> = {
                 USER_ALREADY_EXISTS:
                   'El correo electrónico ya está registrado.',
@@ -85,7 +85,8 @@ export const BetterAuthProvider: Provider = {
 
           if (ctx.path === '/sign-in/email' && ctx.method === 'POST') {
             const user =
-              ctx.context.newSession?.user || (returned as any)?.user;
+              ctx.context.newSession?.user ||
+              (returned as { user?: { id: string; role: string } })?.user;
 
             if (user) {
               const isActive = await checkUserActivityUseCase.execute(user.id);
@@ -106,10 +107,13 @@ export const BetterAuthProvider: Provider = {
                     ORDER BY created_at DESC
                     LIMIT 1;
                   `;
-                  const result = await pool.query(query, [user.id]);
+                  const result = await pool.query<{
+                    status: string;
+                    endsAt: Date | string | null;
+                  }>(query, [user.id]);
                   const sub = result.rows[0];
 
-                  let subscription: any = null;
+                  let subscription: Record<string, unknown> | null = null;
                   if (sub) {
                     const now = new Date();
                     const isExpired =
@@ -128,7 +132,7 @@ export const BetterAuthProvider: Provider = {
                     ...(typeof returned === 'object' ? returned : {}),
                     subscription,
                   });
-                } catch (error) {
+                } catch (error: unknown) {
                   console.error(
                     'Error fetching subscription in login hook:',
                     error,
@@ -150,10 +154,6 @@ export const BetterAuthProvider: Provider = {
             type: 'string',
             required: false,
             defaultValue: 'subscriber',
-          },
-          username: {
-            type: 'string',
-            required: true,
           },
           birthDate: {
             type: 'string',
@@ -195,11 +195,11 @@ export const BetterAuthProvider: Provider = {
         },
       },
       plugins: [
-        username() as any,
+        username(),
         captcha({
           provider: 'cloudflare-turnstile',
           secretKey: turnstileSecretKey,
-        }) as any,
+        }),
       ],
 
       emailVerification: {
@@ -225,7 +225,7 @@ export const BetterAuthProvider: Provider = {
               icon: '/icons/notification-icon.png',
               data: { url },
             })
-            .catch((err) =>
+            .catch((err: unknown) =>
               console.error('Error enviando push de verificación:', err),
             );
         },
@@ -236,7 +236,14 @@ export const BetterAuthProvider: Provider = {
           create: {
             after: async (user) => {
               try {
-                const userData = user as any;
+                const userData = user as unknown as {
+                  id: string;
+                  name: string;
+                  username: string;
+                  birthDate?: string;
+                  gender?: string;
+                  age?: number;
+                };
                 await pool.query(
                   'INSERT INTO antigravity_profiles (user_id, full_name, username, birth_date, gender, age, is_active) VALUES ($1, $2, $3, $4, $5, $6, $7)',
                   [
@@ -253,7 +260,7 @@ export const BetterAuthProvider: Provider = {
                   'INSERT INTO antigravity_wallets (user_id, panter_coin_balance) VALUES ($1, $2)',
                   [userData.id, 0],
                 );
-              } catch (error) {
+              } catch (error: unknown) {
                 console.error('Error initializing user profile/wallet:', error);
               }
             },

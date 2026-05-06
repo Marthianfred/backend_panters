@@ -120,7 +120,7 @@ export class LiveChatGateway
     });
   }
 
-  notifyPrivateChatRequest(creatorId: string, data: any) {
+  notifyPrivateChatRequest(creatorId: string, data: Record<string, unknown>) {
     const room = `live_${creatorId}`;
     this.server.to(room).emit('privateChatRequest', data);
   }

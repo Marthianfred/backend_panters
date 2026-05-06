@@ -1,22 +1,25 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GetMySubscriptionUseCase } from './get-my-subscription.use-case';
-import * as userSubscriptionsInterface from '../../interfaces/user.subscriptions.repository.interface';
-import { NotFoundException } from '@nestjs/common';
+import {
+  IUserSubscriptionsRepository,
+  USER_SUBSCRIPTIONS_REPOSITORY,
+  UserSubscriptionWithPlanDto,
+} from '../../interfaces/user.subscriptions.repository.interface';
 
 describe('GetMySubscriptionUseCase', () => {
   let useCase: GetMySubscriptionUseCase;
-  let subscriptionsRepository: any;
+  let subscriptionsRepository: jest.Mocked<IUserSubscriptionsRepository>;
 
   beforeEach(async () => {
     subscriptionsRepository = {
       findActiveWithPlanByUserId: jest.fn(),
-    };
+    } as unknown as jest.Mocked<IUserSubscriptionsRepository>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GetMySubscriptionUseCase,
         {
-          provide: userSubscriptionsInterface.USER_SUBSCRIPTIONS_REPOSITORY,
+          provide: USER_SUBSCRIPTIONS_REPOSITORY,
           useValue: subscriptionsRepository,
         },
       ],
@@ -26,7 +29,7 @@ describe('GetMySubscriptionUseCase', () => {
   });
 
   it('debería retornar la suscripción activa correctamente', async () => {
-    const mockResult = {
+    const mockResult: UserSubscriptionWithPlanDto = {
       id: 'sub-1',
       status: 'active',
       planName: 'VIP MENSUAL',
@@ -34,9 +37,9 @@ describe('GetMySubscriptionUseCase', () => {
       cancelAtPeriodEnd: false,
     };
 
-    subscriptionsRepository.findActiveWithPlanByUserId.mockResolvedValue(
-      mockResult,
-    );
+    (
+      subscriptionsRepository.findActiveWithPlanByUserId as jest.Mock
+    ).mockResolvedValue(mockResult);
 
     const result = await useCase.execute('user-1');
 
@@ -49,9 +52,10 @@ describe('GetMySubscriptionUseCase', () => {
     });
   });
 
-  it('debería lanzar NotFoundException si no hay suscripción activa', async () => {
+  it('debería retornar null si no hay suscripción activa', async () => {
     subscriptionsRepository.findActiveWithPlanByUserId.mockResolvedValue(null);
 
-    await expect(useCase.execute('user-1')).rejects.toThrow(NotFoundException);
+    const result = await useCase.execute('user-1');
+    expect(result).toBeNull();
   });
 });

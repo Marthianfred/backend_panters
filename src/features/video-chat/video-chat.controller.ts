@@ -6,6 +6,7 @@ import {
   Req,
   Param,
   UseGuards,
+  BadRequestException,
 } from '@nestjs/common';
 import { RequestPrivateChatHandler } from './request-chat/request-private-chat.handler';
 import { JoinPrivateChatHandler } from './join-chat/join-private-chat.handler';
@@ -34,6 +35,7 @@ export class VideoChatController {
   @Get('appointments')
   @Roles(Role.SUBSCRIBER, Role.MODEL, Role.ADMIN)
   async listAppointments(@Req() req: AuthenticatedRequest) {
+    if (!req.user) throw new BadRequestException('Usuario no autenticado');
     const userId = req.user.id;
     return this.listHandler.execute(userId);
   }
@@ -44,6 +46,7 @@ export class VideoChatController {
     @Req() req: AuthenticatedRequest,
     @Body() dto: RequestPrivateChatDto,
   ) {
+    if (!req.user) throw new BadRequestException('Usuario no autenticado');
     const userId = req.user.id;
     return this.requestHandler.execute(userId, dto);
   }
@@ -54,6 +57,7 @@ export class VideoChatController {
     @Req() req: AuthenticatedRequest,
     @Param('sessionId') sessionId: string,
   ) {
+    if (!req.user) throw new BadRequestException('Usuario no autenticado');
     const userId = req.user.id;
     return this.joinHandler.execute(userId, sessionId);
   }
@@ -64,6 +68,7 @@ export class VideoChatController {
     @Req() req: AuthenticatedRequest,
     @Param('sessionId') sessionId: string,
   ) {
+    if (!req.user) throw new BadRequestException('Usuario no autenticado');
     const userId = req.user.id;
     return this.startHandler.execute(userId, sessionId);
   }
@@ -75,6 +80,7 @@ export class VideoChatController {
     @Param('sessionId') sessionId: string,
     @Body() dto: EndPrivateChatDto,
   ) {
+    if (!req.user) throw new BadRequestException('Usuario no autenticado');
     const userId = req.user.id;
     return this.endHandler.execute(userId, sessionId, dto);
   }

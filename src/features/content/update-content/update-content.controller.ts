@@ -7,6 +7,7 @@ import {
   Req,
   HttpStatus,
   Res,
+  BadRequestException,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { UpdateContentHandler } from './update-content.handler';
@@ -40,6 +41,7 @@ export class UpdateContentController {
     @Res() res: Response,
   ): Promise<void> {
     try {
+      if (!req.user) throw new BadRequestException('Usuario no autenticado');
       const creatorId = req.user.id;
 
       const response = await this.handler.execute({

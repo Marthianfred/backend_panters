@@ -11,7 +11,7 @@ export class GetPantersController {
   @Get()
   @UseGuards(AuthGuard)
   public async getPanters(): Promise<GetPantersResponse> {
-    return this.getPantersHandler.execute({});
+    return this.getPantersHandler.execute();
   }
 
   @Get('ranking')

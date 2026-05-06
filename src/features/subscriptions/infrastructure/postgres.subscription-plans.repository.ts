@@ -8,6 +8,19 @@ import {
   UpdatePlanDto,
 } from '../plans.models';
 
+interface SubscriptionPlanRow {
+  id: string;
+  name: string;
+  description: string | null;
+  price_usd: string;
+  duration_days: number;
+  benefits: string | string[];
+  stripe_price_id: string | null;
+  is_active: boolean;
+  created_at: Date;
+  updated_at: Date;
+}
+
 @Injectable()
 export class PostgresSubscriptionPlansRepository implements ISubscriptionPlansRepository {
   private readonly pool: Pool;
@@ -25,7 +38,7 @@ export class PostgresSubscriptionPlansRepository implements ISubscriptionPlansRe
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *;
     `;
-    const result = await this.pool.query(query, [
+    const result = await this.pool.query<SubscriptionPlanRow>(query, [
       plan.name,
       plan.description || '',
       plan.priceUsd,
@@ -39,13 +52,13 @@ export class PostgresSubscriptionPlansRepository implements ISubscriptionPlansRe
   async findAll(): Promise<SubscriptionPlanDto[]> {
     const query =
       'SELECT * FROM public.subscription_plans WHERE is_active = true ORDER BY created_at ASC;';
-    const result = await this.pool.query(query);
+    const result = await this.pool.query<SubscriptionPlanRow>(query);
     return result.rows.map((row) => this.mapToDto(row));
   }
 
   async findById(id: string): Promise<SubscriptionPlanDto | null> {
     const query = 'SELECT * FROM public.subscription_plans WHERE id = $1;';
-    const result = await this.pool.query(query, [id]);
+    const result = await this.pool.query<SubscriptionPlanRow>(query, [id]);
     if (result.rows.length === 0) return null;
     return this.mapToDto(result.rows[0]);
   }
@@ -55,7 +68,9 @@ export class PostgresSubscriptionPlansRepository implements ISubscriptionPlansRe
   ): Promise<SubscriptionPlanDto | null> {
     const query =
       'SELECT * FROM public.subscription_plans WHERE stripe_price_id = $1;';
-    const result = await this.pool.query(query, [stripePriceId]);
+    const result = await this.pool.query<SubscriptionPlanRow>(query, [
+      stripePriceId,
+    ]);
     if (result.rows.length === 0) return null;
     return this.mapToDto(result.rows[0]);
   }
@@ -67,7 +82,7 @@ export class PostgresSubscriptionPlansRepository implements ISubscriptionPlansRe
     const current = await this.findById(id);
     if (!current) throw new NotFoundException('Plan no encontrado');
 
-    const fieldsSchema = {
+    const fieldsSchema: Record<string, unknown> = {
       name: updates.name,
       description: updates.description,
       price_usd: updates.priceUsd,
@@ -86,7 +101,7 @@ export class PostgresSubscriptionPlansRepository implements ISubscriptionPlansRe
     const query = `UPDATE public.subscription_plans SET ${setClause}, updated_at = NOW() WHERE id = $1 RETURNING *;`;
     const values = [id, ...keys.map((k) => fieldsSchema[k])];
 
-    const result = await this.pool.query(query, values);
+    const result = await this.pool.query<SubscriptionPlanRow>(query, values);
     return this.mapToDto(result.rows[0]);
   }
 
@@ -96,17 +111,17 @@ export class PostgresSubscriptionPlansRepository implements ISubscriptionPlansRe
     await this.pool.query(query, [id]);
   }
 
-  private mapToDto(row: any): SubscriptionPlanDto {
+  private mapToDto(row: SubscriptionPlanRow): SubscriptionPlanDto {
     return {
       id: row.id,
       name: row.name,
-      description: row.description,
+      description: row.description || undefined,
       priceUsd: parseFloat(row.price_usd),
       durationDays: row.duration_days,
       benefits: Array.isArray(row.benefits)
         ? row.benefits
-        : JSON.parse(row.benefits || '[]'),
-      stripePriceId: row.stripe_price_id,
+        : (JSON.parse(row.benefits || '[]') as string[]),
+      stripePriceId: row.stripe_price_id || undefined,
       isActive: row.is_active,
       createdAt: row.created_at,
       updatedAt: row.updated_at,

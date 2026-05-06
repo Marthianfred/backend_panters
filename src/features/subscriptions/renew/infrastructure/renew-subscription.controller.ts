@@ -1,4 +1,10 @@
-import { Controller, Post, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  UseGuards,
+  Request,
+  BadRequestException,
+} from '@nestjs/common';
 
 import {
   ApiTags,
@@ -11,6 +17,7 @@ import {
   RenewSessionResponse,
 } from '../application/renew-subscription.use-case';
 import { AuthGuard } from '@/features/auth/guards/auth.guard';
+import type { AuthenticatedRequest } from '@/features/auth/types/auth.types';
 
 @ApiTags('subscriptions')
 @ApiBearerAuth()
@@ -35,7 +42,12 @@ export class RenewSubscriptionController {
     status: 400,
     description: 'Error al generar la sesión de pago',
   })
-  async renew(@Request() req: any): Promise<RenewSessionResponse> {
+  async renew(
+    @Request() req: AuthenticatedRequest,
+  ): Promise<RenewSessionResponse> {
+    if (!req.user) {
+      throw new BadRequestException('Usuario no autenticado');
+    }
     const userId = req.user.id;
     return this.renewSubscriptionUseCase.execute({ userId });
   }

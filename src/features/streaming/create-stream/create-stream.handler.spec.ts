@@ -4,16 +4,21 @@ import { STREAM_REPOSITORY } from '../get-viewer-access/interfaces/stream.reposi
 import { KINESIS_VIDEO_SERVICE } from '../get-viewer-access/interfaces/kinesis.service.interface';
 import { ConfigService } from '@nestjs/config';
 
+import { IStreamRepository } from '../get-viewer-access/interfaces/stream.repository.interface';
+import { IKinesisVideoService } from '../get-viewer-access/interfaces/kinesis.service.interface';
+
 describe('CreateStreamHandler', () => {
   let handler: CreateStreamHandler;
-  let mockStreamRepository: any;
-  let mockKinesisVideoService: any;
-  let mockConfigService: any;
+  let mockStreamRepository: jest.Mocked<IStreamRepository>;
+  let mockKinesisVideoService: jest.Mocked<IKinesisVideoService>;
+  let mockConfigService: jest.Mocked<Partial<ConfigService>>;
 
   beforeEach(async () => {
     mockStreamRepository = {
       createStream: jest.fn().mockResolvedValue(undefined),
-    };
+      deactivateAllStreamsByCreator: jest.fn().mockResolvedValue(undefined),
+      getStreamMetadataById: jest.fn(),
+    } as unknown as jest.Mocked<IStreamRepository>;
 
     mockKinesisVideoService = {
       createSignalingChannel: jest
@@ -27,15 +32,20 @@ describe('CreateStreamHandler', () => {
         sessionToken: 'test-token',
         expiration: new Date(),
       }),
-    };
+      getSignalingEndpoint: jest
+        .fn()
+        .mockResolvedValue('https://signaling.endpoint'),
+      generateViewerCredentials: jest.fn(),
+      getIceServers: jest.fn(),
+    } as unknown as jest.Mocked<IKinesisVideoService>;
 
     mockConfigService = {
-      get: jest.fn((key: string, defaultValue?: any) => {
+      get: jest.fn((key: string, defaultValue?: unknown) => {
         if (key === 'KN_STREAMS_REGION') return 'us-east-2';
         if (key === 'AWS_BUCKET') return 'panters-test';
         return defaultValue;
       }),
-    };
+    } as unknown as jest.Mocked<Partial<ConfigService>>;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [

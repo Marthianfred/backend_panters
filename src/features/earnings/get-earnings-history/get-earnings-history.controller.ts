@@ -1,4 +1,11 @@
-import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Req,
+  UseGuards,
+  BadRequestException,
+} from '@nestjs/common';
 import { GetEarningsHistoryHandler } from './get-earnings-history.handler';
 import {
   EarningsHistoryRequest,
@@ -24,6 +31,7 @@ export class GetEarningsHistoryController {
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ): Promise<EarningsHistoryResponse> {
+    if (!req.user) throw new BadRequestException('Usuario no autenticado');
     const request: EarningsHistoryRequest = {
       creatorId: req.user.id,
       page: page ? parseInt(page, 10) : 1,

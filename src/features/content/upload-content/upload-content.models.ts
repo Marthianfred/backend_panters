@@ -16,7 +16,7 @@ export interface UploadProgressData {
   status: 'starting' | 'saving_db' | 'uploading_s3' | 'completed' | 'error';
   progress: number;
   message: string;
-  data?: any;
+  data?: Record<string, unknown>;
 }
 
 export interface UploadContentResponse {
