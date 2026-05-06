@@ -69,8 +69,8 @@ export class AwsKinesisVideoService implements IKinesisVideoService {
               : 'kinesisvideo:ConnectAsViewer',
             'kinesisvideo:GetSignalingChannelEndpoint',
             'kinesisvideo:GetIceServerConfig',
+            'kinesisvideo:DescribeSignalingChannel',
           ],
-
           Resource: '*',
         },
       ],
