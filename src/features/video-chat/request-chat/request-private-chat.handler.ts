@@ -17,7 +17,7 @@ import { Logger } from '@nestjs/common';
 @Injectable()
 export class RequestPrivateChatHandler {
   private readonly logger = new Logger(RequestPrivateChatHandler.name);
-  private readonly PRICE_PER_MINUTE = 50;
+  private readonly PRICE_PER_MINUTE = 20;
 
   constructor(
     @Inject(VIDEO_CHAT_REPOSITORY)
