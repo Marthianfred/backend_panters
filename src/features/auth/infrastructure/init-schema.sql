@@ -351,3 +351,57 @@ CREATE TABLE IF NOT EXISTS "user_push_subscriptions" (
     created_at TIMESTAMP DEFAULT now(),
     updated_at TIMESTAMP DEFAULT now()
 );
+
+-- ===========================================================================
+-- 12. PAYOUTS (Solicitudes de Cobro)
+-- ===========================================================================
+DO $$ BEGIN
+    CREATE TYPE payout_status AS ENUM (
+        'PENDING_APPROVAL', 
+        'PENDING_RECEIPT_CONFIRMATION', 
+        'COMPLETED', 
+        'REJECTED'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+CREATE TABLE IF NOT EXISTS "payout_requests" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    creator_id TEXT NOT NULL REFERENCES "user"(id) ON DELETE CASCADE,
+    amount NUMERIC(15, 2) NOT NULL,
+    status payout_status NOT NULL DEFAULT 'PENDING_APPROVAL',
+    admin_id TEXT REFERENCES "user"(id),
+    approved_at TIMESTAMP,
+    confirmed_at TIMESTAMP,
+    rejected_at TIMESTAMP,
+    rejection_reason TEXT,
+    created_at TIMESTAMP DEFAULT now(),
+    updated_at TIMESTAMP DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_payout_requests_creator_id ON payout_requests (creator_id);
+CREATE INDEX IF NOT EXISTS idx_payout_requests_status ON payout_requests (status);
+
+-- ===========================================================================
+-- 13. MODEL VERIFICATION (Verificación de Modelos)
+-- ===========================================================================
+DO $$ BEGIN
+    CREATE TYPE verification_status AS ENUM ('PENDING', 'APPROVED', 'REJECTED');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+CREATE TABLE IF NOT EXISTS "model_verifications" (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid (),
+    user_id TEXT REFERENCES "user"(id) ON DELETE CASCADE,
+    status verification_status DEFAULT 'PENDING',
+    rejection_reason TEXT,
+    admin_id TEXT REFERENCES "user"(id),
+    verified_at TIMESTAMP,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_model_verifications_user_id ON model_verifications (user_id);
+CREATE INDEX IF NOT EXISTS idx_model_verifications_status ON model_verifications (status);

@@ -27,6 +27,7 @@ import { ReportsModule } from '@/features/reports/reports.module';
 import { ScheduleModule } from '@nestjs/schedule';
 
 import { ModelVerificationModule } from '@/features/admin/model-verification/model-verification.module';
+import { PayoutsModule } from '@/features/payouts/payouts.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { ModelVerificationModule } from '@/features/admin/model-verification/mod
     SubscriptionPlansManagementModule,
     ModelVerificationModule,
     ReportsModule,
+    PayoutsModule,
   ],
 })
 export class AppModule implements NestModule {
