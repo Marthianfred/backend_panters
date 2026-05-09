@@ -51,6 +51,21 @@ export class CreateStreamHandler {
     const signalingEndpoint =
       await this.kinesisVideoService.getSignalingEndpoint(channelArn, 'MASTER');
 
+    let iceServers: unknown[] = [];
+    try {
+      iceServers = await this.kinesisVideoService.getIceServers(
+        channelArn,
+        credentials,
+        'MASTER',
+      );
+    } catch (e) {
+      const errorMessage = e instanceof Error ? e.message : 'Error desconocido';
+      console.warn(
+        '[CreateStream] No se pudieron obtener ICE servers de AWS para el Master:',
+        errorMessage,
+      );
+    }
+
     await this.streamRepository.createStream({
       id: streamId,
       creatorId: request.creatorId,
@@ -70,6 +85,7 @@ export class CreateStreamHandler {
       region,
       signalingEndpoint,
       credentials,
+      iceServers,
     };
   }
 }

@@ -11,4 +11,5 @@ export interface CreateStreamResponse {
   region: string;
   signalingEndpoint: string;
   credentials: WebRTCCredentials;
+  iceServers: unknown[];
 }
