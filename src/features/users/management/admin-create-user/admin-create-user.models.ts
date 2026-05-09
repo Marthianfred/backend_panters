@@ -1,10 +1,4 @@
-import { IsEmail, IsString, IsEnum, MinLength } from 'class-validator';
-
-export enum UserRoleFlag {
-  ADMIN = 'admin',
-  MODEL = 'model',
-  SUBSCRIBER = 'subscriber',
-}
+import { IsEmail, IsString, IsUUID, MinLength } from 'class-validator';
 
 export class AdminCreateUserRequest {
   @IsEmail()
@@ -17,13 +11,13 @@ export class AdminCreateUserRequest {
   @IsString()
   name!: string;
 
-  @IsEnum(UserRoleFlag)
-  role!: UserRoleFlag;
+  @IsUUID()
+  roleId!: string;
 }
 
 export class AdminCreateUserResponse {
   userId!: string;
   email!: string;
-  role!: string;
+  roleId!: string;
   mustChangePassword!: boolean;
 }

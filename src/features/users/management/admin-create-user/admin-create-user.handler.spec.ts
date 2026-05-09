@@ -1,7 +1,6 @@
 import { AdminCreateUserHandler } from './admin-create-user.handler';
-import { UserRoleFlag } from './admin-create-user.models';
 import { PostgresUsersManagementRepository } from '../infrastructure/postgres.users-management.repository';
-import { BetterAuthInstance } from '../../../auth/types/auth.types';
+import type { BetterAuthInstance } from '../../../auth/types/auth.types';
 
 describe('AdminCreateUserHandler', () => {
   let handler: AdminCreateUserHandler;
@@ -11,6 +10,8 @@ describe('AdminCreateUserHandler', () => {
     };
   };
   let mockRepository: jest.Mocked<PostgresUsersManagementRepository>;
+
+  const mockRoleId = 'c901e6a7-f58c-493e-b567-5d554a32ac46';
 
   beforeEach(() => {
     mockAuthInstance = {
@@ -34,7 +35,7 @@ describe('AdminCreateUserHandler', () => {
       email: 'newuser@test.com',
       password: 'initialPassword123',
       name: 'New User',
-      role: UserRoleFlag.MODEL,
+      roleId: mockRoleId,
     };
 
     mockAuthInstance.api.signUpEmail.mockResolvedValue({
@@ -52,7 +53,7 @@ describe('AdminCreateUserHandler', () => {
     });
     expect(mockRepository.updateUserRole).toHaveBeenCalledWith(
       'user-123',
-      'model',
+      mockRoleId,
     );
     expect(mockRepository.setMustChangePassword).toHaveBeenCalledWith(
       'user-123',
@@ -60,6 +61,7 @@ describe('AdminCreateUserHandler', () => {
     );
     expect(result.mustChangePassword).toBe(true);
     expect(result.userId).toBe('user-123');
+    expect(result.roleId).toBe(mockRoleId);
   });
 
   it('debe lanzar error si falla signUpEmail', async () => {
@@ -72,7 +74,7 @@ describe('AdminCreateUserHandler', () => {
         email: 'error@test.com',
         password: 'password',
         name: 'Error',
-        role: UserRoleFlag.SUBSCRIBER,
+        roleId: mockRoleId,
       }),
     ).rejects.toThrow('Auth failed');
   });

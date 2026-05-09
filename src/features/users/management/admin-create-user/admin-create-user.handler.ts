@@ -43,13 +43,13 @@ export class AdminCreateUserHandler {
 
       const userId = authResult.user.id;
 
-      await this.repository.updateUserRole(userId, request.role);
+      await this.repository.updateUserRole(userId, request.roleId);
       await this.repository.setMustChangePassword(userId, true);
 
       return {
         userId: userId,
         email: request.email,
-        role: request.role,
+        roleId: request.roleId,
         mustChangePassword: true,
       };
     } catch (error: unknown) {
