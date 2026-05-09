@@ -5,12 +5,18 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
+# Ajuste de permisos inicial
+RUN chown node:node /app
+USER node
 
-# Caché de pnpm para builds ultra-rápidos
+COPY --chown=node:node package.json pnpm-lock.yaml ./
+
+# Instalación ignorando scripts para evitar fallos de husky/seguridad
 RUN --mount=type=cache,id=pnpm,target=/home/node/.local/share/pnpm/store \
-    pnpm config set only-built-dependencies @nestjs/core,@scarf/scarf,sharp,unrs-resolver && \
-    pnpm install --frozen-lockfile
+    pnpm install --frozen-lockfile --ignore-scripts
+
+# Reconstrucción selectiva de binarios necesarios
+RUN pnpm rebuild @nestjs/core @scarf/scarf sharp unrs-resolver
 
 COPY --chown=node:node . .
 
@@ -21,7 +27,6 @@ FROM node:22-alpine AS production
 RUN apk add --no-cache libc6-compat
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Binario de Stripe desde la imagen oficial
 COPY --from=stripe/stripe-cli:latest /bin/stripe /usr/local/bin/stripe
 
 ENV NODE_ENV=production
@@ -32,18 +37,18 @@ USER node
 
 COPY --chown=node:node package.json pnpm-lock.yaml ./
 
-# Instalación limpia de producción
+# Instalación de producción optimizada
 RUN --mount=type=cache,id=pnpm,target=/home/node/.local/share/pnpm/store \
-    pnpm config set only-built-dependencies @nestjs/core,@scarf/scarf,sharp,unrs-resolver && \
-    pnpm install --prod --frozen-lockfile --shamefully-hoist
+    pnpm install --prod --frozen-lockfile --ignore-scripts --shamefully-hoist
 
-COPY --from=builder /app/dist ./dist
-COPY start.sh ./
+# Reconstrucción selectiva en producción para asegurar binarios de Sharp
+RUN pnpm rebuild sharp
+
+COPY --chown=node:node --from=builder /app/dist ./dist
+COPY --chown=node:node start.sh ./
 
 RUN chmod +x start.sh
 
 EXPOSE 3001
-
-USER node
 
 CMD ["./start.sh"]
