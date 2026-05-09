@@ -109,5 +109,13 @@
       "eslint --fix",
       "prettier --write"
     ]
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@nestjs/core",
+      "@scarf/scarf",
+      "sharp",
+      "unrs-resolver"
+    ]
   }
 }
