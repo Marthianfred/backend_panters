@@ -7,10 +7,12 @@ WORKDIR /app
 
 COPY package.json pnpm-lock.yaml ./
 
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+# Caché de pnpm para builds ultra-rápidos
+RUN --mount=type=cache,id=pnpm,target=/home/node/.local/share/pnpm/store \
+    pnpm config set only-built-dependencies @nestjs/core,@scarf/scarf,sharp,unrs-resolver && \
     pnpm install --frozen-lockfile
 
-COPY . .
+COPY --chown=node:node . .
 
 RUN pnpm build
 
@@ -19,15 +21,20 @@ FROM node:22-alpine AS production
 RUN apk add --no-cache libc6-compat
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
+# Binario de Stripe desde la imagen oficial
 COPY --from=stripe/stripe-cli:latest /bin/stripe /usr/local/bin/stripe
 
 ENV NODE_ENV=production
-
 WORKDIR /app
+RUN chown node:node /app
 
-COPY package.json pnpm-lock.yaml ./
+USER node
 
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
+COPY --chown=node:node package.json pnpm-lock.yaml ./
+
+# Instalación limpia de producción
+RUN --mount=type=cache,id=pnpm,target=/home/node/.local/share/pnpm/store \
+    pnpm config set only-built-dependencies @nestjs/core,@scarf/scarf,sharp,unrs-resolver && \
     pnpm install --prod --frozen-lockfile --shamefully-hoist
 
 COPY --from=builder /app/dist ./dist
