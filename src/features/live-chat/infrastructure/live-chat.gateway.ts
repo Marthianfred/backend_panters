@@ -10,6 +10,10 @@ import {
 import { Server, Socket } from 'socket.io';
 import { LiveChatService } from '../application/live-chat.service';
 
+interface LiveChatSocketData {
+  creatorId?: string;
+}
+
 @WebSocketGateway({
   cors: {
     origin: true,
@@ -30,6 +34,11 @@ export class LiveChatGateway
   }
 
   handleDisconnect(client: Socket) {
+    const socketData = client.data as LiveChatSocketData;
+    const creatorId = socketData.creatorId;
+    if (creatorId) {
+      this.updateViewerCount(creatorId);
+    }
     console.log(`Cliente desconectado del Live Chat WS: ${client.id}`);
   }
 
@@ -40,6 +49,9 @@ export class LiveChatGateway
   ) {
     const room = `live_${data.creatorId}`;
     void client.join(room);
+    const socketData = client.data as LiveChatSocketData;
+    socketData.creatorId = data.creatorId;
+    this.updateViewerCount(data.creatorId);
     console.log(`Cliente ${client.id} se unió a la sala: ${room}`);
   }
 
@@ -50,7 +62,16 @@ export class LiveChatGateway
   ) {
     const room = `live_${data.creatorId}`;
     void client.leave(room);
+    const socketData = client.data as LiveChatSocketData;
+    delete socketData.creatorId;
+    this.updateViewerCount(data.creatorId);
     console.log(`Cliente ${client.id} abandonó la sala: ${room}`);
+  }
+
+  private updateViewerCount(creatorId: string) {
+    const room = `live_${creatorId}`;
+    const count = this.server.sockets.adapter.rooms.get(room)?.size || 0;
+    this.server.to(room).emit('viewerCount', { count });
   }
 
   @SubscribeMessage('sendChatMessage')

@@ -19,13 +19,19 @@ describe('LiveChatGateway', () => {
     mockServer = {
       to: jest.fn().mockReturnThis(),
       emit: jest.fn(),
-    };
+      sockets: {
+        adapter: {
+          rooms: new Map<string, { size: number }>(),
+        },
+      },
+    } as unknown as Server;
 
     mockSocket = {
       id: 'socket-id',
       join: jest.fn(),
       leave: jest.fn(),
       emit: jest.fn(),
+      data: {} as Record<string, unknown>,
       handshake: {
         headers: {},
       },
@@ -76,16 +82,58 @@ describe('LiveChatGateway', () => {
     gateway.server = mockServer as Server;
   });
 
-  it('should join a live room', () => {
+  it('should join a live room and update viewer count', () => {
     const creatorId = 'creator-1';
+    const room = `live_${creatorId}`;
+    const roomsMap = mockServer.sockets!.adapter.rooms as Map<
+      string,
+      { size: number }
+    >;
+    roomsMap.set(room, { size: 1 });
+
     gateway.handleJoinLive({ creatorId }, mockSocket as Socket);
-    expect(mockSocket.join).toHaveBeenCalledWith(`live_${creatorId}`);
+
+    expect(mockSocket.join).toHaveBeenCalledWith(room);
+    const socketData = mockSocket.data as { creatorId?: string };
+    expect(socketData.creatorId).toBe(creatorId);
+    expect(mockServer.to).toHaveBeenCalledWith(room);
+    expect(mockServer.emit).toHaveBeenCalledWith('viewerCount', { count: 1 });
   });
 
-  it('should leave a live room', () => {
+  it('should leave a live room and update viewer count', () => {
     const creatorId = 'creator-1';
+    const room = `live_${creatorId}`;
+    const roomsMap = mockServer.sockets!.adapter.rooms as Map<
+      string,
+      { size: number }
+    >;
+    roomsMap.set(room, { size: 0 });
+
     gateway.handleLeaveLive({ creatorId }, mockSocket as Socket);
-    expect(mockSocket.leave).toHaveBeenCalledWith(`live_${creatorId}`);
+
+    expect(mockSocket.leave).toHaveBeenCalledWith(room);
+    const socketData = mockSocket.data as { creatorId?: string };
+    expect(socketData.creatorId).toBeUndefined();
+    expect(mockServer.to).toHaveBeenCalledWith(room);
+    expect(mockServer.emit).toHaveBeenCalledWith('viewerCount', { count: 0 });
+  });
+
+  it('should update viewer count on disconnect if in a live room', () => {
+    const creatorId = 'creator-1';
+    const room = `live_${creatorId}`;
+    const socketData = mockSocket.data as { creatorId?: string };
+    socketData.creatorId = creatorId;
+
+    const roomsMap = mockServer.sockets!.adapter.rooms as Map<
+      string,
+      { size: number }
+    >;
+    roomsMap.set(room, { size: 2 });
+
+    gateway.handleDisconnect(mockSocket as Socket);
+
+    expect(mockServer.to).toHaveBeenCalledWith(room);
+    expect(mockServer.emit).toHaveBeenCalledWith('viewerCount', { count: 2 });
   });
 
   it('should broadcast a chat message to the correct room', async () => {
